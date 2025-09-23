@@ -5,6 +5,11 @@ function initSlideShow(platformToDisplay = 0) {
     const slides = Array.from(slideshow.querySelectorAll('.slide'));
     const totalSlides = slides.length;
 
+    // Set initial display states
+    slideshow.style.display = 'flex';
+    document.getElementById('galleries').style.display = 'none';
+    document.getElementById('header').style.display = 'none';
+
     let currentIndex = slides.findIndex(s =>
         Number(s.dataset.index) === Number(platformToDisplay)
     ) || 0;
@@ -42,6 +47,40 @@ function initSlideShow(platformToDisplay = 0) {
         updateSlideshow();
     }
 
+    function activateCurrentSlide() {
+        const activeSlide = slides[currentIndex];
+        const activePlatformName = activeSlide.dataset.platform;
+        const activeGalleryIndex = Number(activeSlide.dataset.index);
+
+        console.log('Activating platform:', activePlatformName, 'at index:', activeGalleryIndex);
+
+        if (activePlatformName === 'recents') {
+            initGallery(LB.totalNumberOfPlatforms);
+        } else if (LB.enabledPlatforms.includes(activePlatformName)) {
+            if (activePlatformName === 'settings' && LB.kioskMode) {
+                return;
+            }
+            initGallery(activeGalleryIndex);
+        } else {
+            initGallery(0, activePlatformName);
+        }
+
+        // Switch to gallery view
+        document.getElementById('slideshow').style.display = 'none';
+        document.getElementById('galleries').style.display = 'flex';
+        document.getElementById('header').style.display = 'flex';
+        window.removeEventListener('keydown', handleHomeKeyDown);
+    }
+
+    function returnToSlideshow() {
+        // Switch back to slideshow view
+        document.getElementById('slideshow').style.display = 'flex';
+        document.getElementById('galleries').style.display = 'none';
+        document.getElementById('header').style.display = 'none';
+        window.addEventListener('keydown', handleHomeKeyDown);
+        updateSlideshow();
+    }
+
     function handleHomeKeyDown(event) {
         event.stopPropagation();
 
@@ -49,25 +88,13 @@ function initSlideShow(platformToDisplay = 0) {
             case 'ArrowRight': nextSlide(); break;
             case 'ArrowLeft': prevSlide(); break;
             case 'Enter': activateCurrentSlide(); break;
-            case 'Escape': returnToSlideshow(); break;
+            case 'Escape':
+                // Only handle ESC if we're in slideshow mode
+                if (document.getElementById('slideshow').style.display === 'flex') {
+                    Neutralino.app.exit();
+                }
+                break;
         }
-    }
-
-    function activateCurrentSlide() {
-        const activeSlide = slides[currentIndex];
-        const platformName = activeSlide.dataset.platform;
-
-        console.log('Activating platform:', platformName);
-
-        // For now, just log - we'll implement gallery navigation later
-        console.log('Would open gallery for:', platformName);
-    }
-
-    function returnToSlideshow() {
-        // Show slideshow, hide galleries
-        document.getElementById('slideshow').style.display = 'flex';
-        document.getElementById('galleries').style.display = 'none';
-        document.getElementById('header').style.display = 'none';
     }
 
     // Event listeners
@@ -93,5 +120,12 @@ function initSlideShow(platformToDisplay = 0) {
     console.log('Slideshow control initialized with', totalSlides, 'slides');
 }
 
-// Export only what we need
+// Gallery function (placeholder for now)
+function initGallery(galleryIndex, platformName = null) {
+    console.log('Opening gallery:', galleryIndex, 'for platform:', platformName);
+    // This will be implemented later
+}
+
 window.initSlideShow = initSlideShow;
+window.initGallery = initGallery;
+window.returnToSlideshow = returnToSlideshow;

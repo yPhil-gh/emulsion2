@@ -31,7 +31,7 @@ async function getGameCoverPath(platformName, gameName) {
     }
 }
 
-LB.utils.updateControls = function(controlId, icon, text, state = '') {
+const updateControls = function(controlId, icon, text, state = '') {
     const control = document.getElementById(controlId);
     if (!control) return;
 
@@ -48,6 +48,6 @@ LB.utils.updateControls = function(controlId, icon, text, state = '') {
     control.className = `control-item ${state}`;
 };
 
-LB.utils.getSelectedGame = function(containers, index) {
+const getSelectedGame = function(containers, index) {
     return containers[index] || containers[0];
 };
