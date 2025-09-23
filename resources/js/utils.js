@@ -30,3 +30,24 @@ async function getGameCoverPath(platformName, gameName) {
         return 'images/missing.png';
     }
 }
+
+LB.utils.updateControls = function(controlId, icon, text, state = '') {
+    const control = document.getElementById(controlId);
+    if (!control) return;
+
+    if (icon && icon !== 'same') {
+        const iconEl = control.querySelector('.icon');
+        if (iconEl) iconEl.src = `images/controls/${icon}.png`;
+    }
+
+    if (text && text !== 'same') {
+        const textEl = control.querySelector('span');
+        if (textEl) textEl.innerHTML = text;
+    }
+
+    control.className = `control-item ${state}`;
+};
+
+LB.utils.getSelectedGame = function(containers, index) {
+    return containers[index] || containers[0];
+};

@@ -31,6 +31,11 @@ async function initApp() {
     // Build the carousel slides using the EXACT same logic as your original
     buildSlideshow(preferences);
 
+    // Initialize slideshow controls
+    initSlideShow(0);
+
+    console.log('Slideshow controls initialized');
+
     // Show main interface
     showMainInterface();
 
