@@ -128,6 +128,23 @@ function initGamepad() {
         }
     }
 
+    // #FIX: More robust
+    function simulateKeyEvent(key, modifiers = {}) {
+        const event = new KeyboardEvent('keydown', {
+            key: key,
+            code: `Key${key.toUpperCase()}`,
+            keyCode: key.charCodeAt(0),
+            which: key.charCodeAt(0),
+            shiftKey: modifiers.shift || false,
+            ctrlKey: modifiers.ctrl || false,
+            altKey: modifiers.alt || false,
+            metaKey: modifiers.meta || false,
+            bubbles: true
+        });
+
+        document.activeElement.dispatchEvent(event);
+    }
+
     // Initialize if gamepad is already connected at startup
     if (connected) {
         startPolling();
