@@ -1,0 +1,321 @@
+/* Form container */
+#platform-form,
+.platform-menu-container {
+  /* padding: 20px; */
+  margin-top: 1em;
+
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+  justify-content: flex-start;
+
+  width: 50vw;
+  max-width: 800px;
+}
+
+/* Rows (flex containers) */
+#platform-form > div {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.platform-menu-image-ctn {
+  text-align: center;
+}
+
+/* Buttons */
+button {
+  font-family: var(--font-main);
+  width: 100%;
+}
+
+/* Details text div */
+#details-text-div {
+  padding: 10px;
+  background-color: #e9ecef;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+label {
+  display: flex !important;
+  flex-direction: row;
+  align-items: center;
+
+  font-family: var(--font-second);
+  font-weight: normal;
+  font-style: normal;
+  font-size: 1em;
+  margin-left: 60px;
+}
+
+label.checkbox {
+  font-family: var(--font-main);
+  font-weight: 600;
+  font-size: 16pt;
+  /* font-style: normal; */
+}
+
+#form-status-label-platform-status.on {
+  color: rgb(0, 255, 0);
+}
+
+.sub-label {
+  color: red;
+  font-size: 0.6em
+}
+
+.radio-container {
+    display: flex;
+    /* gap: 10px; */
+    width: -webkit-fill-available;
+}
+
+.radio-container label {
+    flex: 1; /* Make each label take up equal space */
+    display: flex;
+    align-items: center;
+    margin: 0;
+}
+
+/* Hide actual radio inputs */
+.radio-container input[type="radio"] {
+    display: none;
+}
+
+/* Style the radio buttons as rectangles */
+.radio-box {
+  display: flex;
+  flex: 1; /* Make the box fill the available space */
+  background-color: var(--color-button-on);
+  font-weight: normal;
+  height: 100%;
+  color: white;
+  justify-content: center;
+  align-items: center;
+  border-right: 1px solid gray;
+  transition: background 0.3s;
+}
+
+.radio-box:hover {
+  font-weight: bold;
+}
+
+.radio-box.last {
+  border-right: none;
+}
+
+/* Change color when selected */
+.radio-container input[type="radio"]:checked + .radio-box {
+    background-color: var(--color-button-off);
+    font-weight: bold;
+}
+
+.input::-webkit-inner-spin-button {
+    background: red; /* Change background */
+    width: 20px; /* Adjust size */
+    height: 20px;
+    border-radius: 50%; /* Make it circular */
+}
+
+#form-status-label-platform-status.off {
+  color: red;
+}
+
+.field {
+  display: flex;
+  flex-direction: row;
+}
+
+#menu {
+  /* display: none; */
+  width: 100vw;
+  /* height: 100vh; */
+  position: absolute;
+  left: 0;
+  /* background-color: var(--color-bg1); */
+  /* background-image: url('../../img/sky2.jpg'); */
+  /* align-items: center; */
+  justify-content: center;
+  font-size: 16pt;
+  font-weight: bold;
+  z-index: 3; /* Ensure it's above other content */
+  /* pointer-events: none; /\* Prevent the footer from blocking clicks *\/ */
+  opacity: 0; /* Start fully transparent */
+  animation: fadeIn 0.3s ease-in-out forwards; /* Apply the fadeIn animation */
+
+  display: flex;
+
+  /* flex-direction: column; */
+  align-items: stretch;
+  overflow: auto;
+  /* bottom: 0; */
+  top: 101px;
+  /* transition: height 0.3s ease; */
+}
+
+#menu::-webkit-scrollbar {
+  width: 10px;
+}
+
+#menu::-webkit-scrollbar-track {
+  background: var(--color-bg1); /* or transparent, etc. */
+}
+
+#menu::-webkit-scrollbar-thumb {
+  background-color: var(--color-border-on); /* or any color */
+  border-radius: 6px;
+  border: 2px solid var(--color-bg1); /* for padding effect */
+}
+
+#menu::-webkit-scrollbar-thumb:hover {
+  background-color: var(--color-border-off);
+}
+
+
+#form-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.cancel-save-buttons {
+  display: flex;
+  flex-direction: row;
+  gap: 1em;
+  justify-content: flex-end;
+  margin-top: 1em;
+}
+
+.spacer-div {
+  min-height: 40px;;
+}
+
+.cancel-save-buttons .button {
+  /* min-width: 200px; */
+}
+
+.button {
+  max-width: fit-content;
+
+  background: var(--color-button-off);
+  border: 1px solid var(--color-border-on);
+  border-radius: 6px;
+  box-sizing: border-box;
+  color: #FFFFFF;
+  display: inline-block;
+  /* font-family: nunito,roboto,proxima-nova,"proxima nova",sans-serif; */
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 16px;
+  min-height: 40px;
+  outline: 0;
+  padding: 12px 14px;
+  text-rendering: geometricprecision;
+  text-transform: none;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  vertical-align: middle;
+}
+
+.button-browse {
+  margin-left: 1em;
+}
+
+.input,
+.input-ctn {
+  width: -webkit-fill-available;
+  min-height: 40px;
+
+  font-size: 12pt;
+  font-weight: 700;
+
+  color: #FFFFFF;
+
+  background-color: var(--color-bg2);
+  border: 1px solid var(--color-border-off);
+  border-radius: 6px;
+  /* box-shadow: rgba(0, 0, 0, 0.1) 1px 2px 4px; */
+  font-family: var(--font-main);
+
+}
+
+.input-ctn {
+  display: flex;
+  flex-direction: row;
+  overflow: hidden;
+}
+
+.footer-size-input-ctn {
+  display: flex;
+  flex-direction: row;
+}
+
+.input:hover,
+.input:focus,
+.input:active,
+.button:hover {
+  background-color: var(--color-button-on);
+  background-position: 0 0;
+  color: #ffffff;
+}
+
+input[type="checkbox"] {
+  height: 30px;
+  width: 30px;
+  margin-right: 10px;
+}
+
+input[type="radio"] {
+  accent-color: green;
+  /* accent-color: var(--color-button-off); */
+  height: 30px;
+  width: 30px;
+}
+
+.input:focus {
+  border: 1px solid var(--color-border-on);
+}
+
+input[type="checkbox"]:focus {
+  outline: 2px solid var(--color-border-on);
+}
+
+.button:active {
+  opacity: .5;
+}
+
+.dual-ctn {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+div.form-icon {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-width: 60px;
+  color: var(--color-icon);
+}
+
+.extensions-inputs-container {
+    display: flex;
+    flex-direction: row;
+    gap: 0.5rem;
+}
+
+.extension-input-row {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.extension-input-row input {
+    width: 80px;
+}

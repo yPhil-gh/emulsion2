@@ -5,13 +5,94 @@
     <title>Emulsion2</title>
 </head>
 <body>
-    <div id="neutralinoapp">
-        <p>Loading platforms...</p>
-    </div>
 
-    <script src="js/neutralino.js"></script>
-    <script src="js/platforms.js"></script>
-    <script src="js/preferences.js"></script>
-    <script src="js/main.js"></script>
-</body>
+        <link rel="stylesheet" href="font/Fork-Awesome-1.2.0/css/fork-awesome.css">
+        <link rel="stylesheet" href="css/init.css">
+        <link rel="stylesheet" href="css/spinner.css">
+        <link rel="stylesheet" href="css/header.css">
+        <link rel="stylesheet" href="css/form.css">
+        <link rel="stylesheet" href="css/home.css">
+        <link rel="stylesheet" href="css/gallery.css">
+        <link rel="stylesheet" href="css/footer.css">
+    </head>
+    <body>
+
+        <div id="neutralinoapp">
+            <p>Loading platforms...</p>
+        </div>
+
+        <div id="splash" tabindex="0">
+            <div class="slide-content">
+                <p class="vendor">Loading</p>
+                <p class="name"><span id="loading-platform-name">plop</span></p>
+            </div>
+        </div>
+
+        <header id="header">
+            <div class="pages-nav-links prev-link">
+                <i class="fa fa-3x fa-angle-left" aria-hidden="true"></i>
+            </div>
+            <div class="center">
+                <span class="platform-name"></span>
+                <span class="platform-stats">
+                    <span class="item-number"></span>
+                    <span class="spacer"></span>
+                    <span class="item-type"></span>
+                </span>
+                <div class="platform-image"></div>
+            </div>
+            <div class="pages-nav-links next-link">
+                <i class="fa fa-3x fa-angle-right" aria-hidden="true"></i>
+            </div>
+        </header>
+
+        <main id="main">
+            <div id="slideshow" tabindex="0"></div>
+            <div id="galleries" tabindex="-1"></div>
+        </main>
+
+        <div id="menu"></div>
+
+        <footer id="footer">
+            <div id="controls" class="left">
+                <div id="dpad" class="control-item">
+                    <img id="dpad-icon" class="icon" src="images/controls/button-dpad-ew.png" alt="Dpad">
+                    <span>Browse</span>
+                </div>
+                <div id="shoulders" class="control-item">
+                    <img id="shoulders-icon" class="icon" src="images/controls/button-shoulders.png" alt="Shoulders">
+                    <span>Browse</span>
+                </div>
+                <div id="south" class="control-item">
+                    <img id="south-icon" class="icon" src="images/controls/button-south.png" alt="Button - South">
+                    <span>Select</span>
+                </div>
+                <div id="west" class="control-item">
+                    <img id="west-icon" class="icon" src="images/controls/button-west.png" alt="Button - West">
+                    <span id="west-span">Config</span>
+                </div>
+                <div id="east" class="control-item" title="Back" onclick="LB.utils.simulateKeyDown('Escape');">
+                    <img id="east-icon" class="icon" src="images/controls/button-east.png" alt="Button - East">
+                    <span id="east-span">Exit</span>
+                </div>
+            </div>
+            <div id="notifications" class="right">
+                <div id="notification"></div>
+                <i class="form-icon fa fa-2x fa-check" aria-hidden="true"></i>
+            </div>
+        </footer>
+        <!--
+             <script src="../js/init.js"></script>
+             <script src="../js/build.js"></script>
+             <script src="../js/control.js"></script>
+             <script src="../js/gallery.js"></script>
+             <script src="../js/renderer.js"></script>
+        -->
+        <script src="js/neutralino.js"></script>
+        <script src="js/platforms.js"></script>
+        <script src="js/preferences.js"></script>
+        <script src="js/main.js"></script>
+
+
+    </body>
 </html>
