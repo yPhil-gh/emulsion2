@@ -1,192 +1,285 @@
-async function buildGalleries(preferences) {
-    const galleriesContainer = document.getElementById('galleries');
-    galleriesContainer.innerHTML = '';
+// Global gallery state
+let currentGalleryPageIndex = 0;
+let currentGameIndex = 0;
+let gameContainers = [];
+let galleryPages = [];
 
-    const platforms = Object.keys(preferences);
+function initGallery(galleryIndex, platformName = null) {
+    console.log('Initializing gallery:', galleryIndex, 'for platform:', platformName);
 
-    // PAGE 0: Settings (always first)
-    const settingsPage = await buildSettingsPage(preferences.settings, 0, platforms);
-    if (settingsPage) {
-        galleriesContainer.appendChild(settingsPage);
+    const galleries = document.getElementById('galleries');
+    galleryPages = Array.from(galleries.querySelectorAll('.page'));
+
+    // Find the target page
+    let targetPageIndex = galleryIndex;
+    if (platformName) {
+        targetPageIndex = galleryPages.findIndex(page =>
+            page.getAttribute('data-platform') === platformName
+        );
     }
 
-    // PAGES 1-N: Enabled platforms
-    let pageIndex = 1;
-    for (const platformName of platforms) {
-        if (platformName === 'settings') continue;
+    currentGalleryPageIndex = Math.max(0, targetPageIndex);
+    currentGameIndex = 0;
 
-        const platformPrefs = preferences[platformName];
-        if (platformPrefs.isEnabled) {
-            const platformPage = await buildPlatformPage(platformName, platformPrefs, pageIndex);
-            if (platformPage) {
-                galleriesContainer.appendChild(platformPage);
-                pageIndex++;
+    updateGallery();
+    setupGalleryEvents();
+
+    // Update header
+    updateGalleryHeader();
+}
+
+function updateGallery() {
+    // Hide all pages
+    galleryPages.forEach(page => {
+        page.style.display = 'none';
+    });
+
+    // Show current page
+    const currentPage = galleryPages[currentGalleryPageIndex];
+    if (currentPage) {
+        currentPage.style.display = 'block';
+
+        // Get game containers for current page
+        gameContainers = Array.from(currentPage.querySelectorAll('.game-container'));
+
+        // Update selection
+        updateGameSelection();
+
+        // Scroll to selected game
+        if (gameContainers[currentGameIndex]) {
+            gameContainers[currentGameIndex].scrollIntoView({
+                behavior: 'smooth',
+                block: 'center'
+            });
+        }
+    }
+}
+
+function updateGameSelection() {
+    gameContainers.forEach((container, index) => {
+        container.classList.toggle('selected', index === currentGameIndex);
+    });
+}
+
+function updateGalleryHeader() {
+    const currentPage = galleryPages[currentGalleryPageIndex];
+    if (!currentPage) return;
+
+    const platformName = currentPage.getAttribute('data-platform');
+    const platformInfo = getPlatformInfo(platformName);
+    const header = document.getElementById('header');
+
+    // Update platform name
+    const platformNameEl = header.querySelector('.platform-name');
+    if (platformNameEl) {
+        platformNameEl.textContent = platformInfo.name;
+    }
+
+    // Update item count
+    const itemNumberEl = header.querySelector('.item-number');
+    const itemTypeEl = header.querySelector('.item-type');
+    if (itemNumberEl && itemTypeEl) {
+        const count = platformName === 'settings' ? gameContainers.length - 1 : gameContainers.length;
+        const itemType = platformName === 'settings' ? 'platform' : 'game';
+
+        itemNumberEl.textContent = count;
+        itemTypeEl.textContent = count === 1 ? itemType : `${itemType}s`;
+    }
+
+    // Update platform image
+    const platformImageEl = header.querySelector('.platform-image');
+    if (platformImageEl) {
+        platformImageEl.style.backgroundImage = `url('images/platforms/${platformName}.png')`;
+    }
+}
+
+function setupGalleryEvents() {
+    // Remove existing listeners
+    window.removeEventListener('keydown', handleGalleryKeyDown);
+
+    // Add new listeners
+    window.addEventListener('keydown', handleGalleryKeyDown);
+
+    // Setup game container clicks
+    gameContainers.forEach((container, index) => {
+        container.onclick = null; // Remove previous handlers
+        container.onclick = () => {
+            if (container.classList.contains('empty-platform-game-container')) return;
+
+            if (currentGalleryPageIndex === 0) { // Settings page
+                openSettingsMenu(container.getAttribute('data-platform'));
+            } else {
+                launchGame(container);
             }
-        }
-    }
+        };
 
-    // LAST PAGE: Recents (if enabled)
-    if (LB.recentlyPlayedPolicy === 'show') {
-        const recentsPage = await buildRecentsPage(pageIndex);
-        if (recentsPage) {
-            galleriesContainer.appendChild(recentsPage);
-            platforms.push("recents");
-        }
-    }
-
-    return platforms;
-}
-
-async function buildSettingsPage(settingsPrefs, pageIndex, platforms) {
-    if (LB.kioskMode) return null;
-
-    const page = document.createElement('div');
-    page.className = 'page';
-    page.id = `page-settings`;
-    page.setAttribute('data-index', pageIndex);
-    page.setAttribute('data-platform', 'settings');
-
-    const pageContent = document.createElement('div');
-    pageContent.className = 'page-content';
-    pageContent.style.gridTemplateColumns = `repeat(${LB.galleryNumOfCols}, 1fr)`;
-
-    // Create platform selection entries
-    platforms.forEach((platformName, i) => {
-        if (platformName === 'settings') return;
-
-        const platformContainer = document.createElement('div');
-        platformContainer.className = 'game-container platform-container';
-        platformContainer.setAttribute('data-platform', platformName);
-        platformContainer.setAttribute('data-index', i);
-
-        const platformInfo = getPlatformInfo(platformName);
-
-        const platformNameElement = document.createElement('div');
-        platformNameElement.className = 'platform-info';
-        platformNameElement.innerHTML = `
-            <span class="vendor">${platformInfo.vendor}</span><br>
-            <span class="name">${platformInfo.name}</span>
-        `;
-
-        const platformImage = document.createElement('img');
-        platformImage.className = 'platform-image';
-        platformImage.src = `images/platforms/${platformName}.png`;
-        platformImage.onerror = () => { platformImage.src = 'images/platforms/default.png'; };
-
-        platformContainer.appendChild(platformNameElement);
-        platformContainer.appendChild(platformImage);
-        pageContent.appendChild(platformContainer);
+        container.oncontextmenu = (e) => {
+            e.preventDefault();
+            if (!container.classList.contains('empty-platform-game-container')) {
+                openGameContextMenu(container, index);
+            }
+        };
     });
-
-    page.appendChild(pageContent);
-    return page;
 }
 
-async function buildPlatformPage(platformName, platformPrefs, pageIndex) {
-    const page = document.createElement('div');
-    page.className = 'page';
-    page.id = `page-${platformName}`;
-    page.setAttribute('data-index', pageIndex);
-    page.setAttribute('data-platform', platformName);
+function handleGalleryKeyDown(event) {
+    event.stopPropagation();
 
-    const pageContent = document.createElement('div');
-    pageContent.className = 'page-content';
-    pageContent.style.gridTemplateColumns = `repeat(${LB.galleryNumOfCols}, 1fr)`;
+    switch (event.key) {
+        case 'ArrowRight':
+            if (event.shiftKey) nextPage();
+            else nextGame();
+            break;
 
-    // Scan for game files
-    const gameFiles = await scanDirectory(platformPrefs.gamesDir, platformPrefs.extensions);
+        case 'ArrowLeft':
+            if (event.shiftKey) prevPage();
+            else prevGame();
+            break;
 
-    if (gameFiles.length === 0) {
-        // No games found message
-        const emptyMessage = createEmptyPlatformMessage(platformPrefs.gamesDir);
-        pageContent.appendChild(emptyMessage);
+        case 'ArrowUp':
+            moveGameRow(-1);
+            break;
+
+        case 'ArrowDown':
+            moveGameRow(1);
+            break;
+
+        case 'PageUp':
+            moveGameRow(-10);
+            break;
+
+        case 'PageDown':
+            moveGameRow(10);
+            break;
+
+        case 'Home':
+            selectGame(0);
+            break;
+
+        case 'End':
+            selectGame(gameContainers.length - 1);
+            break;
+
+        case 'Enter':
+            activateCurrentGame();
+            break;
+
+        case 'Escape':
+            returnToSlideshow();
+            break;
+
+        case 'i':
+            if (!LB.kioskMode) openContextMenu();
+            break;
+    }
+
+    updateGameSelection();
+}
+
+// Navigation functions
+function nextGame() {
+    if (gameContainers.length === 0) return;
+    currentGameIndex = (currentGameIndex + 1) % gameContainers.length;
+    scrollToCurrentGame();
+}
+
+function prevGame() {
+    if (gameContainers.length === 0) return;
+    currentGameIndex = (currentGameIndex - 1 + gameContainers.length) % gameContainers.length;
+    scrollToCurrentGame();
+}
+
+function nextPage() {
+    currentGalleryPageIndex = (currentGalleryPageIndex + 1) % galleryPages.length;
+    currentGameIndex = 0;
+    updateGallery();
+}
+
+function prevPage() {
+    currentGalleryPageIndex = (currentGalleryPageIndex - 1 + galleryPages.length) % galleryPages.length;
+    currentGameIndex = 0;
+    updateGallery();
+}
+
+function moveGameRow(rows) {
+    if (gameContainers.length === 0) return;
+
+    const col = currentGameIndex % LB.galleryNumOfCols;
+    const currentRow = Math.floor(currentGameIndex / LB.galleryNumOfCols);
+    const newRow = Math.max(0, Math.min(currentRow + rows,
+        Math.floor((gameContainers.length - 1) / LB.galleryNumOfCols)));
+
+    currentGameIndex = Math.min(newRow * LB.galleryNumOfCols + col, gameContainers.length - 1);
+    scrollToCurrentGame();
+}
+
+function selectGame(index) {
+    if (gameContainers.length === 0) return;
+    currentGameIndex = Math.max(0, Math.min(index, gameContainers.length - 1));
+    scrollToCurrentGame();
+}
+
+function scrollToCurrentGame() {
+    if (gameContainers[currentGameIndex]) {
+        gameContainers[currentGameIndex].scrollIntoView({
+            behavior: 'smooth',
+            block: 'center'
+        });
+    }
+}
+
+function activateCurrentGame() {
+    if (gameContainers.length === 0) return;
+
+    const selectedGame = gameContainers[currentGameIndex];
+    if (selectedGame.classList.contains('empty-platform-game-container')) return;
+
+    if (currentGalleryPageIndex === 0) { // Settings
+        openSettingsMenu(selectedGame.getAttribute('data-platform'));
     } else {
-        // Create game containers
-        for (let i = 0; i < gameFiles.length; i++) {
-            const gameContainer = await createGameContainer(platformName, platformPrefs, gameFiles[i], i);
-            pageContent.appendChild(gameContainer);
-        }
+        launchGame(selectedGame);
     }
-
-    page.appendChild(pageContent);
-    return page;
 }
 
-async function buildRecentsPage(pageIndex) {
-    const recents = await loadRecentGames();
-    if (!recents || recents.length === 0) return null;
+// Placeholder functions for game actions
+function launchGame(gameContainer) {
+    console.log('Launching game:', gameContainer.getAttribute('data-game-name'));
+    const command = gameContainer.getAttribute('data-command');
+    console.log('Command:', command);
 
-    const sortedRecents = [...recents].sort((a, b) => new Date(b.date) - new Date(a.date));
-
-    const page = document.createElement('div');
-    page.className = 'page';
-    page.id = 'page-recents';
-    page.setAttribute('data-index', pageIndex);
-    page.setAttribute('data-platform', 'recents');
-
-    const pageContent = document.createElement('div');
-    pageContent.className = 'page-content';
-    pageContent.style.gridTemplateColumns = `repeat(${LB.galleryNumOfCols}, 1fr)`;
-
-    sortedRecents.forEach((recent, i) => {
-        const gameContainer = createRecentGameContainer(recent, i);
-        pageContent.appendChild(gameContainer);
-    });
-
-    page.appendChild(pageContent);
-    return page;
+    // TODO: Implement game launching with Neutralino
+    // Neutralino.os.execCommand(command);
 }
 
-async function createGameContainer(platformName, platformPrefs, gameFilePath, index) {
-    const gameContainer = document.createElement('div');
-    gameContainer.className = 'game-container';
-
-    // Get game info
-    const gameInfo = await getGameInfo(platformName, gameFilePath, platformPrefs);
-
-    gameContainer.title = `${gameInfo.cleanName}\n\nClick to launch with ${platformPrefs.emulator}`;
-    gameContainer.setAttribute('data-game-name', gameInfo.fileNameWithoutExt);
-    gameContainer.setAttribute('data-platform', platformName);
-    gameContainer.setAttribute('data-command', buildGameCommand(platformPrefs.emulator, platformPrefs.emulatorArgs, gameInfo.launchPath));
-    gameContainer.setAttribute('data-index', index);
-
-    const gameImage = document.createElement('img');
-    gameImage.className = 'game-image';
-    gameImage.src = await getGameCoverPath(platformName, gameInfo.fileNameWithoutExt);
-    gameImage.onerror = () => { gameImage.src = 'images/missing.png'; };
-
-    const gameLabel = document.createElement('div');
-    gameLabel.className = 'game-label';
-    gameLabel.textContent = gameInfo.cleanName;
-
-    gameContainer.appendChild(gameImage);
-    gameContainer.appendChild(gameLabel);
-
-    return gameContainer;
+function openSettingsMenu(platformName) {
+    console.log('Opening settings for:', platformName);
+    // TODO: Implement settings menu
 }
 
-function createRecentGameContainer(recent, index) {
-    const gameContainer = document.createElement('div');
-    gameContainer.className = 'game-container recent-game';
-
-    const date = new Date(recent.date);
-    gameContainer.title = `${recent.gameName} (${recent.platform}) - Last played on ${date.toLocaleString()}`;
-
-    gameContainer.setAttribute('data-game-name', recent.fileName);
-    gameContainer.setAttribute('data-platform', recent.platform);
-    gameContainer.setAttribute('data-index', index);
-
-    const gameImage = document.createElement('img');
-    gameImage.className = 'game-image';
-    gameImage.src = getGameCoverPath(recent.platform, recent.fileName);
-    gameImage.onerror = () => { gameImage.src = 'images/missing.png'; };
-
-    const gameLabel = document.createElement('div');
-    gameLabel.className = 'game-label';
-    gameLabel.textContent = recent.gameName;
-
-    gameContainer.appendChild(gameImage);
-    gameContainer.appendChild(gameLabel);
-
-    return gameContainer;
+function openGameContextMenu(gameContainer, index) {
+    console.log('Opening context menu for game:', index);
+    // TODO: Implement context menu
 }
+
+function openContextMenu() {
+    console.log('Opening context menu');
+    // TODO: Implement general context menu
+}
+
+function returnToSlideshow() {
+    window.removeEventListener('keydown', handleGalleryKeyDown);
+    window.initSlideShow(currentGalleryPageIndex);
+}
+
+// Utility function
+function getPlatformInfo(platformName) {
+    const platform = PLATFORMS.find(p => p.name === platformName);
+    if (platform) {
+        return { vendor: platform.vendor, name: platform.displayName };
+    }
+    return { vendor: platformName, name: platformName };
+}
+
+// Export functions
+window.initGallery = initGallery;
+window.returnToSlideshow = returnToSlideshow;

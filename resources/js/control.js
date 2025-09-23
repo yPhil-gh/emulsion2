@@ -54,22 +54,21 @@ function initSlideShow(platformToDisplay = 0) {
 
         console.log('Activating platform:', activePlatformName, 'at index:', activeGalleryIndex);
 
-        if (activePlatformName === 'recents') {
-            initGallery(LB.totalNumberOfPlatforms);
-        } else if (LB.enabledPlatforms.includes(activePlatformName)) {
-            if (activePlatformName === 'settings' && LB.kioskMode) {
-                return;
-            }
-            initGallery(activeGalleryIndex);
-        } else {
-            initGallery(0, activePlatformName);
-        }
-
         // Switch to gallery view
         document.getElementById('slideshow').style.display = 'none';
         document.getElementById('galleries').style.display = 'flex';
         document.getElementById('header').style.display = 'flex';
         window.removeEventListener('keydown', handleHomeKeyDown);
+
+        // Initialize the gallery
+        if (activePlatformName === 'recents') {
+            initGallery(LB.totalNumberOfPlatforms);
+        } else if (LB.enabledPlatforms.includes(activePlatformName)) {
+            if (activePlatformName === 'settings' && LB.kioskMode) return;
+            initGallery(activeGalleryIndex);
+        } else {
+            initGallery(0, activePlatformName);
+        }
     }
 
     function returnToSlideshow() {

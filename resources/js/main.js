@@ -28,6 +28,8 @@ async function initApp() {
     LB.recentlyPlayedPolicy = preferences.settings.recentlyPlayedPolicy;
     LB.disabledPlatformsPolicy = preferences.settings.disabledPlatformsPolicy;
 
+    await buildGalleries(preferences);
+
     // Build the carousel slides using the EXACT same logic as your original
     buildSlideshow(preferences);
 
