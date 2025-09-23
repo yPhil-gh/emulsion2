@@ -25,6 +25,8 @@ async function initApp() {
 
     appContainer.appendChild(platformList);
 
+    initGamepad();
+
     Neutralino.events.on('windowClose', () => {
         Neutralino.app.exit();
     });
