@@ -1,0 +1,28 @@
+// SINGLE SOURCE OF TRUTH - Platforms definition
+const PLATFORMS = [
+    { name: "atari", extensions: [".zip"] },
+    { name: "spectrum", extensions: [".zip"] },
+    { name: "c64", extensions: [".zip"] },
+    { name: "nes", extensions: [".zip"] },
+    { name: "sms", extensions: [".zip"] },
+    { name: "pcengine", extensions: [".pce"] },
+    { name: "amiga", extensions: [".lha", ".adf"] },
+    { name: "megadrive", extensions: [".md"] },
+    { name: "gameboy", extensions: [".md"] },
+    { name: "lynx", extensions: [".md"] },
+    { name: "gamegear", extensions: [".zip"] },
+    { name: "snes", extensions: [".smc"] },
+    { name: "jaguar", extensions: [".jag"] },
+    { name: "saturn", extensions: [".cue"] },
+    { name: "psx", extensions: [".cue"] },
+    { name: "n64", extensions: [".z64"] },
+    { name: "dreamcast", extensions: [".gdi", ".cdi"] },
+    { name: "ps2", extensions: [".bin", ".iso"] },
+    { name: "gamecube", extensions: [".iso", ".ciso"] },
+    { name: "xbox", extensions: [".iso"] },
+    { name: "psp", extensions: [".iso"] },
+    { name: "ps3", extensions: [".SFO"] },
+    { name: "3ds", extensions: [".3ds"] },
+    { name: "xbox360", extensions: [".iso", ".xex"] },
+    { name: "ps4", extensions: [".iso"] }
+];

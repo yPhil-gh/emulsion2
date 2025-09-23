@@ -1,0 +1,76 @@
+{
+  "$schema": "https://raw.githubusercontent.com/neutralinojs/neutralinojs/main/schemas/neutralino.config.schema.json",
+  "applicationId": "com.yphil.emulsion2",
+  "version": "1.0.0",
+  "defaultMode": "window",
+  "port": 0,
+  "documentRoot": "/resources/",
+  "url": "/",
+  "enableServer": true,
+  "enableNativeAPI": true,
+  "tokenSecurity": "one-time",
+  "logging": {
+    "enabled": true,
+    "writeToLogFile": true
+  },
+  "nativeAllowList": [
+    "app.*",
+    "os.*",
+    "filesystem.*",
+    "debug.log"
+  ],
+  "globalVariables": {
+    "APP_NAME": "Emulsion2",
+    "APP_VERSION": "1.0.0"
+  },
+  "modes": {
+    "window": {
+      "title": "Emulsion2 - Game Launcher",
+      "width": 1400,
+      "height": 900,
+      "minWidth": 1024,
+      "minHeight": 768,
+      "center": true,
+      "fullScreen": false,
+      "alwaysOnTop": false,
+      "icon": "/resources/icons/appIcon.png",
+      "enableInspector": true,
+      "borderless": false,
+      "maximize": false,
+      "hidden": false,
+      "resizable": true,
+      "exitProcessOnClose": false
+    },
+    "browser": {
+      "globalVariables": {
+        "TEST": "Test value browser"
+      },
+      "nativeBlockList": [
+        "filesystem.*"
+      ]
+    },
+    "cloud": {
+      "url": "/resources/#cloud",
+      "nativeAllowList": [
+        "app.*"
+      ]
+    },
+    "chrome": {
+      "width": 800,
+      "height": 500,
+      "args": "--user-agent=\"Neutralinojs chrome mode\"",
+      "nativeBlockList": [
+        "filesystem.*",
+        "os.*"
+      ]
+    }
+  },
+  "cli": {
+    "binaryName": "emulsion2",
+    "resourcesPath": "/resources/",
+    "extensionsPath": "/extensions/",
+    "clientLibrary": "/resources/js/neutralino.js",
+    "binaryVersion": "6.3.0",
+    "clientVersion": "6.3.0"
+  }
+}
