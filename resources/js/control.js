@@ -72,9 +72,9 @@ function initSlideShow(platformToDisplay = 0) { // Remove appPreferences paramet
             document.getElementById('galleries').style.display = 'flex';
             initGallery(window.LB.totalNumberOfPlatforms);
         } else if (activePlatformName === 'settings') {
-            // Open settings menu
-            document.getElementById('galleries').style.display = 'none';
-            openPlatformMenu('settings');
+            // Show the first gallery page (settings gallery)
+            document.getElementById('galleries').style.display = 'flex';
+            initGallery(0);
         } else {
             // Open configured platform gallery
             document.getElementById('galleries').style.display = 'flex';
