@@ -509,17 +509,28 @@ function buildPlatformForm(platformName) {
 
     async function _gamesDirButtonClick(event) {
         event.stopPropagation();
-        const selectedPath = await ipcRenderer.invoke('select-file-or-directory', 'openDirectory');
-        if (selectedPath) {
-            gamesDirInput.value = selectedPath;
+        try {
+            const result = await Neutralino.os.showFolderDialog('Select Games Directory');
+            if (result && result.length > 0) {
+                gamesDirInput.value = result;
+            }
+        } catch (err) {
+            console.error('Failed to select directory:', err);
         }
     }
 
     async function _emulatorButtonClick(event) {
         event.stopPropagation();
-        const selectedPath = await ipcRenderer.invoke('select-file-or-directory', 'openFile');
-        if (selectedPath) {
-            emulatorInput.value = selectedPath;
+        try {
+            const result = await Neutralino.os.showOpenDialog('Select Emulator', {
+                filters: [{ name: 'Executables', extensions: ['exe', 'bat', 'sh', '*'] }],
+                multiple: false
+            });
+            if (result && result.length > 0) {
+                emulatorInput.value = result;
+            }
+        } catch (err) {
+            console.error('Failed to select file:', err);
         }
     }
 
@@ -622,11 +633,11 @@ function buildPlatformForm(platformName) {
               .filter(ext => ext.length > 1);  // Filter out empty/. only
 
         try {
-            await LB.prefs.save(platformName, 'isEnabled', statusCheckBox.checked);
-            await LB.prefs.save(platformName, 'gamesDir', gamesDirInput.value);
-            await LB.prefs.save(platformName, 'emulator', emulatorInput.value);
-            await LB.prefs.save(platformName, 'extensions', extensions);
-            await LB.prefs.save(platformName, 'emulatorArgs', emulatorArgsInput.value);
+            await updatePreference(platformName, 'isEnabled', statusCheckBox.checked);
+            await updatePreference(platformName, 'gamesDir', gamesDirInput.value);
+            await updatePreference(platformName, 'emulator', emulatorInput.value);
+            await updatePreference(platformName, 'extensions', extensions);
+            await updatePreference(platformName, 'emulatorArgs', emulatorArgsInput.value);
             window.location.reload();
         } catch (error) {
             console.error('Failed to save preferences:', error);
