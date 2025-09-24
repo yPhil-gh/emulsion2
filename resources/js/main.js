@@ -30,6 +30,11 @@ async function initApp() {
     LB.galleryNumOfCols = LB.preferences.settings.numberOfColumns;
     LB.recentlyPlayedPolicy = LB.preferences.settings.recentlyPlayedPolicy;
     LB.disabledPlatformsPolicy = LB.preferences.settings.disabledPlatformsPolicy;
+    LB.theme = LB.preferences.settings.theme;
+
+    console.log("LB.theme: ", LB.theme);
+
+    applyTheme(LB.theme);
 
     await buildGalleries(LB.preferences);
 
