@@ -127,6 +127,7 @@ function buildHomeSlide(platformName, preferences) {
     }
 
     slide.setAttribute('data-index', preferences[platformName].index);
+    slide.setAttribute('data-name', platformName);
     slide.setAttribute('data-is-enabled', preferences[platformName].isEnabled);
 
     return slide;

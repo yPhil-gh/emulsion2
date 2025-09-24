@@ -1,4 +1,4 @@
-function initSlideShow(platformToDisplay = 0) { // Remove appPreferences parameter
+function initSlideShow(platformToDisplay = 0) {
     console.log('Initializing slideshow control...');
 
     const slideshow = document.getElementById("slideshow");
@@ -13,9 +13,25 @@ function initSlideShow(platformToDisplay = 0) { // Remove appPreferences paramet
     document.getElementById('galleries').style.display = 'none';
     document.getElementById('header').style.display = 'none';
 
-    let currentIndex = slides.findIndex(s =>
-        Number(s.dataset.index) === Number(platformToDisplay)
-    ) || 0;
+    // Default index
+    let currentIndex = 0;
+
+    if (typeof platformToDisplay === 'string') {
+        // Lookup by name
+        const foundIndex = slides.findIndex(s =>
+            s.dataset.platform === platformToDisplay ||
+            s.dataset.name === platformToDisplay
+        );
+        if (foundIndex !== -1) {
+            currentIndex = foundIndex;
+        }
+    } else {
+        // Fallback to numeric index
+        const idx = slides.findIndex(s => Number(s.dataset.index) === Number(platformToDisplay));
+        if (idx !== -1) {
+            currentIndex = idx;
+        }
+    }
 
     function updateSlideshow() {
         const angleIncrement = 360 / totalSlides;
@@ -82,15 +98,6 @@ function initSlideShow(platformToDisplay = 0) { // Remove appPreferences paramet
         }
     }
 
-    function returnToSlideshow() {
-        // Switch back to slideshow view
-        document.getElementById('slideshow').style.display = 'flex';
-        document.getElementById('galleries').style.display = 'none';
-        document.getElementById('header').style.display = 'none';
-        window.addEventListener('keydown', handleHomeKeyDown);
-        updateSlideshow();
-    }
-
     function handleHomeKeyDown(event) {
         event.stopPropagation();
 
@@ -128,6 +135,31 @@ function initSlideShow(platformToDisplay = 0) { // Remove appPreferences paramet
     updateSlideshow();
 
     console.log('Slideshow control initialized with', totalSlides, 'slides');
+
+    // Expose helper so it can be used project-wide
+    window.goToSlideshow = function (platformName) {
+
+        console.log("platformName: ", platformName);
+
+        slideshow.style.display = 'flex';
+        document.getElementById('galleries').style.display = 'none';
+        document.getElementById('header').style.display = 'none';
+
+        window.addEventListener('keydown', handleHomeKeyDown);
+
+        const slides = Array.from(slideshow.querySelectorAll('.slide'));
+        const foundIndex = slides.findIndex(s =>
+            s.dataset.platform === platformName ||
+            s.dataset.name === platformName
+        );
+
+        if (foundIndex !== -1) {
+            currentIndex = foundIndex;
+            updateSlideshow();
+        } else {
+            console.warn(`No slide found for platform: ${platformName}`);
+        }
+    };
 }
 
 // Simple function to check if a platform needs configuration
@@ -146,4 +178,3 @@ function initGallery(galleryIndex, platformName = null) {
 
 window.initSlideShow = initSlideShow;
 window.initGallery = initGallery;
-window.returnToSlideshow = returnToSlideshow;
