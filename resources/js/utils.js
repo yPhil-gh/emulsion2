@@ -5,10 +5,6 @@ function setFooterSize(size) {
     }
 }
 
-function applyTheme(theme) {
-    document.documentElement.setAttribute('data-theme', theme);
-}
-
 function initSlideShow(startIndex) {
     // Basic slideshow initialization
     const slides = document.querySelectorAll('.home-slide');
@@ -42,6 +38,7 @@ const getSelectedGame = function(containers, index) {
 
 
 function applyTheme(theme) {
+    console.log("applyTheme: ");
     const body = document.querySelector('body');
     const menu = document.getElementById('menu');
 
@@ -65,3 +62,5 @@ function applyTheme(theme) {
         menu.style.filter = 'opacity(1)';
     }, 100);
 }
+
+window.applyTheme = applyTheme;

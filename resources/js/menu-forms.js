@@ -86,175 +86,593 @@ function handleMenuKeyDown(event) {
     }
 }
 
-function buildPreferencesForm() {
-    const form = document.createElement('form');
-    form.className = 'menu-form';
+function buildPrefsFormItem(name, iconName, type, description, shortDescription, value, onChangeFct) {
 
-    const preferences = LB.preferences || {};
+    let input;
+    const group = document.createElement('div');
 
-    // Example: theme selector
-    const themeGroup = createFormGroup('theme', 'Theme');
-    const themeInput = document.createElement('input');
-    themeInput.type = 'text';
-    themeInput.value = preferences.theme || 'default';
-    themeGroup.appendChild(themeInput);
-    form.appendChild(themeGroup);
+    const radios = [];
 
-    const buttons = createButtonsContainer();
-    const saveBtn = createButton('Save', async () => {
-        preferences.theme = themeInput.value;
-        await savePreferences(preferences);
-        closePlatformMenu();
-    });
-    buttons.appendChild(saveBtn);
+    if (typeof type === 'object') {
+        const types = type;
 
-    const cancelBtn = createButton('Cancel', closePlatformMenu);
-    buttons.appendChild(cancelBtn);
+        const inputCtn = document.createElement('div');
+        inputCtn.classList.add('input-ctn');
 
-    form.appendChild(buttons);
+        const radiosContainer = document.createElement('div');
+        radiosContainer.classList.add('radio-container');
 
-    return form;
+        types.forEach((type, index) => {
+
+            const label = document.createElement('label');
+
+            const radio = document.createElement('input');
+            radio.type = 'radio';
+            radio.name = name;
+            radio.value = type;
+            radio.checked = type === value;
+
+            const radioBox = document.createElement('div');
+            radioBox.classList.add('radio-box');
+            radioBox.textContent = type;
+
+            if (index === types.length - 1) {
+                radioBox.classList.add('last');
+            }
+
+            radios.push(radio);
+
+            const text = document.createTextNode(type.charAt(0).toUpperCase() + type.slice(1));
+
+            radio.addEventListener('change', () => {
+                console.log("change!: ");
+                if (radio.checked && onChangeFct) onChangeFct(type);
+            });
+
+            label.appendChild(radio);
+            label.appendChild(radioBox);
+            radiosContainer.appendChild(label);
+
+        });
+
+        inputCtn.appendChild(radiosContainer);
+
+        input = inputCtn;
+
+    } else if (type === 'menu') {
+
+    } else {
+
+        input = document.createElement('input');
+        input.type = type;
+        input.id = name;
+        input.name = name;
+        input.min = '2';
+        input.max = '12';
+        input.placeholder = description;
+
+        input.classList.add('input');
+        input.value = value;
+
+    }
+
+    const icon = document.createElement('div');
+    icon.classList.add('form-icon');
+    icon.innerHTML = `<i class="form-icon fa fa-2x fa-${iconName}" aria-hidden="true"></i>`;
+
+    const label = document.createElement('label');
+    label.textContent = shortDescription;
+
+    const SubLabel = document.createElement('label');
+    SubLabel.id = 'num-cols-sub-label';
+    SubLabel.classList.add('sub-label');
+
+    const ctn = document.createElement('div');
+    ctn.classList.add('dual-ctn');
+
+    ctn.appendChild(icon);
+    ctn.appendChild(input);
+
+    group.appendChild(label);
+    group.appendChild(ctn);
+
+    return { group, input, radios };
 }
 
-function buildPlatformForm(platformName) {
+function buildPreferencesForm() {
+    // Container
     const formContainer = document.createElement('div');
     formContainer.classList.add('platform-menu-container');
 
-    const platformInfo = getPlatformInfo(platformName);
-    console.info("BUILDPLATFORMFORM: ", platformInfo);
-    const platformPrefs = LB.preferences[platformName] || {};
-
-    // Platform image
+    // Image
     const platformMenuImageCtn = document.createElement('div');
     platformMenuImageCtn.classList.add('platform-menu-image-ctn');
+    const platformMenuImage = document.createElement('img');
+    platformMenuImage.src = `images/platforms/settings.png`;
+    platformMenuImage.title = `Emulsion version ${LB.versionNumber}`;
+    platformMenuImage.width = 250;
+    platformMenuImageCtn.appendChild(platformMenuImage);
+    formContainer.appendChild(platformMenuImageCtn);
 
+    function setFooterSize(size) {
+        const footer = document.getElementById('footer');
+        footer.className = `footer-${size}`;
+    }
+
+    // Rows / inputs
+    const formItems = [
+        buildPrefsFormItem('numberOfColumns', 'th', 'number', 'The number of columns in each platform gallery', 'Number of columns', LB.galleryNumOfCols),
+        buildPrefsFormItem('footerSize', 'arrows', ['small', 'medium', 'big'], '', 'Footer menu size', LB.footerSize, setFooterSize),
+        buildPrefsFormItem('homeMenuTheme', 'arrows-h', ['flat', '3D'], '', 'Home menu style', LB.homeMenuTheme),
+        buildPrefsFormItem('theme', 'eyedropper', ['default', 'day', 'night'], '', 'Emulsion Theme', LB.theme, applyTheme),
+        buildPrefsFormItem('disabledPlatformsPolicy', 'check-square-o', ['show', 'hide'], '', 'Disabled Platforms', LB.disabledPlatformsPolicy),
+        buildPrefsFormItem('recentlyPlayedPolicy', 'clock-o', ['show', 'hide'], '', 'Recently Played', LB.recentlyPlayedPolicy),
+        buildPrefsFormItem('steamGridAPIKey', 'steam-square', 'text', 'Your SteamGrid API Key', 'SteamGrid API Key', LB.steamGridAPIKey || ''),
+        buildPrefsFormItem('giantBombAPIKey', 'bomb', 'text', 'Your GiantBomb API Key', 'GiantBomb API Key', LB.giantBombAPIKey || '')
+    ];
+
+    formItems.forEach(item => formContainer.appendChild(item.group));
+
+    // Buttons
+    const saveButton = document.createElement('button');
+    saveButton.type = 'button';
+    saveButton.classList.add('button');
+    saveButton.textContent = 'Save';
+
+    const aboutButton = document.createElement('button');
+    aboutButton.type = 'button';
+    aboutButton.className = 'button';
+    aboutButton.textContent = 'About';
+
+    const cancelButton = document.createElement('button');
+    cancelButton.type = 'button';
+    cancelButton.classList.add('is-info', 'button');
+    cancelButton.textContent = 'Cancel';
+
+    const formContainerButtons = document.createElement('div');
+    formContainerButtons.classList.add('cancel-save-buttons');
+    formContainerButtons.append(cancelButton, aboutButton, saveButton);
+    formContainer.appendChild(formContainerButtons);
+
+    // Spacer
+    const formContainerVSpacerDiv = document.createElement('div');
+    formContainerVSpacerDiv.classList.add('spacer-div');
+    formContainer.appendChild(formContainerVSpacerDiv);
+
+    // Event listeners
+    cancelButton.addEventListener('click', () => {
+        // simulate escape key behavior
+        document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', code: 'Escape', keyCode: 27, which: 27, bubbles: true }));
+    });
+
+    aboutButton.addEventListener('click', async () => {
+        // Neutralino open URL to local or remote about page
+        await Neutralino.os.open(LB.baseDir + '/about.html');
+    });
+
+    saveButton.addEventListener('click', async () => {
+        try {
+            let numberOfColumns = parseInt(formItems[0].input.value, 10);
+            if (numberOfColumns < 2) numberOfColumns = 2;
+            else if (numberOfColumns > 12) numberOfColumns = 12;
+
+            await LB.prefs.save('settings', 'numberOfColumns', numberOfColumns);
+            await LB.prefs.save('settings', 'footerSize', formItems[1].radios.find(r => r.checked)?.value);
+            await LB.prefs.save('settings', 'homeMenuTheme', formItems[2].radios.find(r => r.checked)?.value);
+            await LB.prefs.save('settings', 'theme', formItems[3].radios.find(r => r.checked)?.value);
+            await LB.prefs.save('settings', 'disabledPlatformsPolicy', formItems[4].radios.find(r => r.checked)?.value);
+            await LB.prefs.save('settings', 'recentlyPlayedPolicy', formItems[5].radios.find(r => r.checked)?.value);
+            await LB.prefs.save('settings', 'steamGridAPIKey', formItems[6].input.value);
+            await LB.prefs.save('settings', 'giantBombAPIKey', formItems[7].input.value);
+
+            Neutralino.app.reloadWindow();
+        } catch (error) {
+            console.error('Failed to save preferences:', error);
+        }
+    });
+
+
+    console.log("formContainer: ", formContainer);
+    return formContainer;
+
+
+}
+
+
+function buildPlatformForm(platformName) {
+
+    // if (platformName === 'settings') {
+    //     return _buildPrefsForm();
+    // }
+
+    const formContainer = document.createElement('div');
+    formContainer.classList.add('platform-menu-container');
+
+    const platformMenuImageCtn = document.createElement('div');
+    platformMenuImageCtn.classList.add('platform-menu-image-ctn');
     const platformMenuImage = document.createElement('img');
     platformMenuImage.src = `images/platforms/${platformName}.png`;
-    platformMenuImage.width = 250;
-    platformMenuImage.onerror = () => {
-        platformMenuImage.src = 'images/missing.png';
-    };
+    platformMenuImage.width = '250';
 
     platformMenuImageCtn.appendChild(platformMenuImage);
 
-    // Platform status
-    const statusGroup = createFormGroup('status', `${platformInfo.name} Status`);
-
-    const statusCheckbox = document.createElement('input');
-    statusCheckbox.type = 'checkbox';
-    statusCheckbox.checked = platformPrefs.isEnabled || false;
-    statusCheckbox.classList.add('checkbox');
+    const statusCheckBox = document.createElement('input');
+    statusCheckBox.type = 'checkbox';
+    statusCheckBox.id = 'input-platform-toggle-checkbox';
+    statusCheckBox.classList.add('checkbox');
 
     const statusLabel = document.createElement('label');
-    statusLabel.textContent = 'Platform enabled';
-    statusLabel.classList.add('checkbox-label');
-    statusLabel.prepend(statusCheckbox);
+    statusLabel.classList.add('checkbox');
+    statusLabel.id = 'form-status-label';
 
-    statusGroup.appendChild(statusLabel);
+    const statusLabelPlatormName = document.createElement('span');
+    statusLabelPlatormName.id = 'form-status-label-platform-name';
 
-    // Games directory
-    const gamesDirGroup = createFormGroup('gamesDir', 'Games Directory');
+    const platformInfo = getPlatformInfo(platformName);
+
+    statusLabelPlatormName.innerHTML = `${platformInfo.name} is&nbsp;`;
+
+    const statusLabelPlatormStatus = document.createElement('span');
+    statusLabelPlatormStatus.id = 'form-status-label-platform-status';
+
+    statusLabel.appendChild(statusCheckBox);
+    statusLabel.appendChild(statusLabelPlatormName);
+    statusLabel.appendChild(statusLabelPlatormStatus);
+
+    const gamesDirGroup = document.createElement('div');
 
     const gamesDirInput = document.createElement('input');
     gamesDirInput.type = 'text';
-    gamesDirInput.value = platformPrefs.gamesDir || '';
-    gamesDirInput.placeholder = `Path to your ${platformInfo.name} games`;
     gamesDirInput.classList.add('input');
+    gamesDirInput.placeholder = `Your ${platformInfo.name} games directory`;
 
-    gamesDirGroup.appendChild(gamesDirInput);
+    const gamesDirLabel = document.createElement('label');
+    gamesDirLabel.textContent = 'Games directory';
 
-    // Emulator
-    const emulatorGroup = createFormGroup('emulator', 'Emulator');
+    const gamesDirSubLabel = document.createElement('label');
+    gamesDirSubLabel.id = 'games-dir-sub-label';
+    gamesDirSubLabel.classList.add('sub-label');
+
+    const gamesDirButton = document.createElement('button');
+    gamesDirButton.classList.add('button', 'button-browse', 'info');
+    gamesDirButton.textContent = 'Browse';
+
+    const gamesDirCtn = document.createElement('div');
+    gamesDirCtn.classList.add('dual-ctn');
+
+    const gamesDirIcon = document.createElement('div');
+    gamesDirIcon.classList.add('form-icon');
+    gamesDirIcon.innerHTML = '<i class="form-icon fa fa-2x fa-folder-open-o" aria-hidden="true"></i>';
+
+    gamesDirCtn.appendChild(gamesDirIcon);
+    gamesDirCtn.appendChild(gamesDirInput);
+    gamesDirCtn.appendChild(gamesDirButton);
+
+    gamesDirGroup.appendChild(gamesDirLabel);
+    gamesDirGroup.appendChild(gamesDirCtn);
+    gamesDirGroup.appendChild(gamesDirSubLabel);
+
+    const emulatorGroup = document.createElement('div');
+
+    const emulatorIcon = document.createElement('div');
+    emulatorIcon.classList.add('form-icon');
+    emulatorIcon.innerHTML = '<i class="form-icon fa fa-2x fa-gamepad" aria-hidden="true"></i>';
+
+    const emulatorInputLabel = document.createElement('label');
+    emulatorInputLabel.textContent = "Emulator";
+
+    const emulatorSubLabel = document.createElement('label');
+    emulatorSubLabel.id = 'emulator-sub-label';
+    emulatorSubLabel.classList.add('sub-label');
 
     const emulatorInput = document.createElement('input');
     emulatorInput.type = 'text';
-    emulatorInput.value = platformPrefs.emulator || '';
-    emulatorInput.placeholder = `Emulator command for ${platformInfo.name}`;
     emulatorInput.classList.add('input');
+    emulatorInput.placeholder = `Your ${platformInfo.name} emulator`;
 
-    emulatorGroup.appendChild(emulatorInput);
+    const emulatorCtn = document.createElement('div');
+    emulatorCtn.classList.add('dual-ctn');
 
-    // Emulator arguments
-    const argsGroup = createFormGroup('emulatorArgs', 'Emulator Arguments');
+    const emulatorButton = document.createElement('button');
+    emulatorButton.classList.add('button', 'button-browse');
+    emulatorButton.textContent = 'Browse';
 
-    const argsInput = document.createElement('input');
-    argsInput.type = 'text';
-    argsInput.value = platformPrefs.emulatorArgs || '';
-    argsInput.placeholder = 'Optional emulator arguments';
-    argsInput.classList.add('input');
+    emulatorCtn.appendChild(emulatorIcon);
+    emulatorCtn.appendChild(emulatorInput);
+    emulatorCtn.appendChild(emulatorButton);
 
-    argsGroup.appendChild(argsInput);
+    emulatorGroup.appendChild(emulatorInputLabel);
+    emulatorGroup.appendChild(emulatorCtn);
+    emulatorGroup.appendChild(emulatorSubLabel);
 
-    // Extensions
-    const extensionsGroup = createFormGroup('extensions', 'File Extensions');
+    // ======== NEW EXTENSIONS SECTION ========
+    const extensionsGroup = document.createElement('div');
 
-    const extensionsInput = document.createElement('input');
-    extensionsInput.type = 'text';
-    extensionsInput.value = (platformPrefs.extensions || []).join(', ');
-    extensionsInput.placeholder = '.zip, .iso, .bin';
-    extensionsInput.classList.add('input');
+    // Label
+    const extensionsLabel = document.createElement('label');
+    extensionsLabel.textContent = 'File Extensions';
 
-    extensionsGroup.appendChild(extensionsInput);
+    // Container for icon + inputs
+    const extensionsCtn = document.createElement('div');
+    extensionsCtn.classList.add('dual-ctn');
 
-    // Buttons
-    const buttonsContainer = createButtonsContainer();
+    // Icon
+    const extensionsIcon = document.createElement('div');
+    extensionsIcon.classList.add('form-icon');
+    extensionsIcon.innerHTML = '<i class="form-icon fa fa-2x fa-file-archive-o" aria-hidden="true"></i>';
 
-    const saveButton = createButton('Save', async () => {
-        if (!gamesDirInput.value.trim()) {
-            alert('Please enter a games directory');
-            return;
-        }
+    // Inputs wrapper
+    const extensionsInputsContainer = document.createElement('div');
+    extensionsInputsContainer.classList.add('extensions-inputs-container');
 
-        if (!emulatorInput.value.trim()) {
-            alert('Please enter an emulator');
-            return;
-        }
+    // Helper to enable/disable the “+” button based on row count
+    function updateAddExtensionBtn() {
+        // Count only the input rows (total children minus the add button itself)
+        const rowCount = extensionsInputsContainer.children.length - 1;
+        addExtensionBtn.disabled = rowCount >= 3;
+        addExtensionBtn.style.opacity = addExtensionBtn.disabled ? '0.5' : '1';
+    }
 
-        try {
-            const preferences = LB.preferences;
-            if (!preferences[platformName]) {
-                preferences[platformName] = {};
-            }
-
-            const extensions = extensionsInput.value
-                  .split(',')
-                  .map(ext => ext.trim())
-                  .filter(ext => ext.length > 0)
-                  .map(ext => (ext.startsWith('.') ? ext : '.' + ext));
-
-            preferences[platformName] = {
-                isEnabled: statusCheckbox.checked,
-                gamesDir: gamesDirInput.value.trim(),
-                emulator: emulatorInput.value.trim(),
-                emulatorArgs: argsInput.value.trim(),
-                extensions: extensions.length > 0 ? extensions : ['.zip'],
-                index: preferences[platformName].index || 0
-            };
-
-            await savePreferences(preferences);
-            closePlatformMenu();
-
-            // Optionally, trigger a UI refresh if needed
-        } catch (error) {
-            console.error('Failed to save platform preferences:', error);
+    // Create the “Select +” button wired to add a new row
+    const addExtensionBtn = document.createElement('button');
+    addExtensionBtn.classList.add('button', 'small');
+    addExtensionBtn.innerHTML = '<i class="form-icon emulator-args-icon fa fa-plus" aria-hidden="true"></i>';
+    addExtensionBtn.addEventListener('click', () => {
+        // Guard so we never exceed 3
+        if (extensionsInputsContainer.children.length - 1 < 3) {
+            const newRow = _createExtensionInputRow('', false);
+            // Insert before the button
+            extensionsInputsContainer.insertBefore(newRow, addExtensionBtn);
+            updateAddExtensionBtn();
         }
     });
 
-    const cancelButton = createButton('Cancel', () => {
-        closePlatformMenu();
-    });
 
-    buttonsContainer.appendChild(cancelButton);
-    buttonsContainer.appendChild(saveButton);
 
-    // Assemble form
+    // // Load existing extensions from preferences
+    // LB.prefs.getValue(platformName, 'extensions')
+    //     .then(extensions => {
+    //         const initialExtensions = extensions || ['.iso'];
+    //         initialExtensions.forEach((ext, index) => {
+    //             const inputRow = _createExtensionInputRow(ext, index === 0);
+    //             extensionsInputsContainer.appendChild(inputRow);
+    //         });
+    //         // Finally append the add button and update its state
+    //         extensionsInputsContainer.appendChild(addExtensionBtn);
+    //         updateAddExtensionBtn();
+    //     })
+    //     .catch(console.error);
+
+    // Assemble the full group
+    extensionsCtn.appendChild(extensionsIcon);
+    extensionsCtn.appendChild(extensionsInputsContainer);
+    extensionsGroup.appendChild(extensionsLabel);
+    extensionsGroup.appendChild(extensionsCtn);
+    // ======== END EXTENSIONS SECTION ========
+
+    const emulatorArgsGroup = document.createElement('div');
+
+    const emulatorArgsCtn = document.createElement('div');
+    emulatorArgsCtn.classList.add('dual-ctn');
+
+    const emulatorArgsIcon = document.createElement('div');
+    emulatorArgsIcon.classList.add('form-icon');
+    emulatorArgsIcon.innerHTML = '<i class="form-icon emulator-args-icon fa fa-2x fa-rocket" aria-hidden="true"></i>';
+
+    const emulatorArgsLabel = document.createElement('label');
+    emulatorArgsLabel.textContent = 'Emulator Arguments';
+
+    const emulatorArgsInput = document.createElement('input');
+    emulatorArgsInput.classList.add('input');
+    emulatorArgsInput.type = 'text';
+    emulatorArgsInput.placeholder = `Your ${platformInfo.name} emulator arguments`;
+
+    emulatorArgsCtn.appendChild(emulatorArgsIcon);
+    emulatorArgsCtn.appendChild(emulatorArgsInput);
+    emulatorArgsGroup.appendChild(emulatorArgsLabel);
+    emulatorArgsGroup.appendChild(emulatorArgsCtn);
+
+    const saveButton = document.createElement('button');
+    saveButton.type = 'button';
+    saveButton.classList.add('button');
+    saveButton.textContent = 'Save';
+
+    const helpButton = document.createElement('button');
+    helpButton.type = 'button';
+    helpButton.classList.add('button');
+    helpButton.textContent = 'Help';
+
+    const cancelButton = document.createElement('button');
+    cancelButton.type = 'button';
+    cancelButton.classList.add('button');
+    cancelButton.textContent = 'Cancel';
+
+    // LB.prefs.getValue(platformName, 'gamesDir')
+    //     .then((value) => {
+    //         gamesDirInput.value = value;
+    //     })
+    //     .catch((error) => {
+    //         console.error('Failed to get platform preference:', error);
+    //     });
+
+    // LB.prefs.getValue(platformName, 'emulator')
+    //     .then((value) => {
+    //         emulatorInput.value = value;
+    //     })
+    //     .catch((error) => {
+    //         console.error('Failed to get platform preference:', error);
+    //     });
+
+    // LB.prefs.getValue(platformName, 'emulatorArgs')
+    //     .then((value) => {
+    //         emulatorArgsInput.value = value;
+    //     })
+    //     .catch((error) => {
+    //         console.error('Failed to get platform preference:', error);
+    //     });
+
+
+    gamesDirButton.addEventListener('click', _gamesDirButtonClick);
+    emulatorButton.addEventListener('click', _emulatorButtonClick);
+
+    async function _gamesDirButtonClick(event) {
+        event.stopPropagation();
+        const selectedPath = await ipcRenderer.invoke('select-file-or-directory', 'openDirectory');
+        if (selectedPath) {
+            gamesDirInput.value = selectedPath;
+        }
+    }
+
+    async function _emulatorButtonClick(event) {
+        event.stopPropagation();
+        const selectedPath = await ipcRenderer.invoke('select-file-or-directory', 'openFile');
+        if (selectedPath) {
+            emulatorInput.value = selectedPath;
+        }
+    }
+
     formContainer.appendChild(platformMenuImageCtn);
-    formContainer.appendChild(statusGroup);
+    formContainer.appendChild(statusLabel);
     formContainer.appendChild(gamesDirGroup);
     formContainer.appendChild(emulatorGroup);
-    formContainer.appendChild(argsGroup);
-    formContainer.appendChild(extensionsGroup);
-    formContainer.appendChild(buttonsContainer);
+    formContainer.appendChild(extensionsGroup);  // <-- New addition
+    formContainer.appendChild(emulatorArgsGroup);
+
+    const formContainerButtons = document.createElement('div');
+    formContainerButtons.classList.add('cancel-save-buttons');
+    formContainerButtons.appendChild(cancelButton);
+    formContainerButtons.appendChild(helpButton);
+    formContainerButtons.appendChild(saveButton);
+
+    // LB.prefs.getValue(platformName, 'isEnabled')
+    //     .then((value) => {
+    //         statusCheckBox.checked = value;
+    //         statusLabelPlatormStatus.textContent = value ? 'On' : 'Off';
+    //         statusLabelPlatormStatus.classList.add(value ? 'on' : 'off');
+    //     })
+    //     .catch((error) => {
+    //         console.error('Failed to get platform preference:', error);
+    //     });
+
+    statusCheckBox.addEventListener('change', (event) => {
+        console.log("event: ", event);
+        const isNotEnablable = !gamesDirInput.value || !emulatorInput.value;
+        const isEnabling = statusCheckBox.checked;
+
+        gamesDirSubLabel.textContent = '';
+        emulatorSubLabel.textContent = '';
+
+        if (isEnabling) {
+            if (!gamesDirInput.value) {
+                gamesDirSubLabel.textContent = 'Please enter a game directory';
+            }
+            if (!emulatorInput.value) {
+                emulatorSubLabel.textContent = 'Please enter an emulator (name or path)';
+            }
+        }
+
+        if (isEnabling && isNotEnablable) {
+            event.preventDefault();
+            statusCheckBox.checked = false;
+            console.log("Cannot enable platform - missing requirements");
+        }
+        else {
+            // Only modify classes and text if requirements are met
+            statusLabelPlatormStatus.classList.remove('on', 'off');
+            statusLabelPlatormStatus.textContent = statusCheckBox.checked ? 'On' : 'Off';
+            statusLabelPlatormStatus.classList.add(statusCheckBox.checked ? 'on' : 'off');
+        }
+    });
+
+    cancelButton.addEventListener('click', _cancelButtonClick);
+
+    helpButton.addEventListener('click', () => {
+        ipcRenderer.invoke('go-to-url', 'https://gitlab.com/yphil/emulsion/-/blob/master/README.md#usage');
+    });
+
+    saveButton.addEventListener('click', _saveButtonClick);
+
+    function _cancelButtonClick(event) {
+
+        const escapeKeyEvent = new KeyboardEvent('keydown', {
+            key: 'Escape',
+            keyCode: 27,
+            code: 'Escape', // The physical key on the keyboard
+            which: 27,     // Same as keyCode
+            bubbles: true
+        });
+
+        document.dispatchEvent(escapeKeyEvent);
+    }
+
+    async function _saveButtonClick(event) {
+
+        if (!gamesDirInput.value) {
+            gamesDirSubLabel.textContent = 'This field cannot be empty';
+            return;
+        }
+
+        gamesDirSubLabel.textContent = '';
+
+        if (!emulatorInput.value) {
+            emulatorSubLabel.textContent = 'This field cannot be empty';
+            return;
+        }
+
+        emulatorSubLabel.textContent = '';
+
+        // Process extensions
+        const extensions = Array.from(extensionsInputsContainer.querySelectorAll('input'))
+              .map(input => {
+                  let val = input.value.trim().toLowerCase();
+                  if (!val.startsWith('.')) val = '.' + val;
+                  return val.replace(/[^a-z0-9.]/gi, '');
+              })
+              .filter(ext => ext.length > 1);  // Filter out empty/. only
+
+        try {
+            await LB.prefs.save(platformName, 'isEnabled', statusCheckBox.checked);
+            await LB.prefs.save(platformName, 'gamesDir', gamesDirInput.value);
+            await LB.prefs.save(platformName, 'emulator', emulatorInput.value);
+            await LB.prefs.save(platformName, 'extensions', extensions);
+            await LB.prefs.save(platformName, 'emulatorArgs', emulatorArgsInput.value);
+            window.location.reload();
+        } catch (error) {
+            console.error('Failed to save preferences:', error);
+        }
+    }
+
+        // EXTENSION INPUT ROW CREATOR
+    function _createExtensionInputRow(value, isFirst) {
+        const row = document.createElement('div');
+        row.classList.add('extension-input-row');
+
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.value = value;
+        input.placeholder = '.ext';
+        input.classList.add('input', 'small');
+
+        // Auto-format on blur
+        input.addEventListener('blur', () => {
+            let val = input.value.trim().toLowerCase();
+            if (!val.startsWith('.')) val = '.' + val;
+            input.value = val.replace(/[^a-z0-9.]/gi, '');
+        });
+
+        if (!isFirst) {
+            const removeBtn = document.createElement('button');
+            removeBtn.classList.add('button', 'small', 'danger');
+            removeBtn.innerHTML = '<i class="form-icon emulator-args-icon fa fa-remove" aria-hidden="true"></i>';
+            removeBtn.addEventListener('click', () => row.remove());
+            row.appendChild(removeBtn);
+        }
+
+        row.appendChild(input);
+        return row;
+    }
+
+    formContainer.appendChild(formContainerButtons);
 
     return formContainer;
 }

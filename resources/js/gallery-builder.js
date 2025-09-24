@@ -97,7 +97,7 @@ async function buildSettingsPage(preferences, index) {
         vendor: 'Emulsion',
         index: -1,
         displayName: 'Settings',
-        imgSrc: 'images/icons/settings.png',
+        imgSrc: 'images/platforms/settings.png',
         isSpecial: true,
         onClick: () => window.openPlatformMenu('settings')
     });

@@ -37,7 +37,7 @@ async function initApp() {
     LB.disabledPlatformsPolicy = LB.preferences.settings.disabledPlatformsPolicy;
     LB.theme = LB.preferences.settings.theme;
 
-    applyTheme(LB.theme);
+    window.applyTheme(LB.theme);
 
     await buildGalleries(LB.preferences);
 
