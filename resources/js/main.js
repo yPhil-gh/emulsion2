@@ -16,46 +16,21 @@ async function initApp() {
     console.log('Initializing Neutralino...');
     await Neutralino.init();
 
-    // Serve userDataPath covers as static files via Neutralino server
-    Neutralino.os.getPath('userData').then(userDataPath => {
+    const configPath = await Neutralino.os.getPath('config');
 
-        // Expose a virtual URL like /covers/<platform>/<file>
-        Neutralino.net.registerHttpHandler('/covers/*', async (request) => {
-            try {
-                // Extract relative path after /covers/
-                const relativePath = request.path.replace(/^\/covers\//, '');
-                const fullPath = `${userDataPath}/covers/${relativePath}`;
-
-                // Read the file as binary
-                const data = await Neutralino.filesystem.readFile(fullPath, 'binary');
-
-                // Guess MIME type (only jpg for now)
-                const headers = {
-                    'Content-Type': 'image/jpeg'
-                };
-
-                return {
-                    status: 200,
-                    headers,
-                    body: data
-                };
-            } catch (err) {
-                // File missing
-                return {
-                    status: 404,
-                    body: 'File not found'
-                };
-            }
-        });
-
-    });
-
+    // Mount the covers directory
+    const coversPath = `${configPath}/emulsion2/covers`;
+    try {
+        await Neutralino.server.mount('/covers', coversPath);
+        console.log('Covers directory mounted at /covers');
+    } catch (err) {
+        console.error('Failed to mount covers directory:', err);
+    }
 
     // Set paths
-    const configPath = await Neutralino.os.getPath('config');
     LB.userDataPath = configPath + '/emulsion2';
 
-    console.log('Paths set');
+    console.log('Paths set', configPath);
 
     // Load preferences and store in LB.preferences
     LB.preferences = await loadPreferences();

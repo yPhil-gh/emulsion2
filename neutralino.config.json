@@ -17,7 +17,8 @@
     "app.*",
     "os.*",
     "filesystem.*",
-    "debug.log"
+      "debug.log",
+      "server.*"
   ],
   "globalVariables": {
     "APP_NAME": "Emulsion2",
