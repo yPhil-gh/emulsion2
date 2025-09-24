@@ -63,7 +63,6 @@ function updateGallery() {
     }
 }
 
-
 function updateGameSelection() {
     gameContainers.forEach((container, index) => {
         container.classList.toggle('selected', index === currentGameIndex);

@@ -19,18 +19,6 @@ function initSlideShow(startIndex) {
     }
 }
 
-// Simple error fallback for game covers
-async function getGameCoverPath(platformName, gameName) {
-    const coverPath = `${LB.userDataPath}/covers/${platformName}/${gameName}.png`;
-
-    try {
-        const exists = await fileExists(coverPath);
-        return exists ? coverPath : 'images/missing.png';
-    } catch (error) {
-        return 'images/missing.png';
-    }
-}
-
 const updateControls = function(controlId, icon, text, state = '') {
     const control = document.getElementById(controlId);
     if (!control) return;

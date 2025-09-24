@@ -16,6 +16,41 @@ async function initApp() {
     console.log('Initializing Neutralino...');
     await Neutralino.init();
 
+    // Serve userDataPath covers as static files via Neutralino server
+    Neutralino.os.getPath('userData').then(userDataPath => {
+
+        // Expose a virtual URL like /covers/<platform>/<file>
+        Neutralino.net.registerHttpHandler('/covers/*', async (request) => {
+            try {
+                // Extract relative path after /covers/
+                const relativePath = request.path.replace(/^\/covers\//, '');
+                const fullPath = `${userDataPath}/covers/${relativePath}`;
+
+                // Read the file as binary
+                const data = await Neutralino.filesystem.readFile(fullPath, 'binary');
+
+                // Guess MIME type (only jpg for now)
+                const headers = {
+                    'Content-Type': 'image/jpeg'
+                };
+
+                return {
+                    status: 200,
+                    headers,
+                    body: data
+                };
+            } catch (err) {
+                // File missing
+                return {
+                    status: 404,
+                    body: 'File not found'
+                };
+            }
+        });
+
+    });
+
+
     // Set paths
     const configPath = await Neutralino.os.getPath('config');
     LB.userDataPath = configPath + '/emulsion2';
@@ -175,6 +210,7 @@ function showMainInterface() {
 // Start the app
 if (window.Neutralino) {
     initApp();
+
 } else {
     document.addEventListener('NeutralinoLoaded', initApp);
 }
