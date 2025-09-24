@@ -427,7 +427,20 @@ function buildPlatformForm(platformName) {
         }
     });
 
+    console.log("LB.preferences: ", LB.preferences[platformName]);
 
+    try {
+        const extensions = LB.preferences[platformName]?.extensions || ['.iso'];
+        extensions.forEach((ext, index) => {
+            const inputRow = _createExtensionInputRow(ext, index === 0);
+            extensionsInputsContainer.appendChild(inputRow);
+        });
+        // Finally append the add button and update its state
+        extensionsInputsContainer.appendChild(addExtensionBtn);
+        updateAddExtensionBtn();
+    } catch (err) {
+        console.error(err);
+    }
 
     // // Load existing extensions from preferences
     // LB.prefs.getValue(platformName, 'extensions')
