@@ -115,7 +115,7 @@ function setupGalleryEvents() {
             if (container.classList.contains('empty-platform-game-container')) return;
 
             if (currentGalleryPageIndex === 0) { // Settings page
-                openSettingsMenu(container.getAttribute('data-platform'));
+                setupGalleryEvents(container.getAttribute('data-platform'));
             } else {
                 launchGame(container);
             }
@@ -131,55 +131,57 @@ function setupGalleryEvents() {
 }
 
 function handleGalleryKeyDown(event) {
+
     event.stopPropagation();
+
+    console.log("event: ", event);
 
     switch (event.key) {
     case 'ArrowRight':
-        console.log("ArrowRight: ");
-            if (event.shiftKey) nextPage();
-            else nextGame();
-            break;
+        if (event.shiftKey) nextPage();
+        else nextGame();
+        break;
 
-        case 'ArrowLeft':
-            if (event.shiftKey) prevPage();
-            else prevGame();
-            break;
+    case 'ArrowLeft':
+        if (event.shiftKey) prevPage();
+        else prevGame();
+        break;
 
-        case 'ArrowUp':
-            moveGameRow(-1);
-            break;
+    case 'ArrowUp':
+        moveGameRow(-1);
+        break;
 
-        case 'ArrowDown':
-            moveGameRow(1);
-            break;
+    case 'ArrowDown':
+        moveGameRow(1);
+        break;
 
-        case 'PageUp':
-            moveGameRow(-10);
-            break;
+    case 'PageUp':
+        moveGameRow(-10);
+        break;
 
-        case 'PageDown':
-            moveGameRow(10);
-            break;
+    case 'PageDown':
+        moveGameRow(10);
+        break;
 
-        case 'Home':
-            selectGame(0);
-            break;
+    case 'Home':
+        selectGame(0);
+        break;
 
-        case 'End':
-            selectGame(gameContainers.length - 1);
-            break;
+    case 'End':
+        selectGame(gameContainers.length - 1);
+        break;
 
-        case 'Enter':
-            activateCurrentGame();
-            break;
+    case 'Enter':
+        activateCurrentGame();
+        break;
 
-        case 'Escape':
-            returnToSlideshow();
-            break;
+    case 'Escape':
+        returnToSlideshow();
+        break;
 
-        case 'i':
-            if (!LB.kioskMode) openContextMenu();
-            break;
+    case 'i':
+        if (!LB.kioskMode) openContextMenu();
+        break;
     }
 
     updateGameSelection();
@@ -244,7 +246,7 @@ function activateCurrentGame() {
     if (selectedGame.classList.contains('empty-platform-game-container')) return;
 
     if (currentGalleryPageIndex === 0) { // Settings
-        openSettingsMenu(selectedGame.getAttribute('data-platform'));
+        openPlatformMenu(selectedGame.getAttribute('data-platform'));
     } else {
         launchGame(selectedGame);
     }
@@ -258,11 +260,6 @@ function launchGame(gameContainer) {
 
     // TODO: Implement game launching with Neutralino
     // Neutralino.os.execCommand(command);
-}
-
-function openSettingsMenu(platformName) {
-    console.log('Opening settings for:', platformName);
-    // TODO: Implement settings menu
 }
 
 function openGameContextMenu(gameContainer, index) {
