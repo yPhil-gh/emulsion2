@@ -27,7 +27,7 @@ function openPlatformMenu(platformName) {
     }
 
     // Show menu
-    menu.style.display = 'block';
+    menu.style.display = 'flex';
 
     // Update controls for menu mode
     updateControlsForMenu();

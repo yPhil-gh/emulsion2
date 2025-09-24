@@ -8,6 +8,7 @@
   /* background-image: url('../../img/sky2.jpg'); */
   /* align-items: center; */
   justify-content: center;
+  text-align: center;
   font-size: 16pt;
   font-weight: bold;
   z-index: 3; /* Ensure it's above other content */
@@ -34,19 +35,29 @@
 
 }
 
-/* Form container */
-#platform-form,
-.platform-menu-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;      /* keeps the top image centered */
-  width: 100%;
-  max-width: 800px;         /* optional: cap width if too wide */
-  margin: 0 auto;
-  overflow-y: auto;         /* ✅ keeps vertical scrolling */
-  padding: 1rem;
-  box-sizing: border-box;
+#platform-form, .platform-menu-container {
+    margin-top: 1em;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    width: 50vw;
+    max-width: 800px;
+    gap: 1em;
 }
+
+/* /\* Form container *\/ */
+/* #platform-form, */
+/* .platform-menu-container { */
+/*   display: flex; */
+/*   flex-direction: column; */
+/*   align-items: center;      /\* keeps the top image centered *\/ */
+/*   width: 100%; */
+/*   max-width: 800px;         /\* optional: cap width if too wide *\/ */
+/*   margin: 0 auto; */
+/*   overflow-y: auto;         /\* ✅ keeps vertical scrolling *\/ */
+/*   padding: 1rem; */
+/*   box-sizing: border-box; */
+/* } */
 
 .platform-menu-container > div {
   width: 100%;              /* each row takes full width */
