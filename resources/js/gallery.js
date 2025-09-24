@@ -61,6 +61,8 @@ function updateGallery() {
             });
         }
     }
+
+    updateGalleryHeader();
 }
 
 function updateGameSelection() {
@@ -70,6 +72,7 @@ function updateGameSelection() {
 }
 
 function updateGalleryHeader() {
+
     const currentPage = galleryPages[currentGalleryPageIndex];
     if (!currentPage) return;
 
@@ -134,9 +137,8 @@ function handleGalleryKeyDown(event) {
 
     event.stopPropagation();
 
-    console.log("event: ", event);
-
     switch (event.key) {
+
     case 'ArrowRight':
         if (event.shiftKey) nextPage();
         else nextGame();
