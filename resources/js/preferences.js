@@ -1,3 +1,5 @@
+
+
 let preferencesFilePath = '';
 
 async function getPreferencesPath() {

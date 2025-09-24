@@ -1,4 +1,6 @@
-// Global state
+
+
+
 window.LB = {
     enabledPlatforms: [],
     galleryNumOfCols: 6,
@@ -6,7 +8,8 @@ window.LB = {
     userDataPath: '',
     totalNumberOfPlatforms: 0,
     kioskMode: false,
-    disabledPlatformsPolicy: 'show'
+    disabledPlatformsPolicy: 'show',
+    preferences: null // Add preferences to LB object
 };
 
 async function initApp() {
@@ -19,21 +22,21 @@ async function initApp() {
 
     console.log('Paths set');
 
-    // Load preferences
-    const preferences = await loadPreferences();
-    console.log('Preferences loaded with keys:', Object.keys(preferences));
+    // Load preferences and store in LB.preferences
+    LB.preferences = await loadPreferences();
+    console.log('Preferences loaded with keys:', Object.keys(LB.preferences));
 
-    // Set basic preferences
-    LB.galleryNumOfCols = preferences.settings.numberOfColumns;
-    LB.recentlyPlayedPolicy = preferences.settings.recentlyPlayedPolicy;
-    LB.disabledPlatformsPolicy = preferences.settings.disabledPlatformsPolicy;
+    // Set basic preferences from LB.preferences
+    LB.galleryNumOfCols = LB.preferences.settings.numberOfColumns;
+    LB.recentlyPlayedPolicy = LB.preferences.settings.recentlyPlayedPolicy;
+    LB.disabledPlatformsPolicy = LB.preferences.settings.disabledPlatformsPolicy;
 
-    await buildGalleries(preferences);
+    await buildGalleries(LB.preferences);
 
     // Build the carousel slides using the EXACT same logic as your original
-    buildSlideshow(preferences);
+    buildSlideshow(LB.preferences);
 
-    // Initialize slideshow controls
+    // Initialize slideshow controls (no need to pass preferences parameter now)
     initSlideShow(0);
 
     console.log('Slideshow controls initialized');

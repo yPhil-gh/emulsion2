@@ -1,9 +1,12 @@
-function initSlideShow(platformToDisplay = 0) {
+function initSlideShow(platformToDisplay = 0) { // Remove appPreferences parameter
     console.log('Initializing slideshow control...');
 
     const slideshow = document.getElementById("slideshow");
     const slides = Array.from(slideshow.querySelectorAll('.slide'));
     const totalSlides = slides.length;
+
+    // Use LB.preferences instead of local parameter
+    const preferences = LB.preferences;
 
     // Set initial display states
     slideshow.style.display = 'flex';
@@ -54,20 +57,28 @@ function initSlideShow(platformToDisplay = 0) {
 
         console.log('Activating platform:', activePlatformName, 'at index:', activeGalleryIndex);
 
-        // Switch to gallery view
+        // Switch to appropriate view
         document.getElementById('slideshow').style.display = 'none';
-        document.getElementById('galleries').style.display = 'flex';
         document.getElementById('header').style.display = 'flex';
         window.removeEventListener('keydown', handleHomeKeyDown);
 
-        // Initialize the gallery
-        if (activePlatformName === 'recents') {
-            initGallery(LB.totalNumberOfPlatforms);
-        } else if (LB.enabledPlatforms.includes(activePlatformName)) {
-            if (activePlatformName === 'settings' && LB.kioskMode) return;
-            initGallery(activeGalleryIndex);
+        // Check if this platform needs configuration (using LB.preferences)
+        if (platformNeedsConfiguration(activePlatformName, LB.preferences)) {
+            // Open configuration menu for unconfigured platform
+            document.getElementById('galleries').style.display = 'none';
+            openPlatformMenu(activePlatformName);
+        } else if (activePlatformName === 'recents') {
+            // Open recents gallery
+            document.getElementById('galleries').style.display = 'flex';
+            initGallery(window.LB.totalNumberOfPlatforms);
+        } else if (activePlatformName === 'settings') {
+            // Open settings menu
+            document.getElementById('galleries').style.display = 'none';
+            openPlatformMenu('settings');
         } else {
-            initGallery(0, activePlatformName);
+            // Open configured platform gallery
+            document.getElementById('galleries').style.display = 'flex';
+            initGallery(activeGalleryIndex);
         }
     }
 
@@ -117,6 +128,14 @@ function initSlideShow(platformToDisplay = 0) {
     updateSlideshow();
 
     console.log('Slideshow control initialized with', totalSlides, 'slides');
+}
+
+// Simple function to check if a platform needs configuration
+function platformNeedsConfiguration(platformName, preferences) {
+    if (platformName === 'settings') return false;
+
+    const platformPrefs = preferences[platformName];
+    return !platformPrefs || !platformPrefs.gamesDir || !platformPrefs.emulator;
 }
 
 // Gallery function (placeholder for now)
