@@ -121,6 +121,7 @@ function buildPlatformForm(platformName) {
     formContainer.classList.add('platform-menu-container');
 
     const platformInfo = getPlatformInfo(platformName);
+    console.info("BUILDPLATFORMFORM: ", platformInfo);
     const platformPrefs = LB.preferences[platformName] || {};
 
     // Platform image

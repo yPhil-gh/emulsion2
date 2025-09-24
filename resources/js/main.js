@@ -17,9 +17,10 @@ async function initApp() {
     await Neutralino.init();
 
     const configPath = await Neutralino.os.getPath('config');
+    LB.userDataPath = configPath + '/emulsion2';
 
     // Mount the covers directory
-    const coversPath = `${configPath}/emulsion2/covers`;
+    const coversPath = `${LB.userDataPath}/covers`;
     try {
         await Neutralino.server.mount('/covers', coversPath);
         console.log('Covers directory mounted at /covers');
@@ -28,7 +29,6 @@ async function initApp() {
     }
 
     // Set paths
-    LB.userDataPath = configPath + '/emulsion2';
 
     console.log('Paths set', configPath);
 
@@ -144,6 +144,7 @@ function buildHomeSlide(platformName, preferences) {
 }
 
 function getPlatformInfo(platformName) {
+    console.info("MAIN GETPLATFORMINFO: ");
     // Find platform info from PLATFORMS array
     const platform = PLATFORMS.find(p => p.name === platformName);
     if (platform) {

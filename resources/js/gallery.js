@@ -134,7 +134,8 @@ function handleGalleryKeyDown(event) {
     event.stopPropagation();
 
     switch (event.key) {
-        case 'ArrowRight':
+    case 'ArrowRight':
+        console.log("ArrowRight: ");
             if (event.shiftKey) nextPage();
             else nextGame();
             break;
@@ -279,15 +280,4 @@ function returnToSlideshow() {
     window.initSlideShow(currentGalleryPageIndex);
 }
 
-// Utility function
-function getPlatformInfo(platformName) {
-    const platform = PLATFORMS.find(p => p.name === platformName);
-    if (platform) {
-        return { vendor: platform.vendor, name: platform.displayName };
-    }
-    return { vendor: platformName, name: platformName };
-}
-
-// Export functions
-window.returnToSlideshow = returnToSlideshow;
 window.initGallery = initGallery;
