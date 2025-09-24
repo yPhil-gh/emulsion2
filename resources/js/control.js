@@ -86,17 +86,18 @@ function initSlideShow(platformToDisplay = 0) {
         } else if (activePlatformName === 'recents') {
             // Open recents gallery
             document.getElementById('galleries').style.display = 'flex';
-            initGallery(window.LB.totalNumberOfPlatforms);
+            window.initGallery(null, 'recents');  // pass NAME
         } else if (activePlatformName === 'settings') {
             // Show the first gallery page (settings gallery)
             document.getElementById('galleries').style.display = 'flex';
-            initGallery(0);
+            window.initGallery(null, 'settings');  // pass NAME
         } else {
-            // Open configured platform gallery
+            // Open configured platform gallery by NAME
             document.getElementById('galleries').style.display = 'flex';
-            initGallery(activeGalleryIndex);
+            window.initGallery(null, activePlatformName);  // pass NAME
         }
     }
+
 
     function handleHomeKeyDown(event) {
         event.stopPropagation();
@@ -170,11 +171,4 @@ function platformNeedsConfiguration(platformName, preferences) {
     return !platformPrefs || !platformPrefs.gamesDir || !platformPrefs.emulator;
 }
 
-// Gallery function (placeholder for now)
-function initGallery(galleryIndex, platformName = null) {
-    console.log('Opening gallery:', galleryIndex, 'for platform:', platformName);
-    // This will be implemented later
-}
-
 window.initSlideShow = initSlideShow;
-window.initGallery = initGallery;

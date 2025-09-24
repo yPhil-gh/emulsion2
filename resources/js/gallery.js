@@ -10,12 +10,18 @@ function initGallery(galleryIndex, platformName = null) {
     const galleries = document.getElementById('galleries');
     galleryPages = Array.from(galleries.querySelectorAll('.page'));
 
-    // Find the target page
+    // Determine target page index
     let targetPageIndex = galleryIndex;
+
     if (platformName) {
-        targetPageIndex = galleryPages.findIndex(page =>
+        const foundIndex = galleryPages.findIndex(page =>
             page.getAttribute('data-platform') === platformName
         );
+        if (foundIndex !== -1) {
+            targetPageIndex = foundIndex;
+        } else {
+            console.warn(`Gallery page not found for platform: ${platformName}, falling back to index ${galleryIndex}`);
+        }
     }
 
     currentGalleryPageIndex = Math.max(0, targetPageIndex);
@@ -36,6 +42,8 @@ function updateGallery() {
 
     // Show current page
     const currentPage = galleryPages[currentGalleryPageIndex];
+    console.log("currentPage: ", currentPage);
+
     if (currentPage) {
         currentPage.style.display = 'block';
 
@@ -54,6 +62,7 @@ function updateGallery() {
         }
     }
 }
+
 
 function updateGameSelection() {
     gameContainers.forEach((container, index) => {
@@ -281,5 +290,5 @@ function getPlatformInfo(platformName) {
 }
 
 // Export functions
-window.initGallery = initGallery;
 window.returnToSlideshow = returnToSlideshow;
+window.initGallery = initGallery;
