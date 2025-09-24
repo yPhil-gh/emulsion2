@@ -442,20 +442,6 @@ function buildPlatformForm(platformName) {
         console.error(err);
     }
 
-    // // Load existing extensions from preferences
-    // LB.prefs.getValue(platformName, 'extensions')
-    //     .then(extensions => {
-    //         const initialExtensions = extensions || ['.iso'];
-    //         initialExtensions.forEach((ext, index) => {
-    //             const inputRow = _createExtensionInputRow(ext, index === 0);
-    //             extensionsInputsContainer.appendChild(inputRow);
-    //         });
-    //         // Finally append the add button and update its state
-    //         extensionsInputsContainer.appendChild(addExtensionBtn);
-    //         updateAddExtensionBtn();
-    //     })
-    //     .catch(console.error);
-
     // Assemble the full group
     extensionsCtn.appendChild(extensionsIcon);
     extensionsCtn.appendChild(extensionsInputsContainer);
@@ -500,30 +486,23 @@ function buildPlatformForm(platformName) {
     cancelButton.classList.add('button');
     cancelButton.textContent = 'Cancel';
 
-    // LB.prefs.getValue(platformName, 'gamesDir')
-    //     .then((value) => {
-    //         gamesDirInput.value = value;
-    //     })
-    //     .catch((error) => {
-    //         console.error('Failed to get platform preference:', error);
-    //     });
+    try {
+        gamesDirInput.value = LB.preferences[platformName]?.gamesDir ?? '';
+    } catch (err) {
+        console.error('Failed to get gamesDir preference:', err);
+    }
 
-    // LB.prefs.getValue(platformName, 'emulator')
-    //     .then((value) => {
-    //         emulatorInput.value = value;
-    //     })
-    //     .catch((error) => {
-    //         console.error('Failed to get platform preference:', error);
-    //     });
+    try {
+        emulatorInput.value = LB.preferences[platformName]?.emulator ?? '';
+    } catch (err) {
+        console.error('Failed to get emulator preference:', err);
+    }
 
-    // LB.prefs.getValue(platformName, 'emulatorArgs')
-    //     .then((value) => {
-    //         emulatorArgsInput.value = value;
-    //     })
-    //     .catch((error) => {
-    //         console.error('Failed to get platform preference:', error);
-    //     });
-
+    try {
+        emulatorArgsInput.value = LB.preferences[platformName]?.emulatorArgs ?? '';
+    } catch (err) {
+        console.error('Failed to get emulatorArgs preference:', err);
+    }
 
     gamesDirButton.addEventListener('click', _gamesDirButtonClick);
     emulatorButton.addEventListener('click', _emulatorButtonClick);
@@ -557,15 +536,14 @@ function buildPlatformForm(platformName) {
     formContainerButtons.appendChild(helpButton);
     formContainerButtons.appendChild(saveButton);
 
-    // LB.prefs.getValue(platformName, 'isEnabled')
-    //     .then((value) => {
-    //         statusCheckBox.checked = value;
-    //         statusLabelPlatormStatus.textContent = value ? 'On' : 'Off';
-    //         statusLabelPlatormStatus.classList.add(value ? 'on' : 'off');
-    //     })
-    //     .catch((error) => {
-    //         console.error('Failed to get platform preference:', error);
-    //     });
+    try {
+        const value = LB.preferences[platformName]?.isEnabled ?? false;
+        statusCheckBox.checked = value;
+        statusLabelPlatormStatus.textContent = value ? 'On' : 'Off';
+        statusLabelPlatormStatus.classList.add(value ? 'on' : 'off');
+    } catch (err) {
+        console.error('Failed to get platform preference:', err);
+    }
 
     statusCheckBox.addEventListener('change', (event) => {
         console.log("event: ", event);
