@@ -13,7 +13,6 @@ window.LB = {
 };
 
 async function initApp() {
-    console.log('Initializing Neutralino...');
     await Neutralino.init();
 
     const configPath = await Neutralino.os.getPath('config');
@@ -23,26 +22,20 @@ async function initApp() {
     const coversPath = `${LB.userDataPath}/covers`;
     try {
         await Neutralino.server.mount('/covers', coversPath);
-        console.log('Covers directory mounted at /covers');
     } catch (err) {
         console.error('Failed to mount covers directory:', err);
     }
 
     // Set paths
 
-    console.log('Paths set', configPath);
-
     // Load preferences and store in LB.preferences
     LB.preferences = await loadPreferences();
-    console.log('Preferences loaded with keys:', Object.keys(LB.preferences));
 
     // Set basic preferences from LB.preferences
     LB.galleryNumOfCols = LB.preferences.settings.numberOfColumns;
     LB.recentlyPlayedPolicy = LB.preferences.settings.recentlyPlayedPolicy;
     LB.disabledPlatformsPolicy = LB.preferences.settings.disabledPlatformsPolicy;
     LB.theme = LB.preferences.settings.theme;
-
-    console.log("LB.theme: ", LB.theme);
 
     applyTheme(LB.theme);
 
@@ -54,12 +47,8 @@ async function initApp() {
     // Initialize slideshow controls (no need to pass preferences parameter now)
     initSlideShow(0);
 
-    console.log('Slideshow controls initialized');
-
     // Show main interface
     showMainInterface();
-
-    console.log('Interface shown');
 
     Neutralino.events.on('windowClose', () => {
         Neutralino.app.exit();
@@ -74,8 +63,6 @@ function buildSlideshow(preferences) {
     }
 
     slideshow.innerHTML = '';
-
-    console.log('Building slideshow from preferences...');
 
     // Count total platforms for recents index
     LB.totalNumberOfPlatforms = Object.keys(preferences).length - 1; // exclude settings
@@ -104,7 +91,6 @@ function buildSlideshow(preferences) {
         }
     }
 
-    console.log('Slideshow built with', slideshow.children.length, 'slides');
 }
 
 function buildHomeSlide(platformName, preferences) {
@@ -144,7 +130,6 @@ function buildHomeSlide(platformName, preferences) {
 }
 
 function getPlatformInfo(platformName) {
-    console.info("MAIN GETPLATFORMINFO: ");
     // Find platform info from PLATFORMS array
     const platform = PLATFORMS.find(p => p.name === platformName);
     if (platform) {

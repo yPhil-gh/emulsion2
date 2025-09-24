@@ -27,7 +27,6 @@ async function directoryExists(path) {
 
 async function loadPreferences() {
     await getPreferencesPath();
-    console.log('Looking for preferences at:', preferencesFilePath);
 
     try {
         const fileExistsResult = await fileExists(preferencesFilePath);

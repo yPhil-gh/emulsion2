@@ -1,5 +1,4 @@
 function initSlideShow(platformToDisplay = 0) {
-    console.log('Initializing slideshow control...');
 
     const slideshow = document.getElementById("slideshow");
     const slides = Array.from(slideshow.querySelectorAll('.slide'));
@@ -71,8 +70,6 @@ function initSlideShow(platformToDisplay = 0) {
         const activePlatformName = activeSlide.dataset.platform;
         const activeGalleryIndex = Number(activeSlide.dataset.index);
 
-        console.log('Activating platform:', activePlatformName, 'at index:', activeGalleryIndex);
-
         // Switch to appropriate view
         document.getElementById('slideshow').style.display = 'none';
         document.getElementById('header').style.display = 'flex';
@@ -135,12 +132,8 @@ function initSlideShow(platformToDisplay = 0) {
     // Initial setup
     updateSlideshow();
 
-    console.log('Slideshow control initialized with', totalSlides, 'slides');
-
     // Expose helper so it can be used project-wide
     window.goToSlideshow = function (platformName) {
-
-        console.log("platformName: ", platformName);
 
         slideshow.style.display = 'flex';
         document.getElementById('galleries').style.display = 'none';
