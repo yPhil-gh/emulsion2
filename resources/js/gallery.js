@@ -252,15 +252,26 @@ function activateCurrentGame() {
     }
 }
 
-// Placeholder functions for game actions
-function launchGame(gameContainer) {
-    console.log('Launching game:', gameContainer.getAttribute('data-game-name'));
-    const command = gameContainer.getAttribute('data-command');
+async function launchGame(gameContainer) {
+    const gameName = gameContainer.dataset.gameName;
+    const gamePath = gameContainer.dataset.gamePath;
+    const emulator = gameContainer.dataset.emulator;
+    const emulatorArgs = gameContainer.dataset.emulatorArgs || '';
+
+    const command = `${emulator} ${emulatorArgs} "${gamePath}"`;
+    console.log('Launching game:', gameName);
     console.log('Command:', command);
 
-    // TODO: Implement game launching with Neutralino
-    // Neutralino.os.execCommand(command);
+    try {
+        // execCommand is async; capture stdout/stderr in callback
+        await Neutralino.os.execCommand(command, (output) => {
+            console.log('Command output:', output);
+        });
+    } catch (err) {
+        console.error('execCommand failed:', err);
+    }
 }
+
 
 function openGameContextMenu(gameContainer, index) {
     console.log('Opening context menu for game:', index);
