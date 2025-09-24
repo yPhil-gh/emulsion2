@@ -176,7 +176,8 @@ function handleGalleryKeyDown(event) {
         break;
 
     case 'Escape':
-        returnToSlideshow();
+        console.log("Escape!: ");
+        window.goToSlideshow(window.currentMenuPlatform);
         break;
 
     case 'i':
@@ -272,7 +273,6 @@ async function launchGame(gameContainer) {
     }
 }
 
-
 function openGameContextMenu(gameContainer, index) {
     console.log('Opening context menu for game:', index);
     // TODO: Implement context menu
@@ -284,6 +284,7 @@ function openContextMenu() {
 }
 
 function returnToSlideshow() {
+    console.log("returnToSlideshow!: ");
     window.removeEventListener('keydown', handleGalleryKeyDown);
     window.initSlideShow(currentGalleryPageIndex);
 }
