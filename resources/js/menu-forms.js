@@ -88,6 +88,8 @@ function handleMenuKeyDown(event) {
 
 function buildPrefsFormItem(name, iconName, type, description, shortDescription, value, onChangeFct) {
 
+    console.log("name, iconName, type, description, shortDescription, value, onChangeFct: ", name, iconName, type, description, shortDescription, value, onChangeFct);
+
     let input;
     const group = document.createElement('div');
 
@@ -194,11 +196,6 @@ function buildPreferencesForm() {
     platformMenuImageCtn.appendChild(platformMenuImage);
     formContainer.appendChild(platformMenuImageCtn);
 
-    function setFooterSize(size) {
-        const footer = document.getElementById('footer');
-        footer.className = `footer-${size}`;
-    }
-
     // Rows / inputs
     const formItems = [
         buildPrefsFormItem('numberOfColumns', 'th', 'number', 'The number of columns in each platform gallery', 'Number of columns', LB.galleryNumOfCols),
@@ -256,16 +253,18 @@ function buildPreferencesForm() {
             if (numberOfColumns < 2) numberOfColumns = 2;
             else if (numberOfColumns > 12) numberOfColumns = 12;
 
-            await LB.prefs.save('settings', 'numberOfColumns', numberOfColumns);
-            await LB.prefs.save('settings', 'footerSize', formItems[1].radios.find(r => r.checked)?.value);
-            await LB.prefs.save('settings', 'homeMenuTheme', formItems[2].radios.find(r => r.checked)?.value);
-            await LB.prefs.save('settings', 'theme', formItems[3].radios.find(r => r.checked)?.value);
-            await LB.prefs.save('settings', 'disabledPlatformsPolicy', formItems[4].radios.find(r => r.checked)?.value);
-            await LB.prefs.save('settings', 'recentlyPlayedPolicy', formItems[5].radios.find(r => r.checked)?.value);
-            await LB.prefs.save('settings', 'steamGridAPIKey', formItems[6].input.value);
-            await LB.prefs.save('settings', 'giantBombAPIKey', formItems[7].input.value);
+            console.log("formItems[1].radios.find(r => r.checked)?.value: ", formItems[1].radios.find(r => r.checked)?.value);
 
-            Neutralino.app.reloadWindow();
+            await updatePreference('settings', 'numberOfColumns', numberOfColumns);
+            await updatePreference('settings', 'footerSize', formItems[1].radios.find(r => r.checked)?.value);
+            await updatePreference('settings', 'homeMenuTheme', formItems[2].radios.find(r => r.checked)?.value);
+            await updatePreference('settings', 'theme', formItems[3].radios.find(r => r.checked)?.value);
+            await updatePreference('settings', 'disabledPlatformsPolicy', formItems[4].radios.find(r => r.checked)?.value);
+            await updatePreference('settings', 'recentlyPlayedPolicy', formItems[5].radios.find(r => r.checked)?.value);
+            await updatePreference('settings', 'steamGridAPIKey', formItems[6].input.value);
+            await updatePreference('settings', 'giantBombAPIKey', formItems[7].input.value);
+
+            // Neutralino.app.reloadWindow();
         } catch (error) {
             console.error('Failed to save preferences:', error);
         }
@@ -274,7 +273,6 @@ function buildPreferencesForm() {
 
     console.log("formContainer: ", formContainer);
     return formContainer;
-
 
 }
 

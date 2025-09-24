@@ -1,4 +1,5 @@
 function setFooterSize(size) {
+    console.log("size: ", size);
     const footer = document.getElementById('footer');
     if (footer) {
         footer.className = `footer-${size}`;
@@ -38,7 +39,7 @@ const getSelectedGame = function(containers, index) {
 
 
 function applyTheme(theme) {
-    console.log("applyTheme: ");
+    console.log("APPLYTHEME!!! ");
     const body = document.querySelector('body');
     const menu = document.getElementById('menu');
 
@@ -64,3 +65,4 @@ function applyTheme(theme) {
 }
 
 window.applyTheme = applyTheme;
+window.setFooterSize = setFooterSize;

@@ -1,5 +1,3 @@
-
-
 let preferencesFilePath = '';
 
 async function getPreferencesPath() {
@@ -42,7 +40,6 @@ async function loadPreferences() {
                     return await createDefaultPreferences();
                 }
 
-                console.log('Loaded preferences:', preferences);
                 return preferences;
             } catch (parseError) {
                 console.error('Invalid JSON in preferences file:', parseError);
@@ -136,10 +133,10 @@ async function savePreferences(preferences) {
 }
 
 async function updatePreference(platformName, key, value) {
-    console.log("updatePreference:", platformName, key, value);
+
+    console.log("platformName, key, value: ", platformName, key, value);
 
     try {
-        // 1. Load current preferences
         const preferences = await loadPreferences();
 
         if (!preferences[platformName]) {
@@ -147,30 +144,14 @@ async function updatePreference(platformName, key, value) {
             return false;
         }
 
-        // 2. Check if value actually changed
         if (preferences[platformName][key] === value) {
             console.log("No changes detected, skipping save");
             return false;
         }
 
-        // 3. Update in-memory
         preferences[platformName][key] = value;
 
-        // 4. Save back to disk
         await savePreferences(preferences);
-
-        // 5. Notify user
-        const notifications = document.getElementById('notifications');
-        const notification = document.getElementById('notification');
-
-        if (notification && notifications) {
-            notification.textContent = 'Preferences saved successfully';
-            notifications.style.opacity = 1;
-
-            setTimeout(() => {
-                notifications.style.opacity = 0;
-            }, 3000);
-        }
 
         console.log(`${platformName}.${key} updated to:`, value);
         return true;

@@ -36,7 +36,10 @@ async function initApp() {
     LB.recentlyPlayedPolicy = LB.preferences.settings.recentlyPlayedPolicy;
     LB.disabledPlatformsPolicy = LB.preferences.settings.disabledPlatformsPolicy;
     LB.theme = LB.preferences.settings.theme;
+    LB.footerSize = LB.preferences.settings.footerSize;
+    LB.homeMenuTheme = LB.preferences.settings.homeMenuTheme;
 
+    window.setFooterSize(LB.footerSize);
     window.applyTheme(LB.theme);
 
     await buildGalleries(LB.preferences);
