@@ -1,5 +1,6 @@
 import { openPlatformMenu } from './menu-forms.js';
-import { getPlatformInfo } from './platforms.js'; // Add this import
+import { getPlatformInfo } from './platforms.js';
+import { cleanFileName } from './utils.js';
 import { LB } from './global.js';
 import { getAllCoverImageUrls } from './backends.js';
 
@@ -414,7 +415,7 @@ async function openContextMenu(index) {
     menuContainer.appendChild(gameMenuContainer);
     await populateGameMenu(gameMenuContainer, gameName, platformName);
 
-    document.querySelector('header .platform-name').textContent = LB.utils.cleanFileName(gameName);
+    document.querySelector('header .platform-name').textContent = cleanFileName(gameName);
     document.querySelector('header .item-type').textContent = '';
     document.querySelector('header .item-number').textContent = '';
 

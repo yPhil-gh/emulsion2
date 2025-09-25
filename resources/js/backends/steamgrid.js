@@ -1,28 +1,25 @@
+// src/js/backends/steamgrid.js
 export const fetchImages = async (gameName, APIKey) => {
-    if (!APIKey) return [];
+    if (!APIKey) {
+        console.warn('[SteamGridDB] API key missing, backend disabled.');
+        return [];
+    }
 
     try {
-        // Search games
+        // 1️⃣ Search games
         const searchUrl = `https://www.steamgriddb.com/api/v2/search/autocomplete/${encodeURIComponent(gameName)}`;
-        const searchResp = await fetch(searchUrl, {
-            headers: { Authorization: `Bearer ${APIKey}` }
-        });
-        if (!searchResp.ok) return [];
-
-        const searchData = await searchResp.json();
+        const searchResp = await Neutralino.os.execCommand(`curl -s -H "Authorization: Bearer ${APIKey}" "${searchUrl}"`);
+        const searchData = JSON.parse(searchResp.stdOut);
         if (!searchData.data?.length) return [];
 
-        // Take the first matching game
+        // 2️⃣ Take the first matching game
         const gameId = searchData.data[0].id;
 
-        // Get grids for that game
+        // 3️⃣ Get grids for that game
         const gridsUrl = `https://www.steamgriddb.com/api/v2/grids/game/${gameId}`;
-        const gridsResp = await fetch(gridsUrl, {
-            headers: { Authorization: `Bearer ${APIKey}` }
-        });
-        if (!gridsResp.ok) return [];
+        const gridsResp = await Neutralino.os.execCommand(`curl -s -H "Authorization: Bearer ${APIKey}" "${gridsUrl}"`);
+        const gridsData = JSON.parse(gridsResp.stdOut);
 
-        const gridsData = await gridsResp.json();
         return gridsData.data.map(img => ({
             url: img.url,
             source: 'SteamGridDB'

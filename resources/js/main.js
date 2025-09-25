@@ -36,6 +36,9 @@ async function initApp() {
     LB.footerSize = LB.preferences.settings.footerSize;
     LB.homeMenuTheme = LB.preferences.settings.homeMenuTheme;
 
+    LB.steamGridAPIKey = LB.preferences.settings.steamGridAPIKey;
+    LB.giantBombAPIKey = LB.preferences.settings.giantBombAPIKey;
+
     setFooterSize(LB.footerSize);
     applyTheme(LB.theme);
 
