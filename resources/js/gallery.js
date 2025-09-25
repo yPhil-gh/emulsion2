@@ -1,6 +1,7 @@
 import { openPlatformMenu } from './menu-forms.js';
 import { getPlatformInfo } from './platforms.js'; // Add this import
 import { LB } from './global.js';
+import { getAllCoverImageUrls } from './backends.js';
 
 // Global gallery state
 let currentGalleryPageIndex = 0;
@@ -360,7 +361,47 @@ function buildGameMenu(gameName, image, platformName) {
     return gameMenuContainer;
 }
 
-function openContextMenu(index) {
+async function populateGameMenu(gameMenuContainer, gameName, platformName) {
+    const dummyContainer = gameMenuContainer.querySelector('.dummy-game-container');
+
+    const urls = await getAllCoverImageUrls(gameName, platformName, {
+        steamGridAPIKey: LB.steamGridAPIKey,
+        giantBombAPIKey: LB.giantBombAPIKey
+    });
+
+    if (urls.length === 0) {
+        dummyContainer.textContent = '';
+        const iconP = document.createElement('p');
+        iconP.innerHTML = `<i class="fa fa-binoculars fa-5x" aria-hidden="true"></i>`;
+        const msgP  = document.createElement('p');
+        msgP.textContent = `No cover art found`;
+        dummyContainer.append(iconP, msgP);
+        dummyContainer.style.gridColumn = `2 / calc(${LB.galleryNumOfCols} + 1)`;
+        dummyContainer.style.animation = 'unset';
+    } else {
+        dummyContainer.remove();
+
+        urls.forEach(({ url, source }) => {
+            const img = new Image();
+            img.src = url;
+            img.title = `${gameName}\n\n- Found on ${source}\n- Click to download and save`;
+            img.classList.add('game-image');
+            img.style.opacity = '0';
+            img.style.transition = 'opacity 0.3s ease-in';
+
+            const container = document.createElement('div');
+            container.classList.add('menu-game-container');
+            container.style.height = 'calc(120vw / ' + LB.galleryNumOfCols + ')';
+            container.appendChild(img);
+            gameMenuContainer.appendChild(container);
+
+            img.onload = () => requestAnimationFrame(() => { img.style.opacity = '1'; });
+            img.onerror = () => console.warn('Failed to load image:', url);
+        });
+    }
+}
+
+async function openContextMenu(index) {
     console.log('Opening context menu');
     console.log("index: ", index);
     const container = gameContainers[index];
@@ -371,14 +412,12 @@ function openContextMenu(index) {
     const platformName = container.dataset.platform;
     const gameMenuContainer = buildGameMenu(gameName, gameImage, platformName);
     menuContainer.appendChild(gameMenuContainer);
-    // await LB.build.populateGameMenu(gameMenuContainer, gameName, platformName);
+    await populateGameMenu(gameMenuContainer, gameName, platformName);
 
-    // document.querySelector('header .platform-name').textContent = LB.utils.cleanFileName(gameName);
-    // document.querySelector('header .item-type').textContent = '';
-    // document.querySelector('header .item-number').textContent = '';
+    document.querySelector('header .platform-name').textContent = LB.utils.cleanFileName(gameName);
+    document.querySelector('header .item-type').textContent = '';
+    document.querySelector('header .item-number').textContent = '';
 
-
-    // TODO: Implement general context menu
 }
 
 export {

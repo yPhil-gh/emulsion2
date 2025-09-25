@@ -1,52 +1,45 @@
-// src/js/backends/exotica.js
-import axios from 'axios';
-import * as cheerio from 'cheerio';
-
 export const fetchImages = async (gameName, platform = '') => {
-
-    console.log("\n");
-    console.log(`Searching Exotica for ${gameName} (${platform})`);
+    console.log(`\nSearching Exotica for ${gameName} (${platform})`);
 
     try {
-        // Build the Exotica search URL using the first letter of the game name
         const firstLetter = gameName.charAt(0).toUpperCase();
         const exoticaUrl = `https://www.exotica.org.uk/wiki/Amiga_Game_Box_Scans/${firstLetter}`;
 
         // Fetch the Exotica page
-        const searchResponse = await axios.get(exoticaUrl);
-        if (searchResponse.status !== 200) return [];
+        const searchResponse = await fetch(exoticaUrl);
+        if (!searchResponse.ok) return [];
 
-        const $ = cheerio.load(searchResponse.data);
+        const htmlText = await searchResponse.text();
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(htmlText, 'text/html');
 
         let gamePageUrl = null;
 
-        // Search for the game in the gallery boxes on the page
-        $('.gallerybox').each((_, element) => {
-            const galleryText = $(element).find('.gallerytext p').text().trim().toLowerCase();
-            const href = $(element).find('a.image').attr('href');
+        // Search gallery boxes
+        const galleryBoxes = doc.querySelectorAll('.gallerybox');
+        galleryBoxes.forEach(box => {
+            const galleryText = box.querySelector('.gallerytext p')?.textContent?.trim().toLowerCase() || '';
+            const href = box.querySelector('a.image')?.getAttribute('href') || '';
 
-            if (
-                galleryText.includes(gameName) ||
-                (href && href.toLowerCase().includes(gameName))
-            ) {
-                gamePageUrl = "https://www.exotica.org.uk/" + href;
-                return false; // Break out of the loop
+            if (galleryText.includes(gameName.toLowerCase()) || href.toLowerCase().includes(gameName.toLowerCase())) {
+                gamePageUrl = `https://www.exotica.org.uk/${href}`;
             }
         });
 
         if (!gamePageUrl) {
-            console.error(`[Exotica] No results found on for "${gameName}" (${platform}).`);
+            console.error(`[Exotica] No results found for "${gameName}" (${platform})`);
             return [];
         }
 
-        const gamePageResponse = await axios.get(gamePageUrl);
-        if (gamePageResponse.status !== 200) return [];
+        const gamePageResponse = await fetch(gamePageUrl);
+        if (!gamePageResponse.ok) return [];
 
-        const gamePage$ = cheerio.load(gamePageResponse.data);
-        const imageUrl = gamePage$('div.fullImageLink a').attr('href');
+        const gamePageHtml = await gamePageResponse.text();
+        const gameDoc = parser.parseFromString(gamePageHtml, 'text/html');
 
+        const imageUrl = gameDoc.querySelector('div.fullImageLink a')?.getAttribute('href');
         if (!imageUrl) {
-            console.error(`[Exotica] No image found for "${gameName}" (${platform}).`);
+            console.error(`[Exotica] No image found for "${gameName}" (${platform})`);
             return [];
         }
 

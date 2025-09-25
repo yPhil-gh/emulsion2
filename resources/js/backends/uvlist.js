@@ -1,44 +1,38 @@
-// src/js/backends/uvlist.js
-import axios from 'axios';
-import * as cheerio from 'cheerio'; // CommonJS shim
-
 export const fetchImages = async (gameName, platform = '') => {
-    console.log("\n");
     console.log(`Searching UVList for ${gameName} (${platform})`);
 
     try {
         const searchUrl = `https://www.uvlist.net/globalsearch/?t=${encodeURIComponent(gameName)}`;
-        const searchResponse = await axios.get(searchUrl);
-        if (searchResponse.status !== 200) return [];
+        const searchResp = await fetch(searchUrl);
+        if (!searchResp.ok) return [];
 
-        const $ = cheerio.load(searchResponse.data);
+        const html = await searchResp.text();
+        const doc = new DOMParser().parseFromString(html, "text/html");
 
-        const href = $(`tr:has(span.badge-companies.${getCompanyClass(platform)})`)
-            .find(`a:contains(${gameName})`)
-            .attr('href');
+        // Find the first matching row
+        const row = Array.from(doc.querySelectorAll('tr'))
+            .find(tr => tr.querySelector(`span.badge-companies.${getCompanyClass(platform)}`) &&
+                        tr.querySelector(`a`)?.textContent.includes(gameName));
 
+        if (!row) return [];
+
+        const href = row.querySelector('a')?.getAttribute('href');
         if (!href) return [];
 
         const gameUrl = `https://www.uvlist.net${href}`;
-        const gameResponse = await axios.get(gameUrl);
-        if (gameResponse.status !== 200) return [];
+        const gameResp = await fetch(gameUrl);
+        if (!gameResp.ok) return [];
 
-        const game$ = cheerio.load(gameResponse.data);
-        const imgSources = [];
+        const gameHtml = await gameResp.text();
+        const gameDoc = new DOMParser().parseFromString(gameHtml, "text/html");
 
-        const colGoldImgs = game$('div.col_gold1 img[data-background-image]');
-        if (colGoldImgs.length) {
-            colGoldImgs.each((i, el) => {
-                const src = game$(el).attr('data-background-image');
-                if (src) imgSources.push(src.startsWith('http') ? src : `https://www.uvlist.net${src}`);
-            });
-        } else {
-            const fallbackSrc = game$('div.mainImage img').attr('src');
-            if (fallbackSrc) imgSources.push(fallbackSrc.startsWith('http') ? fallbackSrc : `https://www.uvlist.net${fallbackSrc}`);
-        }
+        const imgs = Array.from(gameDoc.querySelectorAll('div.col_gold1 img[data-background-image]'));
+        const imgSources = imgs.length > 0
+            ? imgs.map(el => el.getAttribute('data-background-image'))
+            : [gameDoc.querySelector('div.mainImage img')?.getAttribute('src')].filter(Boolean);
 
         return imgSources.map(url => ({
-            url,
+            url: url.startsWith('http') ? url : `https://www.uvlist.net${url}`,
             source: 'UVList'
         }));
 
@@ -50,13 +44,9 @@ export const fetchImages = async (gameName, platform = '') => {
 
 function getCompanyClass(platform) {
     switch (platform) {
-        case 'pcengine':
-            return 'comp_nec';
-        case 'gamecube':
-            return 'comp_ninte';
-        case 'dreamcast':
-            return 'comp_sega';
-        default:
-            return 'comp_ninte';
+        case 'pcengine': return 'comp_nec';
+        case 'gamecube': return 'comp_ninte';
+        case 'dreamcast': return 'comp_sega';
+        default: return 'comp_ninte';
     }
 }

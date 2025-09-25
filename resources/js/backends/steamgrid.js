@@ -1,31 +1,35 @@
-import SGDB from 'steamgriddb';
-
-export const fetchImages = async (gameName, APIKey, platform) => {
-
-    console.log("\n");
-    console.log(`Searching SteamGrid for ${gameName} (${platform})`);
-
-    const client = new SGDB({ key: APIKey });
+export const fetchImages = async (gameName, APIKey) => {
+    if (!APIKey) return [];
 
     try {
-        const games = await client.searchGame(gameName);
-        if (!games.length) return [];
+        // Search games
+        const searchUrl = `https://www.steamgriddb.com/api/v2/search/autocomplete/${encodeURIComponent(gameName)}`;
+        const searchResp = await fetch(searchUrl, {
+            headers: { Authorization: `Bearer ${APIKey}` }
+        });
+        if (!searchResp.ok) return [];
 
-        const imageUrls = [];
+        const searchData = await searchResp.json();
+        if (!searchData.data?.length) return [];
 
-        for (const game of games) {
-            const gameId = game.steam_app_id || game.id;
-            const images = await client.getGrids({ type: 'game', id: gameId });
-            imageUrls.push(...images.map(img => img.url));
-        }
+        // Take the first matching game
+        const gameId = searchData.data[0].id;
 
-        return imageUrls.map((url) => ({
-            url,
+        // Get grids for that game
+        const gridsUrl = `https://www.steamgriddb.com/api/v2/grids/game/${gameId}`;
+        const gridsResp = await fetch(gridsUrl, {
+            headers: { Authorization: `Bearer ${APIKey}` }
+        });
+        if (!gridsResp.ok) return [];
+
+        const gridsData = await gridsResp.json();
+        return gridsData.data.map(img => ({
+            url: img.url,
             source: 'SteamGridDB'
         }));
 
     } catch (err) {
-        console.error('SteamGridDB error:', err.message);
+        console.error(`[SteamGridDB] Error: ${err.message}`);
         return [];
     }
 };

@@ -1,5 +1,6 @@
 import { openPlatformMenu } from './menu-forms.js';
 import { LB } from './global.js';
+import { initGallery } from './gallery.js';
 
 function initSlideShow(platformToDisplay = 0) {
 
@@ -86,15 +87,15 @@ function initSlideShow(platformToDisplay = 0) {
         } else if (activePlatformName === 'recents') {
             // Open recents gallery
             document.getElementById('galleries').style.display = 'flex';
-            window.initGallery(null, 'recents');  // pass NAME
+            initGallery(null, 'recents');  // pass NAME
         } else if (activePlatformName === 'settings') {
             // Show the first gallery page (settings gallery)
             document.getElementById('galleries').style.display = 'flex';
-            window.initGallery(null, 'settings');  // pass NAME
+            initGallery(null, 'settings');  // pass NAME
         } else {
             // Open configured platform gallery by NAME
             document.getElementById('galleries').style.display = 'flex';
-            window.initGallery(null, activePlatformName);  // pass NAME
+            initGallery(null, activePlatformName);  // pass NAME
         }
     }
 

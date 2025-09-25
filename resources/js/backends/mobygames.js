@@ -1,43 +1,40 @@
-// src/js/backends/mobygames.js
-import axios from 'axios';
-import * as cheerio from 'cheerio'; // It's a CJS thing
-
 export const fetchImages = async (gameName, platform = '') => {
 
-    console.log("\n");
-    console.log(`Searching MobyGames for ${gameName} (${platform})`);
+    console.log(`\nSearching MobyGames for ${gameName} (${platform})`);
 
     try {
         const searchUrl = `https://www.mobygames.com/search/?q=${encodeURIComponent(gameName)}`;
-        const searchResponse = await axios.get(searchUrl);
+        const searchResponse = await fetch(searchUrl);
+        if (!searchResponse.ok) return [];
 
-        if (searchResponse.status !== 200) return [];
+        const searchHtml = await searchResponse.text();
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(searchHtml, 'text/html');
 
-        const $ = cheerio.load(searchResponse.data);
-        const firstHref = $('#main > table a[href]').first().attr('href');
+        // Find first link inside the main table
+        const firstLink = doc.querySelector('#main > table a[href]');
+        if (!firstLink) return [];
 
-        if (!firstHref) return [];
+        const firstHref = firstLink.getAttribute('href');
 
-        // Make sure the URL is correct
+        // Build correct URL to covers page
         const coversPage = firstHref.startsWith('http')
             ? firstHref
             : `https://www.mobygames.com${firstHref}covers/${platform}`;
 
-        const coversResponse = await axios.get(coversPage);
+        const coversResponse = await fetch(coversPage);
+        if (!coversResponse.ok) return [];
 
-        if (coversResponse.status !== 200) return [];
+        const coversHtml = await coversResponse.text();
+        const coversDoc = parser.parseFromString(coversHtml, 'text/html');
 
-        const covers$ = cheerio.load(coversResponse.data);
-        const imgSources = [];
+        const imgElements = coversDoc.querySelectorAll('.img-holder img[src]');
+        const imgSources = Array.from(imgElements).map(img => {
+            const src = img.getAttribute('src');
+            return src ? (src.startsWith('http') ? src : `https://www.mobygames.com${src}`) : null;
+        }).filter(Boolean);
 
-        covers$('.img-holder img[src]').each((i, el) => {
-            const src = covers$(el).attr('src');
-            if (src) {
-                imgSources.push(src.startsWith('http') ? src : `https://www.mobygames.com${src}`);
-            }
-        });
-
-        return imgSources.map((url) => ({
+        return imgSources.map(url => ({
             url,
             source: 'MobyGames'
         }));
