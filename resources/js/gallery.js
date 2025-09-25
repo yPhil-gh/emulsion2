@@ -57,6 +57,8 @@ function updateGallery() {
         // Get game containers for current page
         gameContainers = Array.from(currentPage.querySelectorAll('.game-container'));
 
+        // ...existing code...
+
         // Update selection
         updateGameSelection();
 
@@ -174,7 +176,6 @@ async function downloadImage(imgSrc, platform, gameName) {
 
 async function selectMenuImage(selectedMenuContainer) {
     const img = selectedMenuContainer.querySelector('img.game-image');
-    console.log("img: ", img);
     if (!img) return;
 
     const gameName = selectedMenuContainer.dataset.gameName;
@@ -184,6 +185,9 @@ async function selectMenuImage(selectedMenuContainer) {
     const savedPath = await downloadImage(img.src, platformName, gameName);
     if (!savedPath) return;
 
+    // Use mounted path directly
+    const mountedUrl = `/covers/${platformName}/${gameName}.jpg?t=${Date.now()}`;
+
     // Update gallery image immediately
     const galleryContainer = document.querySelector(
         `.game-container[data-platform="${platformName}"][data-game-name="${gameName}"]`
@@ -191,7 +195,7 @@ async function selectMenuImage(selectedMenuContainer) {
     if (galleryContainer) {
         const galleryImg = galleryContainer.querySelector('img');
         if (galleryImg) {
-            galleryImg.src = `file://${savedPath}?${Date.now()}`; // cache-bust
+            galleryImg.src = mountedUrl;
         }
     }
 
