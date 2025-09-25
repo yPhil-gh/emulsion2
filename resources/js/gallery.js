@@ -208,7 +208,7 @@ async function selectMenuImage(selectedMenuContainer) {
     updateGallery();
 }
 
-function handleGalleryKeyDown(event) {
+export function handleGalleryKeyDown(event) {
 
     event.stopPropagation();
 

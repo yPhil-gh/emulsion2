@@ -2,6 +2,7 @@ import { loadPreferences } from './preferences.js';
 import { updatePreference } from './preferences.js'; // Add this import
 import { setFooterSize, applyTheme } from './utils.js'; // Add these imports
 import { getPlatformInfo } from './platforms.js'; // Add this import
+import { handleGalleryKeyDown } from './gallery.js'; // Add this import
 import { LB } from './global.js';
 
 window.isMenuOpen = false;
