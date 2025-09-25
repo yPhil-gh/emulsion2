@@ -1,9 +1,6 @@
 import { fetchImages as steamgridFetch } from './backends/steamgrid.js';
-// import { fetchImages as exoticaFetch } from './backends/exotica.js';
 import { fetchImages as wikipediaFetch } from './backends/wikipedia.js';
-// import { fetchImages as commonsFetch } from './backends/commons.js';
 import { fetchImages as giantbombFetch } from './backends/giantbomb.js';
-// import { fetchImages as uvlistFetch } from './backends/uvlist.js';
 
 export const getAllCoverImageUrls = async (gameName, platform, options = {}) => {
     const { steamGridAPIKey, giantBombAPIKey } = options;
@@ -17,9 +14,6 @@ export const getAllCoverImageUrls = async (gameName, platform, options = {}) => 
     if (giantBombAPIKey) { // <-- Only add if API key exists
         backends.push(() => giantbombFetch(gameName, giantBombAPIKey, platform));
     }
-
-    // backends.push(() => exoticaFetch(gameName, platform));
-    // backends.push(() => uvlistFetch(gameName, platform));
 
     backends.push(() => wikipediaFetch(gameName));
 

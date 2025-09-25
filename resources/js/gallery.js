@@ -111,6 +111,9 @@ function updateGalleryHeader() {
 }
 
 function setupGalleryEvents() {
+
+    console.info("SETUPGALLERYEVENTS");
+
     // Remove existing listeners
     window.removeEventListener('keydown', handleGalleryKeyDown);
 
@@ -130,12 +133,6 @@ function setupGalleryEvents() {
             }
         };
 
-        container.oncontextmenu = (e) => {
-            e.preventDefault();
-            if (!container.classList.contains('empty-platform-game-container')) {
-                openGameContextMenu(container, index);
-            }
-        };
     });
 }
 
@@ -279,11 +276,6 @@ async function launchGame(gameContainer) {
     } catch (err) {
         console.error('execCommand failed:', err);
     }
-}
-
-function openGameContextMenu(gameContainer, index) {
-    console.log('Opening context menu for game:', index);
-    // TODO: Implement context menu
 }
 
 function createManualSelectButton(gameName, platformName, imgElem) {
