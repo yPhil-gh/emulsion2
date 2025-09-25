@@ -1,44 +1,39 @@
 export const fetchImages = async (gameName, platform = '') => {
-
-    console.log(`\nSearching MobyGames for ${gameName} (${platform})`);
+    console.log(`Searching MobyGames for ${gameName} (${platform})`);
 
     try {
         const searchUrl = `https://www.mobygames.com/search/?q=${encodeURIComponent(gameName)}`;
-        const searchResponse = await fetch(searchUrl);
-        if (!searchResponse.ok) return [];
 
-        const searchHtml = await searchResponse.text();
+        // Use curl to avoid CORS
+        const resp = await Neutralino.os.execCommand(`curl -s "${searchUrl}"`);
+        const htmlText = resp.stdOut;
+
+        console.log("resp: ", resp.stdOut);
+
         const parser = new DOMParser();
-        const doc = parser.parseFromString(searchHtml, 'text/html');
+        const doc = parser.parseFromString(htmlText, 'text/html');
 
-        // Find first link inside the main table
-        const firstLink = doc.querySelector('#main > table a[href]');
+        console.log("doc: ", doc);
+
+        const firstLink = doc.querySelector('#main table a[href]');
+        console.log("firstLink: ", firstLink);
         if (!firstLink) return [];
 
-        const firstHref = firstLink.getAttribute('href');
+        const href = firstLink.getAttribute('href');
+        const coversUrl = href.startsWith('http')
+            ? href
+            : `https://www.mobygames.com${href}covers/${platform}`;
 
-        // Build correct URL to covers page
-        const coversPage = firstHref.startsWith('http')
-            ? firstHref
-            : `https://www.mobygames.com${firstHref}covers/${platform}`;
-
-        const coversResponse = await fetch(coversPage);
-        if (!coversResponse.ok) return [];
-
-        const coversHtml = await coversResponse.text();
+        const coversResp = await Neutralino.os.execCommand(`curl -s "${coversUrl}"`);
+        const coversHtml = coversResp.stdOut;
         const coversDoc = parser.parseFromString(coversHtml, 'text/html');
 
-        const imgElements = coversDoc.querySelectorAll('.img-holder img[src]');
-        const imgSources = Array.from(imgElements).map(img => {
-            const src = img.getAttribute('src');
-            return src ? (src.startsWith('http') ? src : `https://www.mobygames.com${src}`) : null;
-        }).filter(Boolean);
+        const imgs = Array.from(coversDoc.querySelectorAll('.img-holder img[src]'))
+            .map(img => img.getAttribute('src'))
+            .filter(Boolean)
+            .map(url => url.startsWith('http') ? url : `https://www.mobygames.com${url}`);
 
-        return imgSources.map(url => ({
-            url,
-            source: 'MobyGames'
-        }));
-
+        return imgs.map(url => ({ url, source: 'MobyGames' }));
     } catch (err) {
         console.error(`[MobyGames] Error: ${err.message}`);
         return [];

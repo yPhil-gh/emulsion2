@@ -1,59 +1,84 @@
-export const fetchImages = async (gameName, platform = '') => {
-    console.log(`Searching Wikipedia for ${gameName} (${platform})`);
+function sanitizeGameName(name) {
+    return name
+        .replace(/[_ ]v?\d+(\.\d+)?/i, '')   // remove versions
+        .replace(/[_ ](cd32|amiga|pc|nes|snes|megadrive|genesis)/i, '') // remove platform
+        .trim();
+}
+
+export const fetchImages = async (gameName) => {
+    console.log(`Searching Wikipedia for "${gameName}"`);
 
     try {
-        const firstLetter = gameName.charAt(0).toUpperCase();
-        const categoryUrl = `https://en.wikipedia.org/w/index.php?title=Category:Amiga_game_covers&from=${firstLetter}`;
+        const sanitizedName = sanitizeGameName(gameName);
 
-        const searchResp = await fetch(categoryUrl);
+        // 1️⃣ Search pages containing the game name
+        const searchUrl = new URL('https://en.wikipedia.org/w/api.php');
+        searchUrl.searchParams.set('action', 'query');
+        searchUrl.searchParams.set('format', 'json');
+        searchUrl.searchParams.set('origin', '*');
+        searchUrl.searchParams.set('list', 'search');
+        searchUrl.searchParams.set('srsearch', sanitizedName);
+        searchUrl.searchParams.set('srlimit', '10');
+
+        const searchResp = await fetch(searchUrl.toString());
         if (!searchResp.ok) return [];
+        const searchData = await searchResp.json();
 
-        const searchHtml = await searchResp.text();
-        const doc = new DOMParser().parseFromString(searchHtml, "text/html");
+        const pageTitles = (searchData.query?.search || [])
+            .map(p => p.title);
 
-        const baseGameName = gameName
-            .replace(/\s*v?\d+\.\d+.*$/i, '')
-            .toLowerCase();
+        if (!pageTitles.length) return [];
 
-        // Search category links
-        let gamePagePath = null;
-        const links = Array.from(doc.querySelectorAll('div.mw-category-group a'));
-        for (const link of links) {
-            const href = link.getAttribute('href') || '';
-            const title = link.getAttribute('title') || '';
-            const normalized = href
-                .replace('/wiki/File:', '')
-                .replace(/_Coverart\.png$/i, '')
-                .replace(/_/g, ' ')
-                .toLowerCase();
+        const fileTitles = [];
 
-            if (normalized.includes(baseGameName) || title.toLowerCase().includes(baseGameName)) {
-                gamePagePath = href;
-                break;
+        // 2️⃣ For each page, get its images
+        for (const title of pageTitles) {
+            const imagesUrl = new URL('https://en.wikipedia.org/w/api.php');
+            imagesUrl.searchParams.set('action', 'query');
+            imagesUrl.searchParams.set('format', 'json');
+            imagesUrl.searchParams.set('origin', '*');
+            imagesUrl.searchParams.set('titles', title);
+            imagesUrl.searchParams.set('prop', 'images');
+            imagesUrl.searchParams.set('imlimit', 'max');
+
+            const resp = await fetch(imagesUrl.toString());
+            if (!resp.ok) continue;
+
+            const data = await resp.json();
+            const pages = Object.values(data.query.pages || {});
+            for (const page of pages) {
+                const imgs = page.images || [];
+                for (const img of imgs) {
+                    const t = img.title?.toLowerCase();
+                    if (t && (t.includes('cover') || t.includes('box') || t.includes('case'))) {
+                        fileTitles.push(img.title);
+                    }
+                }
             }
         }
 
-        if (!gamePagePath) return [];
+        if (!fileTitles.length) return [];
 
-        const gamePageUrl = `https://en.wikipedia.org${gamePagePath}`;
-        const gamePageResp = await fetch(gamePageUrl);
-        if (!gamePageResp.ok) return [];
+        // 3️⃣ Fetch the actual image URLs
+        const images = [];
+        for (const fileTitle of fileTitles) {
+            const infoUrl = new URL('https://en.wikipedia.org/w/api.php');
+            infoUrl.searchParams.set('action', 'query');
+            infoUrl.searchParams.set('format', 'json');
+            infoUrl.searchParams.set('origin', '*');
+            infoUrl.searchParams.set('titles', fileTitle);
+            infoUrl.searchParams.set('prop', 'imageinfo');
+            infoUrl.searchParams.set('iiprop', 'url');
 
-        const gamePageHtml = await gamePageResp.text();
-        const gameDoc = new DOMParser().parseFromString(gamePageHtml, "text/html");
+            const infoResp = await fetch(infoUrl.toString());
+            if (!infoResp.ok) continue;
+            const infoData = await infoResp.json();
+            const page = Object.values(infoData.query.pages)[0];
+            const url = page?.imageinfo?.[0]?.url;
+            if (url) images.push({ url, source: 'Wikipedia' });
+        }
 
-        const imgSources = Array.from(gameDoc.querySelectorAll('div.fullImageLink a'))
-            .map(a => {
-                const href = a.getAttribute('href');
-                if (!href) return null;
-                return href.startsWith('//') ? `https:${href}` : href;
-            })
-            .filter(Boolean);
-
-        return imgSources.map(url => ({
-            url,
-            source: 'Wikipedia'
-        }));
+        return images;
 
     } catch (err) {
         console.error(`[Wikipedia] Error: ${err.message}`);
