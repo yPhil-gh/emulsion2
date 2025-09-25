@@ -1,3 +1,8 @@
+import { PLATFORMS } from './platforms.js';
+import { openPlatformMenu } from './menu-forms.js';
+import { LB } from './global.js';
+import { getPlatformInfo } from './platforms.js'; // Add this import
+
 // gallery-builder.js (fixed & portable)
 
 async function buildGalleries(preferences) {
@@ -99,7 +104,7 @@ async function buildSettingsPage(preferences, index) {
         displayName: 'Settings',
         imgSrc: 'images/platforms/settings.png',
         isSpecial: true,
-        onClick: () => window.openPlatformMenu('settings')
+        onClick: () => openPlatformMenu('settings')
     });
     pageContent.appendChild(settingsContainer);
 
@@ -112,7 +117,7 @@ async function buildSettingsPage(preferences, index) {
             vendor: info.vendor,
             displayName: info.name,
             imgSrc: `images/platforms/${platform.name}.png`,
-            onClick: () => window.openPlatformMenu(platform.name)
+            onClick: () => openPlatformMenu(platform.name)
         });
         pageContent.appendChild(platformContainer);
     });
@@ -127,7 +132,6 @@ async function buildPlatformPage(platformName, platformPrefs = {}, index) {
     page.id = `page${index}`;
     page.setAttribute('data-index', index);
     page.setAttribute('data-platform', platformName);
-    page.setAttribute('data-plop', 'plop');
     page.style.display = 'flex';
 
     const pageContent = document.createElement('div');
@@ -344,6 +348,4 @@ async function loadRecentGames() {
     return []; // fallback
 }
 
-if (typeof window.buildGalleries !== 'function') {
-    window.buildGalleries = buildGalleries;
-}
+export { buildGalleries };

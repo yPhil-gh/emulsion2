@@ -1,18 +1,15 @@
+import { LB } from './global.js';
+import { loadPreferences } from './preferences.js';
+import { buildGalleries } from './gallery-builder.js';
+import { initSlideShow } from './control.js';
+import { getPlatformInfo } from './platforms.js';
+import { setFooterSize, applyTheme } from './utils.js'; // Add these imports
 
-
-
-window.LB = {
-    enabledPlatforms: [],
-    galleryNumOfCols: 6,
-    baseDir: '/resources',
-    userDataPath: '',
-    totalNumberOfPlatforms: 0,
-    kioskMode: false,
-    disabledPlatformsPolicy: 'show',
-    preferences: null // Add preferences to LB object
-};
+console.info("MAIN! ");
 
 async function initApp() {
+
+    console.info("INITAPP! ");
     await Neutralino.init();
 
     const configPath = await Neutralino.os.getPath('config');
@@ -39,8 +36,8 @@ async function initApp() {
     LB.footerSize = LB.preferences.settings.footerSize;
     LB.homeMenuTheme = LB.preferences.settings.homeMenuTheme;
 
-    window.setFooterSize(LB.footerSize);
-    window.applyTheme(LB.theme);
+    setFooterSize(LB.footerSize);
+    applyTheme(LB.theme);
 
     await buildGalleries(LB.preferences);
 
@@ -50,7 +47,6 @@ async function initApp() {
     // Initialize slideshow controls (no need to pass preferences parameter now)
     initSlideShow(0);
 
-    // Show main interface
     showMainInterface();
 
     Neutralino.events.on('windowClose', () => {
@@ -132,29 +128,9 @@ function buildHomeSlide(platformName, preferences) {
     return slide;
 }
 
-function getPlatformInfo(platformName) {
-    // Find platform info from PLATFORMS array
-    const platform = PLATFORMS.find(p => p.name === platformName);
-    if (platform) {
-        return { vendor: platform.vendor, name: platform.displayName };
-    }
-
-    // Fallback for settings and recents
-    if (platformName === 'settings') {
-        return { vendor: 'Emulsion', name: 'Settings' };
-    }
-    if (platformName === 'recents') {
-        return { vendor: 'Emulsion', name: 'Recents' };
-    }
-
-    // Final fallback
-    return { vendor: platformName, name: platformName };
-}
-
 function showMainInterface() {
-    // Hide the Neutralino default app container
-    const neutralinoApp = document.getElementById('neutralinoapp');
-    if (neutralinoApp) neutralinoApp.style.display = 'none';
+
+    console.info("SHOWMAININTERFACE!");
 
     // Hide the splash screen
     const splash = document.getElementById('splash');
@@ -172,9 +148,4 @@ function showMainInterface() {
 }
 
 // Start the app
-if (window.Neutralino) {
-    initApp();
-
-} else {
-    document.addEventListener('NeutralinoLoaded', initApp);
-}
+initApp();

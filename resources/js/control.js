@@ -1,3 +1,6 @@
+import { openPlatformMenu } from './menu-forms.js';
+import { LB } from './global.js';
+
 function initSlideShow(platformToDisplay = 0) {
 
     const slideshow = document.getElementById("slideshow");
@@ -164,4 +167,7 @@ function platformNeedsConfiguration(platformName, preferences) {
     return !platformPrefs || !platformPrefs.gamesDir || !platformPrefs.emulator;
 }
 
-window.initSlideShow = initSlideShow;
+export {
+    initSlideShow
+};
+

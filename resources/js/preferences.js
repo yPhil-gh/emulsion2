@@ -1,3 +1,4 @@
+import { PLATFORMS } from './platforms.js';
 let preferencesFilePath = '';
 
 async function getPreferencesPath() {
@@ -160,3 +161,9 @@ async function updatePreference(platformName, key, value) {
         return false;
     }
 }
+
+export {
+    loadPreferences,
+    savePreferences,
+    updatePreference
+};

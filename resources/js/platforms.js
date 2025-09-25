@@ -1,5 +1,5 @@
 // SINGLE SOURCE OF TRUTH - Platforms definition
-const PLATFORMS = [
+export const PLATFORMS = [
     { name: "atari", vendor: "Atari", displayName: "2600", extensions: [".zip"] },
     { name: "spectrum", vendor: "Sinclair", displayName: "ZX Spectrum", extensions: [".zip"] },
     { name: "c64", vendor: "Commodore", displayName: "64", extensions: [".zip"] },
@@ -26,3 +26,22 @@ const PLATFORMS = [
     { name: "xbox360", vendor: "Microsoft", displayName: "Xbox 360", extensions: [".iso", ".xex"] },
     { name: "ps4", vendor: "Sony", displayName: "PlayStation 4", extensions: [".iso"] }
 ];
+
+export function getPlatformInfo(platformName) {
+    // Find platform info from PLATFORMS array
+    const platform = PLATFORMS.find(p => p.name === platformName);
+    if (platform) {
+        return { vendor: platform.vendor, name: platform.displayName };
+    }
+
+    // Fallback for settings and recents
+    if (platformName === 'settings') {
+        return { vendor: 'Emulsion', name: 'Settings' };
+    }
+    if (platformName === 'recents') {
+        return { vendor: 'Emulsion', name: 'Recents' };
+    }
+
+    // Final fallback
+    return { vendor: platformName, name: platformName };
+}

@@ -150,3 +150,7 @@ function initGamepad() {
         startPolling();
     }
 }
+
+export {
+    initGamepad
+};

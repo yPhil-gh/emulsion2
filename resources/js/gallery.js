@@ -1,3 +1,7 @@
+import { openPlatformMenu } from './menu-forms.js';
+import { getPlatformInfo } from './platforms.js'; // Add this import
+import { LB } from './global.js';
+
 // Global gallery state
 let currentGalleryPageIndex = 0;
 let currentGameIndex = 0;
@@ -183,7 +187,7 @@ function handleGalleryKeyDown(event) {
         break;
 
     case 'i':
-        if (!LB.kioskMode) openContextMenu();
+        if (!LB.kioskMode) openContextMenu(currentGameIndex);
         break;
     }
 
@@ -280,15 +284,103 @@ function openGameContextMenu(gameContainer, index) {
     // TODO: Implement context menu
 }
 
-function openContextMenu() {
+function createManualSelectButton(gameName, platformName, imgElem) {
+    const btn = document.createElement('button');
+    btn.classList.add('button');
+    btn.title = 'Select image';
+    btn.innerHTML = '<i class="fa fa-plus" aria-hidden="true"></i>';
+
+    btn.addEventListener('click', async e => {
+        e.stopPropagation();
+
+        // Ask the main process to show a file picker
+        // const srcPath = await ipcRenderer.invoke('pick-image');
+
+        const srcPath = await Neutralino.os.showOpenDialog('Select Image', {
+            filters: [{ name: 'Executables', extensions: ['png', 'jpg', 'webp', '*'] }],
+            multiple: false
+        });
+        if (!srcPath) return;  // user cancelled
+
+        // Destination in user data covers folder
+        const destPath = path.join(
+            LB.userDataPath,
+            'covers',
+            platformName,
+            `${gameName}.jpg`
+        );
+
+        // Update the img element to the new file (with cache‐bust)
+        imgElem.src = `file://${destPath}?${Date.now()}`;
+
+        // Tell main to copy the file
+        const ok = await ipcRenderer.invoke('save-cover', srcPath, destPath);
+        console.log(ok
+                    ? `Cover saved to ${destPath}`
+                    : 'Failed to save cover');
+    });
+
+    return btn;
+}
+
+function buildGameMenu(gameName, image, platformName) {
+    const gameMenuContainer = document.createElement('div');
+    gameMenuContainer.classList.add('page-content');
+    gameMenuContainer.style.gridTemplateColumns = `repeat(${LB.galleryNumOfCols}, 1fr)`;
+
+    const currentImageContainer = document.createElement('div');
+    currentImageContainer.classList.add('menu-game-container');
+    currentImageContainer.style.height = 'calc(120vw / ' + LB.galleryNumOfCols + ')';
+
+    const currentImage = document.createElement('img');
+    currentImage.src = image.src;
+    currentImage.className = 'current-image';
+    currentImage.alt = 'Current game image';
+
+    const gameLabel = document.createElement('div');
+    gameLabel.classList.add('game-label');
+    // gameLabel.textContent = 'Current Image';
+
+    const manualBtn = createManualSelectButton(gameName, platformName, currentImage);
+
+    gameLabel.appendChild(manualBtn);
+
+    currentImageContainer.appendChild(currentImage);
+    currentImageContainer.appendChild(gameLabel);
+
+    gameMenuContainer.appendChild(currentImageContainer);
+
+    const dummyGameContainer = document.createElement('div');
+    dummyGameContainer.classList.add('menu-game-container', 'dummy-game-container');
+    dummyGameContainer.style.height = 'calc(120vw / ' + LB.galleryNumOfCols + ')';
+    dummyGameContainer.innerHTML = `Searching...`;
+
+    gameMenuContainer.appendChild(dummyGameContainer);
+
+    return gameMenuContainer;
+}
+
+function openContextMenu(index) {
     console.log('Opening context menu');
+    console.log("index: ", index);
+    const container = gameContainers[index];
+    const gameImage = container.querySelector('img');
+    const gameName = container.dataset.gameName;
+    const menuContainer = document.getElementById('menu');
+    console.log("gameName: ", gameName);
+    const platformName = container.dataset.platform;
+    const gameMenuContainer = buildGameMenu(gameName, gameImage, platformName);
+    menuContainer.appendChild(gameMenuContainer);
+    // await LB.build.populateGameMenu(gameMenuContainer, gameName, platformName);
+
+    // document.querySelector('header .platform-name').textContent = LB.utils.cleanFileName(gameName);
+    // document.querySelector('header .item-type').textContent = '';
+    // document.querySelector('header .item-number').textContent = '';
+
+
     // TODO: Implement general context menu
 }
 
-function returnToSlideshow() {
-    console.log("returnToSlideshow!: ");
-    window.removeEventListener('keydown', handleGalleryKeyDown);
-    window.initSlideShow(currentGalleryPageIndex);
-}
-
-window.initGallery = initGallery;
+export {
+    initGallery
+};

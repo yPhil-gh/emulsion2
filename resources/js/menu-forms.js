@@ -1,3 +1,9 @@
+import { loadPreferences } from './preferences.js';
+import { updatePreference } from './preferences.js'; // Add this import
+import { setFooterSize, applyTheme } from './utils.js'; // Add these imports
+import { getPlatformInfo } from './platforms.js'; // Add this import
+import { LB } from './global.js';
+
 window.isMenuOpen = false;
 window.currentMenuPlatform = null;
 
@@ -587,7 +593,7 @@ function buildPlatformForm(platformName) {
     cancelButton.addEventListener('click', _cancelButtonClick);
 
     helpButton.addEventListener('click', () => {
-        ipcRenderer.invoke('go-to-url', 'https://gitlab.com/yphil/emulsion/-/blob/master/README.md#usage');
+        Neutralino.os.open('https://gitlab.com/yphil/emulsion/-/blob/master/README.md#usage');
     });
 
     saveButton.addEventListener('click', _saveButtonClick);
@@ -760,8 +766,6 @@ async function saveCurrentMenu() {
     }
 }
 
-// Export to global
-window.openPlatformMenu = openPlatformMenu;
-window.closePlatformMenu = closePlatformMenu;
-window.buildPreferencesForm = buildPreferencesForm;
-window.buildPlatformForm = buildPlatformForm;
+export {
+    openPlatformMenu
+};
