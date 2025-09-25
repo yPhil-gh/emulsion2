@@ -1,17 +1,11 @@
-function sanitizeGameName(name) {
-    return name
-        .replace(/[_ ]v?\d+(\.\d+)?/i, '')   // remove versions
-        .replace(/[_ ](cd32|amiga|pc|nes|snes|megadrive|genesis)/i, '') // remove platform
-        .trim();
-}
+import { cleanFileName } from '../utils.js';
 
 export const fetchImages = async (gameName) => {
-    console.log(`Searching Wikipedia for "${gameName}"`);
 
     try {
-        const sanitizedName = sanitizeGameName(gameName);
+        const sanitizedName = cleanFileName(gameName);
 
-        // 1️⃣ Search pages containing the game name
+        // Search pages containing the game name
         const searchUrl = new URL('https://en.wikipedia.org/w/api.php');
         searchUrl.searchParams.set('action', 'query');
         searchUrl.searchParams.set('format', 'json');
@@ -31,7 +25,7 @@ export const fetchImages = async (gameName) => {
 
         const fileTitles = [];
 
-        // 2️⃣ For each page, get its images
+        // For each page, get its images
         for (const title of pageTitles) {
             const imagesUrl = new URL('https://en.wikipedia.org/w/api.php');
             imagesUrl.searchParams.set('action', 'query');
