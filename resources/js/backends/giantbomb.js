@@ -7,13 +7,10 @@ export const fetchImages = async (gameName, apiKey, platform = '') => {
     try {
         const searchUrl = `https://www.giantbomb.com/api/search/?api_key=${apiKey}&format=json&query=${encodeURIComponent(gameName)}&resources=game`;
 
-        const response = await fetch(searchUrl);
-        if (!response.ok) {
-            console.warn(`[GiantBomb] No results for: ${gameName}`);
-            return [];
-        }
+        // Run HTTP request on OS level to avoid CORS
+        const resp = await Neutralino.os.execCommand(`curl -s "${searchUrl}"`);
+        const data = JSON.parse(resp.stdOut);
 
-        const data = await response.json();
         if (!data.results?.length) {
             console.warn(`[GiantBomb] No results for: ${gameName}`);
             return [];
