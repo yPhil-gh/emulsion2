@@ -41,6 +41,8 @@ function initGallery(galleryIndex, platformName = null) {
 }
 
 function updateGallery() {
+
+    console.info("UPDATEGALLERY: ");
     // Hide all pages
     galleryPages.forEach(page => {
         page.style.display = 'none';
@@ -48,7 +50,6 @@ function updateGallery() {
 
     // Show current page
     const currentPage = galleryPages[currentGalleryPageIndex];
-    console.log("currentPage: ", currentPage);
 
     if (currentPage) {
         currentPage.style.display = 'block';
@@ -136,6 +137,73 @@ function setupGalleryEvents() {
     });
 }
 
+async function ensureDirectory(path) {
+    try {
+        await Neutralino.filesystem.createDirectory(path);
+    } catch (err) {
+        // Ignore "already exists" error
+        if (!err.message.includes('EEXIST')) {
+            console.error("Failed to create directory:", path, err);
+            throw err;
+        }
+    }
+}
+
+async function downloadImage(imgSrc, platform, gameName) {
+    try {
+        // Mounted covers path
+        const destPath = `${LB.userDataPath}/covers/${platform}/${gameName}.jpg`;
+
+        // NOTE: Don't call createDirectory inside mounted folder
+
+        // Use curl to download the image (bypasses CORS)
+        const command = `curl -L "${imgSrc}" -o "${destPath}"`;
+        const result = await Neutralino.os.execCommand(command);
+        if (result.exitCode !== 0) {
+            console.error("curl failed:", result.stdErr);
+            return null;
+        }
+
+        console.log(`✅ Saved cover: ${destPath}`);
+        return destPath;
+    } catch (err) {
+        console.error("❌ downloadImage failed:", err);
+        return null;
+    }
+}
+
+async function selectMenuImage(selectedMenuContainer) {
+    const img = selectedMenuContainer.querySelector('img.game-image');
+    console.log("img: ", img);
+    if (!img) return;
+
+    const gameName = selectedMenuContainer.dataset.gameName;
+    const platformName = selectedMenuContainer.dataset.platformName;
+
+    // Save the chosen image
+    const savedPath = await downloadImage(img.src, platformName, gameName);
+    if (!savedPath) return;
+
+    // Update gallery image immediately
+    const galleryContainer = document.querySelector(
+        `.game-container[data-platform="${platformName}"][data-game-name="${gameName}"]`
+    );
+    if (galleryContainer) {
+        const galleryImg = galleryContainer.querySelector('img');
+        if (galleryImg) {
+            galleryImg.src = `file://${savedPath}?${Date.now()}`; // cache-bust
+        }
+    }
+
+    // Close menu and refresh gallery
+    document.getElementById('menu').innerHTML = '';
+    const currentPage = galleryPages[currentGalleryPageIndex];
+    if (currentPage) {
+        gameContainers = Array.from(currentPage.querySelectorAll('.game-container'));
+    }
+    updateGallery();
+}
+
 function handleGalleryKeyDown(event) {
 
     event.stopPropagation();
@@ -152,42 +220,24 @@ function handleGalleryKeyDown(event) {
         else prevGame();
         break;
 
-    case 'ArrowUp':
-        moveGameRow(-1);
-        break;
-
-    case 'ArrowDown':
-        moveGameRow(1);
-        break;
-
-    case 'PageUp':
-        moveGameRow(-10);
-        break;
-
-    case 'PageDown':
-        moveGameRow(10);
-        break;
-
-    case 'Home':
-        selectGame(0);
-        break;
-
-    case 'End':
-        selectGame(gameContainers.length - 1);
-        break;
-
+    case 'ArrowUp': moveGameRow(-1); break;
+    case 'ArrowDown': moveGameRow(1); break;
+    case 'PageUp': moveGameRow(-10); break;
+    case 'PageDown': moveGameRow(10); break;
+    case 'Home': selectGame(0); break;
+    case 'End': selectGame(gameContainers.length - 1); break;
     case 'Enter':
-        activateCurrentGame();
+        const selected = gameContainers[currentGameIndex];
+        if (selected.classList.contains('menu-game-container')) {
+            selectMenuImage(selected);
+            console.log("selectMenuImage: ");
+        } else {
+            activateCurrentGame();
+        }
         break;
 
-    case 'Escape':
-        console.log("Escape!: ");
-        window.goToSlideshow(window.currentMenuPlatform);
-        break;
-
-    case 'i':
-        if (!LB.kioskMode) openContextMenu(currentGameIndex);
-        break;
+    case 'Escape': window.goToSlideshow(window.currentMenuPlatform); break;
+    case 'i': if (!LB.kioskMode) openGameMenu(currentGameIndex); break;
     }
 
     updateGameSelection();
@@ -196,6 +246,7 @@ function handleGalleryKeyDown(event) {
 // Navigation functions
 function nextGame() {
     if (gameContainers.length === 0) return;
+    console.log("gameContainers: ", gameContainers);
     currentGameIndex = (currentGameIndex + 1) % gameContainers.length;
     scrollToCurrentGame();
 }
@@ -237,6 +288,7 @@ function selectGame(index) {
 }
 
 function scrollToCurrentGame() {
+    console.info("scrollToCurrentGame: ");
     if (gameContainers[currentGameIndex]) {
         gameContainers[currentGameIndex].scrollIntoView({
             behavior: 'smooth',
@@ -384,6 +436,10 @@ async function populateGameMenu(gameMenuContainer, gameName, platformName) {
 
             const container = document.createElement('div');
             container.classList.add('menu-game-container');
+
+            container.setAttribute('data-platform-name', platformName);
+            container.setAttribute('data-game-name', gameName);
+
             container.style.height = 'calc(120vw / ' + LB.galleryNumOfCols + ')';
             container.appendChild(img);
             gameMenuContainer.appendChild(container);
@@ -394,7 +450,7 @@ async function populateGameMenu(gameMenuContainer, gameName, platformName) {
     }
 }
 
-async function openContextMenu(index) {
+async function openGameMenu(index) {
     console.log('Opening context menu');
     console.log("index: ", index);
     const container = gameContainers[index];
@@ -410,6 +466,9 @@ async function openContextMenu(index) {
     document.querySelector('header .platform-name').textContent = cleanFileName(gameName);
     document.querySelector('header .item-type').textContent = '';
     document.querySelector('header .item-number').textContent = '';
+
+    gameContainers = Array.from(document.querySelectorAll('.menu-game-container'));
+
 
 }
 

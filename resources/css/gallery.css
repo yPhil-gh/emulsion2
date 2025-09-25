@@ -56,6 +56,9 @@
   gap: 10px;
   padding: 10px;
   padding-bottom: 20vh;
+
+  height: 100vh;
+  /* overflow-y: auto;     /\* scroll inside if content exceeds *\/ */
 }
 
 .prefs-platform-img {
