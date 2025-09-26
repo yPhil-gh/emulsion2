@@ -38,9 +38,9 @@ function openPlatformMenu(platformName) {
     // Update controls for menu mode
     updateControlsForMenu();
 
-    // // Keyboard handling
-    // window.removeEventListener('keydown', handleGalleryKeyDown);
-    // window.addEventListener('keydown', handleMenuKeyDown);
+    // Keyboard handling
+    window.removeEventListener('keydown', handleGalleryKeyDown);
+    window.addEventListener('keydown', handleMenuKeyDown);
 
     window.isMenuOpen = true;
     window.currentMenuPlatform = platformName;
@@ -61,11 +61,11 @@ function closePlatformMenu() {
     // Restore controls
     updateControlsForGallery();
 
-    // // Restore gallery keyboard handling
-    // window.removeEventListener('keydown', handleMenuKeyDown);
-    // if (typeof handleGalleryKeyDown === 'function') {
-    //     window.addEventListener('keydown', handleGalleryKeyDown);
-    // }
+    // Restore gallery keyboard handling
+    window.removeEventListener('keydown', handleMenuKeyDown);
+    if (typeof handleGalleryKeyDown === 'function') {
+        window.addEventListener('keydown', handleGalleryKeyDown);
+    }
 
     window.isMenuOpen = false;
     window.currentMenuPlatform = null;
@@ -79,7 +79,7 @@ function handleMenuKeyDown(event) {
         case 'Escape':
             closePlatformMenu();
             break;
-    case 'Enter':
+        case 'Enter':
             // Handle form submission if needed
             break;
         case 's':
@@ -753,6 +753,5 @@ function updateControlsForGallery() {
 }
 
 export {
-    openPlatformMenu,
-    closePlatformMenu
+    openPlatformMenu
 };

@@ -120,11 +120,11 @@ function setupGalleryEvents() {
 
     console.info("SETUPGALLERYEVENTS");
 
-    // // Remove existing listeners
-    // window.removeEventListener('keydown', handleGalleryKeyDown);
+    // Remove existing listeners
+    window.removeEventListener('keydown', handleGalleryKeyDown);
 
-    // // Add new listeners
-    // window.addEventListener('keydown', handleGalleryKeyDown);
+    // Add new listeners
+    window.addEventListener('keydown', handleGalleryKeyDown);
 
     // Setup game container clicks
     gameContainers.forEach((container, index) => {
@@ -500,6 +500,5 @@ async function closeGameMenu() {
 }
 
 export {
-    initGallery,
-    closeGameMenu
+    initGallery
 };
