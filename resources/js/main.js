@@ -111,6 +111,8 @@ function buildHomeSlide(platformName, preferences) {
     slideContent.innerHTML = `<p class="vendor">${platformInfo.vendor}</p> <p class="name">${platformInfo.name}</p>`;
 
     slide.setAttribute('data-platform', platformName);
+    slide.setAttribute('data-is-enabled', preferences[platformName].isEnabled);
+
     slide.appendChild(slideContent);
 
     if (platformName === 'recents') {
@@ -126,7 +128,6 @@ function buildHomeSlide(platformName, preferences) {
 
     slide.setAttribute('data-index', preferences[platformName].index);
     slide.setAttribute('data-name', platformName);
-    slide.setAttribute('data-is-enabled', preferences[platformName].isEnabled);
 
     return slide;
 }

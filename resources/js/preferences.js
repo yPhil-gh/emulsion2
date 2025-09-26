@@ -86,6 +86,7 @@ function validatePreferences(preferences) {
 async function createDefaultPreferences() {
     const defaultPreferences = {
         settings: {
+            isEnabled: true,
             index: 0,
             numberOfColumns: 6,
             footerSize: "medium",

@@ -72,32 +72,26 @@ function initSlideShow(platformToDisplay = 0) {
     function activateCurrentSlide() {
         const activeSlide = slides[currentIndex];
         const activePlatformName = activeSlide.dataset.platform;
-        const activeGalleryIndex = Number(activeSlide.dataset.index);
+        const isPlatformEnabled = activeSlide.dataset.isEnabled === "true";
 
         // Switch to appropriate view
         document.getElementById('slideshow').style.display = 'none';
         document.getElementById('header').style.display = 'flex';
         window.removeEventListener('keydown', handleHomeKeyDown);
 
-        // Check if this platform needs configuration (using LB.preferences)
-        if (platformNeedsConfiguration(activePlatformName, LB.preferences)) {
-            // Open configuration menu for unconfigured platform
+        console.log("activePlatformName: ", activePlatformName);
+
+        if (!isPlatformEnabled) {
+            // Open configuration menu / page
             document.getElementById('galleries').style.display = 'none';
             openPlatformMenu(activePlatformName);
-        } else if (activePlatformName === 'recents') {
-            // Open recents gallery
-            document.getElementById('galleries').style.display = 'flex';
-            initGallery(null, 'recents');  // pass NAME
-        } else if (activePlatformName === 'settings') {
-            // Show the first gallery page (settings gallery)
-            document.getElementById('galleries').style.display = 'flex';
-            initGallery(null, 'settings');  // pass NAME
         } else {
-            // Open configured platform gallery by NAME
+            // Open platform page
             document.getElementById('galleries').style.display = 'flex';
             initGallery(null, activePlatformName);  // pass NAME
         }
     }
+
 
 
     function handleHomeKeyDown(event) {
@@ -158,14 +152,6 @@ function initSlideShow(platformToDisplay = 0) {
             console.warn(`No slide found for platform: ${platformName}`);
         }
     };
-}
-
-// Simple function to check if a platform needs configuration
-function platformNeedsConfiguration(platformName, preferences) {
-    if (platformName === 'settings') return false;
-
-    const platformPrefs = preferences[platformName];
-    return !platformPrefs || !platformPrefs.gamesDir || !platformPrefs.emulator;
 }
 
 export {
