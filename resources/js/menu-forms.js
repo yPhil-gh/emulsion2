@@ -38,9 +38,9 @@ function openPlatformMenu(platformName) {
     // Update controls for menu mode
     updateControlsForMenu();
 
-    // Keyboard handling
-    window.removeEventListener('keydown', handleGalleryKeyDown);
-    window.addEventListener('keydown', handleMenuKeyDown);
+    // // Keyboard handling
+    // window.removeEventListener('keydown', handleGalleryKeyDown);
+    // window.addEventListener('keydown', handleMenuKeyDown);
 
     window.isMenuOpen = true;
     window.currentMenuPlatform = platformName;
@@ -79,7 +79,7 @@ function handleMenuKeyDown(event) {
         case 'Escape':
             closePlatformMenu();
             break;
-        case 'Enter':
+    case 'Enter':
             // Handle form submission if needed
             break;
         case 's':
@@ -753,5 +753,6 @@ function updateControlsForGallery() {
 }
 
 export {
-    openPlatformMenu
+    openPlatformMenu,
+    closePlatformMenu
 };

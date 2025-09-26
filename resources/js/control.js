@@ -1,4 +1,4 @@
-import { openPlatformMenu } from './menu-forms.js';
+import { openPlatformMenu, closePlatformMenu } from './menu-forms.js';
 import { LB } from './global.js';
 import { initGallery } from './gallery.js';
 
@@ -48,9 +48,9 @@ function activateCurrentSlide() {
 
     document.getElementById('slideshow').style.display = 'none';
     document.getElementById('header').style.display = 'flex';
-    window.removeEventListener('keydown', handleHomeKeyDown);
 
     if (isPlatformEnabled) {
+        window.removeEventListener('keydown', handleHomeKeyDown);
         galleries.style.display = 'flex';
         initGallery(null, platformName);
     } else {
@@ -60,17 +60,29 @@ function activateCurrentSlide() {
 }
 
 function handleHomeKeyDown(event) {
+    const isSlideshowOpen = document.getElementById('slideshow').style.display !== 'none';
+    const isGalleryOpen = document.getElementById('slideshow').style.display !== 'none';
+    const isMenuOpen = document.getElementById('menu').style.display !== 'none';
+    const isPlatformMenuOpen = document.getElementById('menu').style.display !== 'none';
+    const isGameMenuOpen = document.getElementById('menu').style.display !== 'none';
     event.stopPropagation();
 
     switch (event.key) {
-        case 'ArrowRight': nextSlide(); break;
-        case 'ArrowLeft': prevSlide(); break;
-        case 'Enter': activateCurrentSlide(); break;
-        case 'Escape':
-            if (document.getElementById('slideshow').style.display === 'flex') {
-                Neutralino.app.exit();
-            }
-            break;
+    case 'ArrowRight':
+        nextSlide();
+        break;
+    case 'ArrowLeft': prevSlide(); break;
+    case 'Enter': activateCurrentSlide(); break;
+    case 'a': console.log("AAA!!"); break;
+    case 'Escape':
+        if (isPlatformMenuOpen) {
+            closePlatformMenu();
+            return;
+        }
+        if (isSlideshowOpen) {
+            Neutralino.app.exit();
+        }
+        break;
     }
 }
 
