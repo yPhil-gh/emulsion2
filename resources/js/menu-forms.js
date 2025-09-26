@@ -1,15 +1,16 @@
-import { loadPreferences } from './preferences.js';
-import { updatePreference } from './preferences.js'; // Add this import
-import { setFooterSize, applyTheme } from './utils.js'; // Add these imports
-import { getPlatformInfo } from './platforms.js'; // Add this import
-import { handleGalleryKeyDown } from './gallery.js'; // Add this import
+import { updatePreference } from './preferences.js';
+import { setFooterSize, applyTheme } from './utils.js';
+import { getPlatformInfo } from './platforms.js';
+import { handleGalleryKeyDown } from './gallery.js';
 import { LB } from './global.js';
+import { goToSlideshow } from './control.js';
 
 window.isMenuOpen = false;
 window.currentMenuPlatform = null;
 
 function openPlatformMenu(platformName) {
     console.log('Opening menu for platform:', platformName);
+    const galleries = document.getElementById('galleries');
 
     const menu = document.getElementById('menu');
     if (!menu) {
@@ -33,7 +34,7 @@ function openPlatformMenu(platformName) {
         menu.appendChild(buildPlatformForm(platformName));
     }
 
-    // Show menu
+    galleries.style.display = 'none';
     menu.style.display = 'flex';
 
     // Update controls for menu mode
@@ -57,9 +58,7 @@ function closePlatformMenu() {
     }
 
     // Restore slideshow state
-    if (typeof window.goToSlideshow === 'function') {
-        window.goToSlideshow(window.currentMenuPlatform);
-    }
+    goToSlideshow(window.currentMenuPlatform);
 
     // Restore controls
     updateControlsForGallery();
@@ -87,7 +86,6 @@ function handleMenuKeyDown(event) {
         case 's':
             if (event.ctrlKey) {
                 event.preventDefault();
-                saveCurrentMenu();
             }
             break;
     }
@@ -753,18 +751,6 @@ function updateControlsForGallery() {
             <span>Exit</span>
         </div>
     `;
-}
-
-async function saveCurrentMenu() {
-    if (!window.currentMenuPlatform) return;
-
-    try {
-        const preferences = await loadPreferences();
-        await savePreferences(preferences);
-        closePlatformMenu();
-    } catch (error) {
-        console.error('Error saving menu preferences:', error);
-    }
 }
 
 export {

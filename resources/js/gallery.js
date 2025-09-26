@@ -3,6 +3,7 @@ import { getPlatformInfo } from './platforms.js';
 import { cleanFileName } from './utils.js';
 import { LB } from './global.js';
 import { getAllCoverImageUrls } from './backends.js';
+import { goToSlideshow } from './control.js';
 
 // Global gallery state
 let currentGalleryPageIndex = 0;
@@ -240,7 +241,7 @@ export function handleGalleryKeyDown(event) {
         }
         break;
 
-    case 'Escape': window.goToSlideshow(window.currentMenuPlatform); break;
+    case 'Escape': goToSlideshow(window.currentMenuPlatform); break;
     case 'i': if (!LB.kioskMode) openGameMenu(currentGameIndex); break;
     }
 

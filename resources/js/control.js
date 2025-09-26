@@ -2,115 +2,102 @@ import { openPlatformMenu } from './menu-forms.js';
 import { LB } from './global.js';
 import { initGallery } from './gallery.js';
 
+let slideshow;
+let slides = [];
+let totalSlides = 0;
+let currentIndex = 0;
+
+function updateSlideshow() {
+    const angleIncrement = 360 / totalSlides;
+    const radius = 90 * totalSlides;
+
+    slides.forEach((slide, i) => {
+        const angle = angleIncrement * (i - currentIndex);
+        slide.style.setProperty('--angle', angle);
+        slide.style.setProperty('--radius', radius);
+
+        slide.classList.remove('active', 'prev-slide-flat', 'next-slide-flat', 'adjacent-flat');
+
+        if (i === currentIndex) {
+            slide.classList.add('active');
+        } else if (i === (currentIndex - 1 + totalSlides) % totalSlides) {
+            slide.classList.add('prev-slide-flat');
+        } else if (i === (currentIndex + 1) % totalSlides) {
+            slide.classList.add('next-slide-flat');
+        } else {
+            slide.classList.add('adjacent-flat');
+        }
+    });
+}
+
+function nextSlide() {
+    currentIndex = (currentIndex + 1) % totalSlides;
+    updateSlideshow();
+}
+
+function prevSlide() {
+    currentIndex = (currentIndex - 1 + totalSlides) % totalSlides;
+    updateSlideshow();
+}
+
+function activateCurrentSlide() {
+    const activeSlide = slides[currentIndex];
+    const galleries = document.getElementById('galleries');
+    const platformName = activeSlide.dataset.platform;
+    const isPlatformEnabled = activeSlide.dataset.isEnabled === "true";
+
+    document.getElementById('slideshow').style.display = 'none';
+    document.getElementById('header').style.display = 'flex';
+    window.removeEventListener('keydown', handleHomeKeyDown);
+
+    if (isPlatformEnabled) {
+        galleries.style.display = 'flex';
+        initGallery(null, platformName);
+    } else {
+        galleries.style.display = 'none';
+        openPlatformMenu(platformName);
+    }
+}
+
+function handleHomeKeyDown(event) {
+    event.stopPropagation();
+
+    switch (event.key) {
+        case 'ArrowRight': nextSlide(); break;
+        case 'ArrowLeft': prevSlide(); break;
+        case 'Enter': activateCurrentSlide(); break;
+        case 'Escape':
+            if (document.getElementById('slideshow').style.display === 'flex') {
+                Neutralino.app.exit();
+            }
+            break;
+    }
+}
+
 function initSlideShow(platformToDisplay = 0) {
+    slideshow = document.getElementById("slideshow");
+    slides = Array.from(slideshow.querySelectorAll('.slide'));
+    totalSlides = slides.length;
 
-    const slideshow = document.getElementById("slideshow");
-    const slides = Array.from(slideshow.querySelectorAll('.slide'));
-    const totalSlides = slides.length;
-
-    // Use LB.preferences instead of local parameter
     const preferences = LB.preferences;
 
-    // Set initial display states
     slideshow.style.display = 'flex';
     document.getElementById('galleries').style.display = 'none';
     document.getElementById('header').style.display = 'none';
 
-    // Default index
-    let currentIndex = 0;
+    currentIndex = 0;
 
     if (typeof platformToDisplay === 'string') {
-        // Lookup by name
         const foundIndex = slides.findIndex(s =>
             s.dataset.platform === platformToDisplay ||
             s.dataset.name === platformToDisplay
         );
-        if (foundIndex !== -1) {
-            currentIndex = foundIndex;
-        }
+        if (foundIndex !== -1) currentIndex = foundIndex;
     } else {
-        // Fallback to numeric index
         const idx = slides.findIndex(s => Number(s.dataset.index) === Number(platformToDisplay));
-        if (idx !== -1) {
-            currentIndex = idx;
-        }
+        if (idx !== -1) currentIndex = idx;
     }
 
-    function updateSlideshow() {
-        const angleIncrement = 360 / totalSlides;
-        const radius = 90 * totalSlides;
-
-        slides.forEach((slide, i) => {
-            const angle = angleIncrement * (i - currentIndex);
-            slide.style.setProperty('--angle', angle);
-            slide.style.setProperty('--radius', radius);
-
-            slide.classList.remove('active', 'prev-slide-flat', 'next-slide-flat', 'adjacent-flat');
-
-            if (i === currentIndex) {
-                slide.classList.add('active');
-            } else if (i === (currentIndex - 1 + totalSlides) % totalSlides) {
-                slide.classList.add('prev-slide-flat');
-            } else if (i === (currentIndex + 1) % totalSlides) {
-                slide.classList.add('next-slide-flat');
-            } else {
-                slide.classList.add('adjacent-flat');
-            }
-        });
-    }
-
-    function nextSlide() {
-        currentIndex = (currentIndex + 1) % totalSlides;
-        updateSlideshow();
-    }
-
-    function prevSlide() {
-        currentIndex = (currentIndex - 1 + totalSlides) % totalSlides;
-        updateSlideshow();
-    }
-
-    function activateCurrentSlide() {
-        const activeSlide = slides[currentIndex];
-        const activePlatformName = activeSlide.dataset.platform;
-        const isPlatformEnabled = activeSlide.dataset.isEnabled === "true";
-
-        // Switch to appropriate view
-        document.getElementById('slideshow').style.display = 'none';
-        document.getElementById('header').style.display = 'flex';
-        window.removeEventListener('keydown', handleHomeKeyDown);
-
-        console.log("activePlatformName: ", activePlatformName);
-
-        if (!isPlatformEnabled) {
-            // Open configuration menu / page
-            document.getElementById('galleries').style.display = 'none';
-            openPlatformMenu(activePlatformName);
-        } else {
-            // Open platform page
-            document.getElementById('galleries').style.display = 'flex';
-            initGallery(null, activePlatformName);  // pass NAME
-        }
-    }
-
-
-
-    function handleHomeKeyDown(event) {
-        event.stopPropagation();
-
-        switch (event.key) {
-            case 'ArrowRight': nextSlide(); break;
-            case 'ArrowLeft': prevSlide(); break;
-            case 'Enter': activateCurrentSlide(); break;
-            case 'Escape':
-                // Only handle ESC if we're in slideshow mode
-                if (document.getElementById('slideshow').style.display === 'flex') {
-                    Neutralino.app.exit();
-                }
-                break;
-        }
-    }
-
-    // Event listeners
     slideshow.addEventListener('wheel', (event) => {
         event.preventDefault();
         event.deltaY > 0 ? nextSlide() : prevSlide();
@@ -127,34 +114,32 @@ function initSlideShow(platformToDisplay = 0) {
 
     window.addEventListener('keydown', handleHomeKeyDown);
 
-    // Initial setup
     updateSlideshow();
+}
 
-    // Expose helper so it can be used project-wide
-    window.goToSlideshow = function (platformName) {
+function goToSlideshow(platformName) {
+    console.log("goToSlideshow:", platformName);
 
-        slideshow.style.display = 'flex';
-        document.getElementById('galleries').style.display = 'none';
-        document.getElementById('header').style.display = 'none';
+    slideshow.style.display = 'flex';
+    document.getElementById('galleries').style.display = 'none';
+    document.getElementById('header').style.display = 'none';
 
-        window.addEventListener('keydown', handleHomeKeyDown);
+    window.addEventListener('keydown', handleHomeKeyDown);
 
-        const slides = Array.from(slideshow.querySelectorAll('.slide'));
-        const foundIndex = slides.findIndex(s =>
-            s.dataset.platform === platformName ||
-            s.dataset.name === platformName
-        );
+    const foundIndex = slides.findIndex(s =>
+        s.dataset.platform === platformName ||
+        s.dataset.name === platformName
+    );
 
-        if (foundIndex !== -1) {
-            currentIndex = foundIndex;
-            updateSlideshow();
-        } else {
-            console.warn(`No slide found for platform: ${platformName}`);
-        }
-    };
+    if (foundIndex !== -1) {
+        currentIndex = foundIndex;
+        updateSlideshow();
+    } else {
+        console.warn(`No slide found for platform: ${platformName}`);
+    }
 }
 
 export {
-    initSlideShow
+    initSlideShow,
+    goToSlideshow
 };
-
