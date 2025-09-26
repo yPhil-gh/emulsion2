@@ -38,6 +38,7 @@ function initGallery(galleryIndex, platformName = null) {
     // setupGalleryEvents();
 
     window.addEventListener('keydown', handleGalleryKeyDown);
+    galleries.addEventListener('wheel', onGalleryWheel);
 
 }
 
@@ -243,6 +244,35 @@ async function selectMenuImage(selectedMenuContainer) {
         gameContainers = Array.from(currentPage.querySelectorAll('.game-container'));
     }
     updateGallery();
+}
+
+function onGalleryWheel(event) {
+    event.preventDefault();
+    if (event.shiftKey) {
+        if (event.deltaY > 0) {
+            nextPage();
+        } else if (event.deltaY < 0) {
+            prevPage();
+        }
+    } else {
+        if (event.deltaY > 0) {
+            simulateKeyDown('ArrowDown');
+        } else if (event.deltaY < 0) {
+            simulateKeyDown('ArrowUp');
+        }
+    }
+}
+
+function simulateKeyDown(key) {
+    const keyCode = key === 'ArrowDown' ? 40 : 38;
+    const keyboardEvent = new KeyboardEvent('keydown', {
+        key,
+        code: key,
+        keyCode,
+        which: keyCode,
+        bubbles: true
+    });
+    document.dispatchEvent(keyboardEvent);
 }
 
 export function handleGalleryKeyDown(event) {
