@@ -58,9 +58,6 @@ function closePlatformMenu() {
     // Restore slideshow state
     goToSlideshow(window.currentMenuPlatform);
 
-    // Restore controls
-    updateControlsForGallery();
-
     // Restore gallery keyboard handling
     window.removeEventListener('keydown', handleMenuKeyDown);
     if (typeof handleGalleryKeyDown === 'function') {

@@ -37,14 +37,8 @@ function initGallery(galleryIndex, platformName = null) {
     updateGallery();
     // setupGalleryEvents();
 
-    window.currentMenuPlatform = platformName;
-
-    // Update header
-    updateGalleryHeader();
-
     window.addEventListener('keydown', handleGalleryKeyDown);
 
-    // updateFooterForGallery();
 }
 
 function updateGallery() {
@@ -61,6 +55,7 @@ function updateGallery() {
     const currentPage = galleryPages[currentGalleryPageIndex];
 
     if (currentPage) {
+        window.currentMenuPlatform = currentPage.dataset.platform;
         currentPage.style.display = 'block';
 
         // Get game containers for current page
@@ -81,10 +76,11 @@ function updateGallery() {
     }
 
     updateGalleryHeader();
+    updateFooterForGallery();
 }
 
 function updateFooterForGallery() {
-    console.log("updateControlsForGallery: ");
+    console.log("updateControlsForGallery: ", window.currentMenuPlatform);
     const controls = document.getElementById('controls');
     controls.innerHTML = `
         <div id="dpad" class="control-item">
@@ -103,12 +99,12 @@ function updateFooterForGallery() {
             <img id="west-icon" class="icon" src="images/controls/button-west.png" alt="Button - West">
             <span>Config</span>
         </div>
-        <div id="east" class="control-item back hover" title="Back">
+        <div class="control-item back hover" title="Back">
             <img id="east-icon" class="icon" src="images/controls/button-east.png" alt="Button - East">
             <span>Exit</span>
         </div>
     `;
-    controls.querySelector(".back").addEventListener("click", goToSlideshow(window.currentMenuPlatform));
+    controls.querySelector(".back").addEventListener("click", () => goToSlideshow(window.currentMenuPlatform));
 
 }
 
