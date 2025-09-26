@@ -10,7 +10,6 @@ window.currentMenuPlatform = null;
 
 function openPlatformMenu(platformName) {
     console.log('Opening menu for platform:', platformName);
-    const galleries = document.getElementById('galleries');
 
     const menu = document.getElementById('menu');
     if (!menu) {
@@ -34,7 +33,6 @@ function openPlatformMenu(platformName) {
         menu.appendChild(buildPlatformForm(platformName));
     }
 
-    galleries.style.display = 'none';
     menu.style.display = 'flex';
 
     // Update controls for menu mode
@@ -74,6 +72,7 @@ function closePlatformMenu() {
 }
 
 function handleMenuKeyDown(event) {
+    console.info("HANDLEMENUKEYDOWN!!");
     event.stopPropagation();
 
     switch (event.key) {

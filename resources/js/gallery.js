@@ -43,6 +43,8 @@ function initGallery(galleryIndex, platformName = null) {
 
 function updateGallery() {
 
+    document.getElementById('galleries').style.display = 'flex';
+
     console.info("UPDATEGALLERY: ");
     // Hide all pages
     galleryPages.forEach(page => {
@@ -241,7 +243,17 @@ export function handleGalleryKeyDown(event) {
         }
         break;
 
-    case 'Escape': goToSlideshow(window.currentMenuPlatform); break;
+    case 'Escape':
+        console.info("Escape!", window.isGameMenuOpen, window.currentMenuPlatform);
+
+        if (window.isGameMenuOpen) {
+            closeGameMenu();
+            initGallery(null, window.currentMenuPlatform);
+        } else {
+            goToSlideshow(window.currentMenuPlatform);
+        }
+
+        break;
     case 'i': if (!LB.kioskMode) openGameMenu(currentGameIndex); break;
     }
 
@@ -462,18 +474,28 @@ async function openGameMenu(index) {
     const gameImage = container.querySelector('img');
     const gameName = container.dataset.gameName;
     const menuContainer = document.getElementById('menu');
+    const galleries = document.getElementById('galleries');
     console.log("gameName: ", gameName);
     const platformName = container.dataset.platform;
     const gameMenuContainer = buildGameMenu(gameName, gameImage, platformName);
     menuContainer.appendChild(gameMenuContainer);
     await populateGameMenu(gameMenuContainer, gameName, platformName);
-
+    window.currentMenuPlatform = platformName;
     document.querySelector('header .platform-name').textContent = cleanFileName(gameName);
     document.querySelector('header .item-type').textContent = '';
     document.querySelector('header .item-number').textContent = '';
-
+    galleries.style.display = 'none';
+    window.isGameMenuOpen = true;
     gameContainers = Array.from(document.querySelectorAll('.menu-game-container'));
+}
 
+async function closeGameMenu() {
+
+    const menu = document.getElementById('menu');
+    if (menu) {
+        menu.style.display = 'none';
+        menu.innerHTML = '';
+    }
 
 }
 
