@@ -35,6 +35,10 @@
 
 }
 
+.dummyHeightDiv {
+  min-height: 101px;
+}
+
 #platform-form, .platform-menu-container {
     margin-top: 1em;
     display: flex;

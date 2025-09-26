@@ -35,7 +35,9 @@ function initGallery(galleryIndex, platformName = null) {
     currentGameIndex = 0;
 
     updateGallery();
-    setupGalleryEvents();
+    // setupGalleryEvents();
+
+    window.currentMenuPlatform = platformName;
 
     // Update header
     updateGalleryHeader();
@@ -127,19 +129,19 @@ function setupGalleryEvents() {
     window.addEventListener('keydown', handleGalleryKeyDown);
 
     // Setup game container clicks
-    gameContainers.forEach((container, index) => {
-        container.onclick = null; // Remove previous handlers
-        container.onclick = () => {
-            if (container.classList.contains('empty-platform-game-container')) return;
+    // gameContainers.forEach((container, index) => {
+    //     container.onclick = null; // Remove previous handlers
+    //     container.onclick = () => {
+    //         if (container.classList.contains('empty-platform-game-container')) return;
 
-            if (currentGalleryPageIndex === 0) { // Settings page
-                setupGalleryEvents(container.getAttribute('data-platform'));
-            } else {
-                launchGame(container);
-            }
-        };
+    //         if (currentGalleryPageIndex === 0) { // Settings page
+    //             setupGalleryEvents(container.getAttribute('data-platform'));
+    //         } else {
+    //             launchGame(container);
+    //         }
+    //     };
 
-    });
+    // });
 }
 
 async function ensureDirectory(path) {
@@ -319,6 +321,11 @@ function activateCurrentGame() {
 
     const selectedGame = gameContainers[currentGameIndex];
     if (selectedGame.classList.contains('empty-platform-game-container')) return;
+
+    if (document.getElementById('galleries').style.display !== 'none') {
+        console.error(`Nearly launched a game (${selectedGame}), investigate that`);
+        return;
+    }
 
     if (currentGalleryPageIndex === 0) { // Settings
         openPlatformMenu(selectedGame.getAttribute('data-platform'));
@@ -500,5 +507,6 @@ async function closeGameMenu() {
 }
 
 export {
-    initGallery
+    initGallery,
+    updateGalleryHeader
 };

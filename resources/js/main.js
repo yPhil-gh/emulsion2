@@ -140,12 +140,8 @@ function showMainInterface() {
     const splash = document.getElementById('splash');
     if (splash) splash.style.display = 'none';
 
-    // Show the main emulsion interface
-    const main = document.getElementById('main');
-    if (main) main.style.display = 'flex';
-
-    const header = document.getElementById('header');
-    if (header) header.style.display = 'flex';
+    // const header = document.getElementById('header');
+    // if (header) header.style.display = 'flex';
 
     const footer = document.getElementById('footer');
     if (footer) footer.style.display = 'flex';

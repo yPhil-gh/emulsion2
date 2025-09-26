@@ -339,13 +339,4 @@ function escapeHtml(str) {
         .replace(/'/g, '&#39;');
 }
 
-// Placeholder functions you probably already have elsewhere in the app.
-// Keep them here as no-ops if not present so this file doesn't explode.
-async function loadRecentGames() {
-    if (typeof window.loadRecentGames === 'function') {
-        return window.loadRecentGames();
-    }
-    return []; // fallback
-}
-
 export { buildGalleries };

@@ -61,11 +61,13 @@ function activateCurrentSlide() {
 
 function handleHomeKeyDown(event) {
     event.stopPropagation();
+    event.stopImmediatePropagation();
 
     switch (event.key) {
         case 'ArrowRight': nextSlide(); break;
         case 'ArrowLeft': prevSlide(); break;
         case 'Enter': activateCurrentSlide(); break;
+    case 'a': console.log("AAAAA: "); break;
         case 'Escape':
             if (document.getElementById('slideshow').style.display === 'flex') {
                 Neutralino.app.exit();

@@ -676,7 +676,11 @@ function buildPlatformForm(platformName) {
         return row;
     }
 
+    const dummyHeightDiv = document.createElement('div');
+    dummyHeightDiv.className = 'dummyHeightDiv';
+
     formContainer.appendChild(formContainerButtons);
+    formContainer.appendChild(dummyHeightDiv);
 
     return formContainer;
 }

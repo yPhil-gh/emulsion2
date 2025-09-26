@@ -134,7 +134,6 @@ a:link {
 }
 
 main {
-  display: none;
   /* display: flex; */
   justify-content: center;
   align-items: flex-start;
