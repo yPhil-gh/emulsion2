@@ -41,6 +41,10 @@ function initGallery(galleryIndex, platformName = null) {
 
     // Update header
     updateGalleryHeader();
+
+    window.addEventListener('keydown', handleGalleryKeyDown);
+
+    // updateFooterForGallery();
 }
 
 function updateGallery() {
@@ -77,6 +81,35 @@ function updateGallery() {
     }
 
     updateGalleryHeader();
+}
+
+function updateFooterForGallery() {
+    console.log("updateControlsForGallery: ");
+    const controls = document.getElementById('controls');
+    controls.innerHTML = `
+        <div id="dpad" class="control-item">
+            <img id="dpad-icon" class="icon" src="images/controls/button-dpad-ew.png" alt="Dpad">
+            <span>Browse</span>
+        </div>
+        <div id="shoulders" class="control-item">
+            <img id="shoulders-icon" class="icon" src="images/controls/button-shoulders.png" alt="Shoulders">
+            <span>Browse</span>
+        </div>
+        <div id="south" class="control-item">
+            <img id="south-icon" class="icon" src="images/controls/button-south.png" alt="Button - South">
+            <span>Select</span>
+        </div>
+        <div id="west" class="control-item">
+            <img id="west-icon" class="icon" src="images/controls/button-west.png" alt="Button - West">
+            <span>Config</span>
+        </div>
+        <div id="east" class="control-item back hover" title="Back">
+            <img id="east-icon" class="icon" src="images/controls/button-east.png" alt="Button - East">
+            <span>Exit</span>
+        </div>
+    `;
+    controls.querySelector(".back").addEventListener("click", goToSlideshow(window.currentMenuPlatform));
+
 }
 
 function updateGameSelection() {

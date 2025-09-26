@@ -36,7 +36,7 @@ function openPlatformMenu(platformName) {
     menu.style.display = 'flex';
 
     // Update controls for menu mode
-    updateControlsForMenu();
+    updateFooterForMenu();
 
     // Keyboard handling
     window.removeEventListener('keydown', handleGalleryKeyDown);
@@ -712,7 +712,8 @@ function createButtonsContainer() {
     return container;
 }
 
-function updateControlsForMenu() {
+function updateFooterForMenu() {
+    console.log("updateControlsForMenu: ");
     const controls = document.getElementById('controls');
     controls.innerHTML = `
         <div class="control-item">
@@ -723,37 +724,13 @@ function updateControlsForMenu() {
             <img class="icon" src="images/controls/button-south.png" alt="Select">
             <span>Select</span>
         </div>
-        <div class="control-item">
+        <div class="control-item back hover">
             <img class="icon" src="images/controls/button-east.png" alt="Back">
             <span>Back</span>
         </div>
     `;
-}
+    controls.querySelector(".back").addEventListener("click", closePlatformMenu);
 
-function updateControlsForGallery() {
-    const controls = document.getElementById('controls');
-    controls.innerHTML = `
-        <div id="dpad" class="control-item">
-            <img id="dpad-icon" class="icon" src="images/controls/button-dpad-ew.png" alt="Dpad">
-            <span>Browse</span>
-        </div>
-        <div id="shoulders" class="control-item">
-            <img id="shoulders-icon" class="icon" src="images/controls/button-shoulders.png" alt="Shoulders">
-            <span>Browse</span>
-        </div>
-        <div id="south" class="control-item">
-            <img id="south-icon" class="icon" src="images/controls/button-south.png" alt="Button - South">
-            <span>Select</span>
-        </div>
-        <div id="west" class="control-item">
-            <img id="west-icon" class="icon" src="images/controls/button-west.png" alt="Button - West">
-            <span>Config</span>
-        </div>
-        <div id="east" class="control-item" title="Back">
-            <img id="east-icon" class="icon" src="images/controls/button-east.png" alt="Button - East">
-            <span>Exit</span>
-        </div>
-    `;
 }
 
 export {
