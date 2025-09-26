@@ -94,6 +94,9 @@ function updateGalleryHeader() {
     const platformInfo = getPlatformInfo(platformName);
     const header = document.getElementById('header');
 
+    header.querySelector(".next-link").addEventListener("click", nextPage);
+    header.querySelector(".prev-link").addEventListener("click", prevPage);
+
     // Update platform name
     const platformNameEl = header.querySelector('.platform-name');
     if (platformNameEl) {
