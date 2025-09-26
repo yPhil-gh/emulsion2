@@ -61,11 +61,11 @@ function closePlatformMenu() {
     // Restore controls
     updateControlsForGallery();
 
-    // Restore gallery keyboard handling
-    window.removeEventListener('keydown', handleMenuKeyDown);
-    if (typeof handleGalleryKeyDown === 'function') {
-        window.addEventListener('keydown', handleGalleryKeyDown);
-    }
+    // // Restore gallery keyboard handling
+    // window.removeEventListener('keydown', handleMenuKeyDown);
+    // if (typeof handleGalleryKeyDown === 'function') {
+    //     window.addEventListener('keydown', handleGalleryKeyDown);
+    // }
 
     window.isMenuOpen = false;
     window.currentMenuPlatform = null;

@@ -1,6 +1,6 @@
 import { openPlatformMenu, closePlatformMenu } from './menu-forms.js';
 import { LB } from './global.js';
-import { initGallery } from './gallery.js';
+import { initGallery, closeGameMenu } from './gallery.js';
 
 let slideshow;
 let slides = [];
@@ -50,7 +50,7 @@ function activateCurrentSlide() {
     document.getElementById('header').style.display = 'flex';
 
     if (isPlatformEnabled) {
-        window.removeEventListener('keydown', handleHomeKeyDown);
+        // window.removeEventListener('keydown', handleHomeKeyDown);
         galleries.style.display = 'flex';
         initGallery(null, platformName);
     } else {
@@ -59,12 +59,27 @@ function activateCurrentSlide() {
     }
 }
 
+function getActivePlatform() {
+    const pages = document.querySelectorAll('.page');
+    const visiblePage = Array.from(pages).find(page =>
+        window.getComputedStyle(page).display === 'block'
+    );
+
+    return visiblePage?.dataset.platform || null;
+}
+
 function handleHomeKeyDown(event) {
     const isSlideshowOpen = document.getElementById('slideshow').style.display !== 'none';
     const isGalleryOpen = document.getElementById('slideshow').style.display !== 'none';
     const isMenuOpen = document.getElementById('menu').style.display !== 'none';
     const isPlatformMenuOpen = document.getElementById('menu').style.display !== 'none';
-    const isGameMenuOpen = document.getElementById('menu').style.display !== 'none';
+    const menu = document.getElementById('menu');
+    const isGameMenuOpen = window.getComputedStyle(menu).display !== 'none';
+
+    const activePlatformName = document.querySelector('.page[style*="display: block"]');
+
+    console.log("getActivePlatform(): ", getActivePlatform());
+
     event.stopPropagation();
 
     switch (event.key) {
@@ -75,13 +90,27 @@ function handleHomeKeyDown(event) {
     case 'Enter': activateCurrentSlide(); break;
     case 'a': console.log("AAA!!"); break;
     case 'Escape':
+        console.log("Escape: ");
+        if (isGameMenuOpen) {
+            console.log("isGameMenuOpen: ");
+            closeGameMenu();
+            initGallery(null, window.currentMenuPlatform);
+            return;
+        }
+        if (isGalleryOpen) {
+            console.log("isGalleryOpen: ", isGalleryOpen);
+            goToSlideshow(getActivePlatform());
+            return;
+        }
         if (isPlatformMenuOpen) {
+            console.log("isPlatformMenuOpen: ");
             closePlatformMenu();
             return;
         }
         if (isSlideshowOpen) {
             Neutralino.app.exit();
         }
+        console.log("break: ");
         break;
     }
 }

@@ -1,5 +1,5 @@
 #menu {
-  /* display: none; */
+  display: none;
   width: 100vw;
   /* height: 100vh; */
   position: absolute;
@@ -16,7 +16,7 @@
   opacity: 0; /* Start fully transparent */
   animation: fadeIn 0.3s ease-in-out forwards; /* Apply the fadeIn animation */
 
-  display: flex;
+  /* display: flex; */
 
   /* flex-direction: column; */
   align-items: stretch;
