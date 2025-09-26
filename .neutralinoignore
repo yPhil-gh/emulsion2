@@ -1,0 +1,22 @@
+# Ignore user data and covers (they are mounted at runtime)
+.covers/
+.config/
+*.db
+
+# Ignore build output / dist folders
+dist/
+resources.neu
+*.zip
+
+# Ignore OS / editor files
+.DS_Store
+Thumbs.db
+*.log
+
+# Ignore Git metadata
+.git/
+.gitignore
+
+# Ignore all tmp folders anywhere
+tmp/
+**/tmp/**
