@@ -12,6 +12,10 @@ async function initApp() {
 
     console.log("cliArgs: ", cliArgs.autoSelect);
 
+    if (PLATFORMS.some(p => p.name === cliArgs.autoSelect)) {
+        console.log("cliArgs.autoSelect is valid! ", cliArgs.autoSelect);
+    }
+
     const configPath = await Neutralino.os.getPath('config');
     LB.userDataPath = configPath + '/emulsion2';
 

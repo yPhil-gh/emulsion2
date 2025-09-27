@@ -1,5 +1,5 @@
 import { openPlatformMenu } from './menu-forms.js';
-import { getPlatformInfo } from './platforms.js';
+import { getPlatformInfo, PLATFORMS } from './platforms.js';
 import { cleanFileName } from './utils.js';
 import { LB } from './global.js';
 import { getAllCoverImageUrls } from './backends.js';
@@ -54,7 +54,7 @@ function updateGallery() {
     const currentPage = galleryPages[currentGalleryPageIndex];
 
     if (currentPage) {
-        window.currentMenuPlatform = currentPage.dataset.platform;
+        window.currentPlatformName = currentPage.dataset.platform;
         currentPage.style.display = 'block';
 
         // Get game containers for current page
@@ -74,7 +74,7 @@ function updateGallery() {
         }
     }
 
-    updateGalleryHeader();
+    updateHeader();
     updateFooterForGallery();
 }
 
@@ -102,7 +102,7 @@ function updateFooterForGallery() {
             <span>Exit</span>
         </div>
     `;
-    controls.querySelector(".back").addEventListener("click", () => goToSlideshow(window.currentMenuPlatform));
+    controls.querySelector(".back").addEventListener("click", () => goToSlideshow(window.currentPlatformName));
 
 }
 
@@ -112,12 +112,14 @@ function updateGameSelection() {
     });
 }
 
-function updateGalleryHeader() {
+function getNbGames(platformName) {
+  const platform = PLATFORMS.find(p => p.name === platformName);
+  return platform ? (platform.nbGames || 0) : 0;
+}
 
-    const currentPage = galleryPages[currentGalleryPageIndex];
-    if (!currentPage) return;
+function updateHeader() {
 
-    const platformName = currentPage.getAttribute('data-platform');
+    const platformName = window.currentPlatformName;
     const platformInfo = getPlatformInfo(platformName);
     const header = document.getElementById('header');
 
@@ -126,16 +128,14 @@ function updateGalleryHeader() {
 
     header.querySelector('.platform-name').textContent = platformInfo.name;
 
-    // Update item count
-    const itemNumberEl = header.querySelector('.item-number');
-    const itemTypeEl = header.querySelector('.item-type');
-    if (itemNumberEl && itemTypeEl) {
-        const count = platformName === 'settings' ? gameContainers.length - 1 : gameContainers.length;
-        const itemType = platformName === 'settings' ? 'platform' : 'game';
+    const platform = PLATFORMS.find(p => p.name === platformName);
+    const nbGames = platform ? platform.nbGames : 0;
 
-        itemNumberEl.textContent = count;
-        itemTypeEl.textContent = (count <= 1) ? itemType : `${itemType}s`;
-    }
+    const count = platformName === 'settings' ? PLATFORMS.length : nbGames;
+    const itemType = platformName === 'settings' ? 'platform' : 'game';
+
+    header.querySelector('.item-number').textContent = count;
+    header.querySelector('.item-type').textContent = (count <= 1) ? itemType : `${itemType}s`;
 
     // Update platform image
     const platformImageEl = header.querySelector('.platform-image');
@@ -231,47 +231,55 @@ function simulateKeyDown(key) {
 }
 
 export function handleGalleryKeyDown(event) {
-
     event.stopPropagation();
 
+    // Safety check first
+    if (gameContainers.length === 0) return;
+
     switch (event.key) {
+        case 'ArrowRight':
+            if (event.shiftKey) nextPage();
+            else nextGame();
+            break;
 
-    case 'ArrowRight':
-        if (event.shiftKey) nextPage();
-        else nextGame();
-        break;
+        case 'ArrowLeft':
+            if (event.shiftKey) prevPage();
+            else prevGame();
+            break;
 
-    case 'ArrowLeft':
-        if (event.shiftKey) prevPage();
-        else prevGame();
-        break;
+        case 'ArrowUp': moveGameRow(-1); break;
+        case 'ArrowDown': moveGameRow(1); break;
+        case 'PageUp': moveGameRow(-10); break;
+        case 'PageDown': moveGameRow(10); break;
+        case 'Home': selectGame(0); break;
+        case 'End': selectGame(gameContainers.length - 1); break;
 
-    case 'ArrowUp': moveGameRow(-1); break;
-    case 'ArrowDown': moveGameRow(1); break;
-    case 'PageUp': moveGameRow(-10); break;
-    case 'PageDown': moveGameRow(10); break;
-    case 'Home': selectGame(0); break;
-    case 'End': selectGame(gameContainers.length - 1); break;
-    case 'Enter':
-        const selected = gameContainers[currentGameIndex];
-        if (selected.classList.contains('menu-game-container')) {
-            selectMenuImage(selected);
-        } else {
-            activateCurrentGame();
-        }
-        break;
+        case 'Enter':
+            const selected = gameContainers[currentGameIndex];
+            // Add safety checks
+            if (selected && selected.classList) {
+                if (selected.classList.contains('menu-game-container')) {
+                    selectMenuImage(selected);
+                } else {
+                    activateCurrentGame();
+                }
+            }
+            break;
 
-    case 'Escape':
+        case 'Escape':
+            if (window.isGameMenuOpen) {
+                closeGameMenu();
+                initGallery(null, window.currentPlatformName);
+            } else {
+                goToSlideshow(window.currentPlatformName);
+            }
+            break;
 
-        if (window.isGameMenuOpen) {
-            closeGameMenu();
-            initGallery(null, window.currentMenuPlatform);
-        } else {
-            goToSlideshow(window.currentMenuPlatform);
-        }
-
-        break;
-    case 'i': if (!LB.kioskMode) openGameMenu(currentGameIndex); break;
+        case 'i':
+            if (!LB.kioskMode && gameContainers[currentGameIndex]) {
+                openGameMenu(currentGameIndex);
+            }
+            break;
     }
 
     updateGameSelection();
@@ -527,12 +535,13 @@ async function openGameMenu(index) {
     galleries.style.display = 'none';
     menu.style.display = 'flex';
     await populateGameMenu(gameMenu, gameName, platformName);
-    window.currentMenuPlatform = platformName;
-    document.querySelector('header .platform-name').textContent = cleanFileName(gameName);
-    document.querySelector('header .item-type').textContent = '';
-    document.querySelector('header .item-number').textContent = '';
+    window.currentPlatformName = platformName;
+    // document.querySelector('header .platform-name').textContent = cleanFileName(gameName);
+    // document.querySelector('header .item-type').textContent = '';
+    // document.querySelector('header .item-number').textContent = '';
     window.isGameMenuOpen = true;
     gameContainers = Array.from(document.querySelectorAll('.menu-game-container'));
+    updateHeader();
 }
 
 async function closeGameMenu() {
@@ -543,5 +552,5 @@ async function closeGameMenu() {
 
 export {
     initGallery,
-    updateGalleryHeader
+    updateHeader
 };

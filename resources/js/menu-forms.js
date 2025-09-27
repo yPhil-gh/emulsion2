@@ -1,12 +1,12 @@
 import { updatePreference } from './preferences.js';
 import { setFooterSize, applyTheme } from './utils.js';
 import { getPlatformInfo } from './platforms.js';
-import { handleGalleryKeyDown } from './gallery.js';
+import { handleGalleryKeyDown, updateHeader } from './gallery.js';
 import { LB } from './global.js';
 import { goToSlideshow } from './control.js';
 
 window.isMenuOpen = false;
-window.currentMenuPlatform = null;
+window.currentPlatformName = null;
 
 function openPlatformMenu(platformName) {
 
@@ -42,7 +42,8 @@ function openPlatformMenu(platformName) {
     window.addEventListener('keydown', handleMenuKeyDown);
 
     window.isMenuOpen = true;
-    window.currentMenuPlatform = platformName;
+    window.currentPlatformName = platformName;
+    updateHeader();
 }
 
 function closePlatformMenu() {
@@ -54,7 +55,7 @@ function closePlatformMenu() {
     }
 
     // Restore slideshow state
-    goToSlideshow(window.currentMenuPlatform);
+    goToSlideshow(window.currentPlatformName);
 
     // Restore gallery keyboard handling
     window.removeEventListener('keydown', handleMenuKeyDown);
@@ -63,7 +64,7 @@ function closePlatformMenu() {
     }
 
     window.isMenuOpen = false;
-    window.currentMenuPlatform = null;
+    window.currentPlatformName = null;
 }
 
 function handleMenuKeyDown(event) {

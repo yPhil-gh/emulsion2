@@ -126,6 +126,17 @@ async function buildSettingsPage(preferences, index) {
     return page;
 }
 
+function incrementNbGames(platformName) {
+    console.log("platformName: ", platformName);
+    const platform = PLATFORMS.find(p => p.name === platformName);
+    if (platform) {
+        platform.nbGames++;
+        console.log(`Incremented ${platformName} to ${platform.nbGames}`);
+    } else {
+        console.warn(`Platform not found: ${platformName}`);
+    }
+}
+
 async function buildPlatformPage(platformName, platformPrefs = {}, index) {
     const page = document.createElement('div');
     page.className = 'page';
@@ -162,8 +173,9 @@ async function buildPlatformPage(platformName, platformPrefs = {}, index) {
         // Create entries for each game
         for (let i = 0; i < gameFiles.length; i++) {
             try {
-                const gameEntry = await createGameEntry(platformName, platformPrefs, gameFiles[i], i);
+                const gameEntry = await createGameContainer(platformName, platformPrefs, gameFiles[i], i);
                 pageContent.appendChild(gameEntry);
+                incrementNbGames(platformName);
             } catch (err) {
                 console.error('Error creating game entry for', gameFiles[i], err);
             }
@@ -222,7 +234,7 @@ async function buildRecentsPage(index) {
     return page;
 }
 
-async function createGameEntry(platformName, platformPrefs, gameFilePath, index) {
+async function createGameContainer(platformName, platformPrefs, gameFilePath, index) {
     const gameContainer = document.createElement('div');
     gameContainer.className = 'game-container';
 
