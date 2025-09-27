@@ -2,15 +2,15 @@ import { LB } from './global.js';
 import { loadPreferences } from './preferences.js';
 import { buildGalleries } from './gallery-builder.js';
 import { initSlideShow } from './control.js';
-import { getPlatformInfo } from './platforms.js';
+import { getPlatformInfo, PLATFORMS } from './platforms.js';
 import { setFooterSize, applyTheme } from './utils.js'; // Add these imports
-
-console.info("MAIN! ");
 
 async function initApp() {
 
-    console.info("INITAPP! ");
+    const cliArgs = await handleCliArgs();
     await Neutralino.init();
+
+    console.log("cliArgs: ", cliArgs.autoSelect);
 
     const configPath = await Neutralino.os.getPath('config');
     LB.userDataPath = configPath + '/emulsion2';
@@ -55,6 +55,87 @@ async function initApp() {
     Neutralino.events.on('windowClose', () => {
         Neutralino.app.exit();
     });
+}
+
+// function getArgValue(args, flag) {
+//     // Finds --flag or --flag=value, returns value or true/false
+//     const found = args.find(arg => arg === flag || arg.startsWith(flag + '='));
+//     if (!found) return false;
+//     if (found === flag) return true;
+//     return found.split('=')[1];
+// }
+
+// async function handleCliArgs() {
+//     const args = NL_ARGS || [];
+
+//     return {
+//         open: getArgValue(args, '--open'),
+//         kiosk: args.includes('--kiosk'),
+//         fullScreen: args.includes('--full-screen'),
+//         autoSelect: getArgValue(args, '--auto-select'),
+//         help: args.includes('--help') || args.includes('-h'),
+//         version: args.includes('--version') || args.includes('-v'),
+//         // add more flags as needed
+//     };
+// }
+
+async function handleCliArgs() {
+    // Robustly split NL_ARGS on spaces and commas, trim each part
+    const args = NL_ARGS || [];
+
+    console.log("args: ", args);
+
+    // Load package info once
+    let pkg;
+    try {
+        const res = await fetch('package.json');
+        pkg = await res.json();
+    } catch (err) {
+        console.error('Failed to load package.json', err);
+    }
+
+    // Help/version handling
+    if (args.includes('--help') || args.includes('-h')) {
+        console.log(`
+${pkg.name} v${pkg.version}
+
+Usage:
+  ${pkg.name} [options]
+
+Options:
+  --kiosk                        Read-only / kids mode: No config / settings, disabled platforms hidden.
+  --full-screen                  Start in full screen mode.
+  --auto-select=[platform_name]  Auto-select [platform_name].
+  --help, -h                     Show this help message.
+  --version, -v                  Show Emulsion version
+
+Platform names:
+${PLATFORMS.map(p => p.name).join(' ')} settings recents
+
+`);
+        Neutralino.app.exit();
+    }
+    if (args.includes('--version') || args.includes('-v')) {
+        console.log(`${pkg.name} v${pkg.version}`);
+        Neutralino.app.exit();
+    }
+
+    // Parse all documented CLI options
+    const cliArgs = {
+        kiosk: args.includes('--kiosk'),
+        fullScreen: args.includes('--full-screen'),
+        autoSelect: false,
+        help: args.includes('--help') || args.includes('-h'),
+        version: args.includes('--version') || args.includes('-v'),
+    };
+    // --auto-select=[platform_name]
+    const autoSelectArg = args.find(arg => arg.startsWith('--auto-select='));
+    console.log("autoSelectArg: ", autoSelectArg);
+    if (autoSelectArg) {
+        cliArgs.autoSelect = autoSelectArg.split('=')[1];
+    }
+
+    return cliArgs;
 }
 
 function buildSlideshow(preferences) {

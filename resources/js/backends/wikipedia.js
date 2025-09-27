@@ -69,7 +69,7 @@ export const fetchImages = async (gameName) => {
             const infoData = await infoResp.json();
             const page = Object.values(infoData.query.pages)[0];
             const url = page?.imageinfo?.[0]?.url;
-            if (url) images.push({ url, source: 'Wikipedia' });
+            if (url) images.push({ url, source: 'wikipedia' });
         }
 
         return images;

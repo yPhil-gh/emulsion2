@@ -9,7 +9,6 @@ window.isMenuOpen = false;
 window.currentMenuPlatform = null;
 
 function openPlatformMenu(platformName) {
-    console.log('Opening menu for platform:', platformName);
 
     const menu = document.getElementById('menu');
     if (!menu) {
@@ -47,7 +46,6 @@ function openPlatformMenu(platformName) {
 }
 
 function closePlatformMenu() {
-    console.log('Closing menu');
 
     const menu = document.getElementById('menu');
     if (menu) {
@@ -69,7 +67,6 @@ function closePlatformMenu() {
 }
 
 function handleMenuKeyDown(event) {
-    console.info("HANDLEMENUKEYDOWN!!");
     event.stopPropagation();
 
     switch (event.key) {
@@ -88,8 +85,6 @@ function handleMenuKeyDown(event) {
 }
 
 function buildPrefsFormItem(name, iconName, type, description, shortDescription, value, onChangeFct) {
-
-    console.log("name, iconName, type, description, shortDescription, value, onChangeFct: ", name, iconName, type, description, shortDescription, value, onChangeFct);
 
     let input;
     const group = document.createElement('div');
@@ -128,7 +123,6 @@ function buildPrefsFormItem(name, iconName, type, description, shortDescription,
             const text = document.createTextNode(type.charAt(0).toUpperCase() + type.slice(1));
 
             radio.addEventListener('change', () => {
-                console.log("change!: ");
                 if (radio.checked && onChangeFct) onChangeFct(type);
             });
 
@@ -254,8 +248,6 @@ function buildPreferencesForm() {
             if (numberOfColumns < 2) numberOfColumns = 2;
             else if (numberOfColumns > 12) numberOfColumns = 12;
 
-            console.log("formItems[1].radios.find(r => r.checked)?.value: ", formItems[1].radios.find(r => r.checked)?.value);
-
             await updatePreference('settings', 'numberOfColumns', numberOfColumns);
             await updatePreference('settings', 'footerSize', formItems[1].radios.find(r => r.checked)?.value);
             await updatePreference('settings', 'homeMenuTheme', formItems[2].radios.find(r => r.checked)?.value);
@@ -271,8 +263,6 @@ function buildPreferencesForm() {
         }
     });
 
-
-    console.log("formContainer: ", formContainer);
     return formContainer;
 
 }
@@ -426,8 +416,6 @@ function buildPlatformForm(platformName) {
         }
     });
 
-    console.log("LB.preferences: ", LB.preferences[platformName]);
-
     try {
         const extensions = LB.preferences[platformName]?.extensions || ['.iso'];
         extensions.forEach((ext, index) => {
@@ -556,7 +544,6 @@ function buildPlatformForm(platformName) {
     }
 
     statusCheckBox.addEventListener('change', (event) => {
-        console.log("event: ", event);
         const isNotEnablable = !gamesDirInput.value || !emulatorInput.value;
         const isEnabling = statusCheckBox.checked;
 
@@ -575,7 +562,7 @@ function buildPlatformForm(platformName) {
         if (isEnabling && isNotEnablable) {
             event.preventDefault();
             statusCheckBox.checked = false;
-            console.log("Cannot enable platform - missing requirements");
+            console.error("Cannot enable platform - missing requirements");
         }
         else {
             // Only modify classes and text if requirements are met
@@ -710,7 +697,6 @@ function createButtonsContainer() {
 }
 
 function updateFooterForMenu() {
-    console.log("updateControlsForMenu: ");
     const controls = document.getElementById('controls');
     controls.innerHTML = `
         <div class="control-item">

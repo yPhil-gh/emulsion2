@@ -264,3 +264,7 @@ div.platform-container {
     opacity: 0;
   }
 }
+
+.empty-platform-message {
+  text-align: center;
+}

@@ -26,7 +26,7 @@ export const fetchImages = async (gameName, apiKey, platform = '') => {
 
         return imgSources.map(url => ({
             url,
-            source: 'GiantBomb'
+            source: 'giantbomb'
         }));
 
     } catch (err) {

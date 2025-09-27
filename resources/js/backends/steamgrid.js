@@ -22,7 +22,7 @@ export const fetchImages = async (gameName, APIKey) => {
 
         return gridsData.data.map(img => ({
             url: img.url,
-            source: 'SteamGridDB'
+            source: 'steamgriddb'
         }));
 
     } catch (err) {

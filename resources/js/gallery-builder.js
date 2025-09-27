@@ -303,7 +303,7 @@ function getGameCoverPath(platformName, fileNameWithoutExt) {
 
 function createEmptyPlatformMessage(gamesDir) {
     const message = document.createElement('div');
-    message.className = 'game-container empty-platform-message';
+    message.className = 'empty-platform-message';
     // Let it span a couple columns for nicer layout; adjust in CSS if needed
     message.style.gridColumn = '1 / span 2';
     message.innerHTML = `
