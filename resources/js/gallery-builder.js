@@ -3,6 +3,7 @@ import { openPlatformMenu } from './menu-forms.js';
 import { LB } from './global.js';
 import { getPlatformInfo } from './platforms.js';
 import { getGameImagePath } from './utils.js';
+import { launchGame, openGameMenu } from './gallery.js';
 
 // gallery-builder.js (fixed & portable)
 
@@ -263,10 +264,14 @@ async function buildGameContainer(platformName, platformPrefs, gameFilePath, ind
     gameContainer.appendChild(gameImage);
     gameContainer.appendChild(gameLabel);
 
-    // gameContainer.addEventListener("contextmenu", (e) => {
-    //     e.preventDefault();
-    //     console.info("CONTEXTMENU!");
-    // });
+    gameContainer.addEventListener("contextmenu", (e) => {
+        e.preventDefault();
+        openGameMenu(index);
+    });
+
+    gameContainer.addEventListener("click", () => {
+        launchGame(gameContainer);
+    });
 
     return gameContainer;
 }

@@ -142,21 +142,11 @@ function updateHeader() {
 
 async function downloadImage(imgSrc, platform, gameName) {
     try {
-        // Mounted covers path
-        // const destPath = `${LB.userDataPath}/covers/${platform}/${gameName}.jpg`;
         const extension = imgSrc.split('.').pop();
-
         const destPath = `${LB.preferences[platform].gamesDir}/images/${gameName}.${extension}`;
 
         // NOTE: Don't call createDirectory inside mounted folder
-
-        // https://cdn2.steamgriddb.com/grid/1beb192fcbfba3b6afa17b00ae68605a.png
-
-
-        // console.log("dir: ", `${LB.preferences[platform].gamesDir}/images/${gameName}.${extension}`);
-        console.log("destPath: ", destPath);
-
-        // Use curl to download the image (bypasses CORS)
+        // Use curl to bypass CORS (Use the real filesystem path for curl, not the mounted one)
         const command = `curl -L "${imgSrc}" -o "${destPath}"`;
         const result = await Neutralino.os.execCommand(command);
         if (result.exitCode !== 0) {
@@ -340,6 +330,57 @@ function scrollToCurrentGame() {
             block: 'center'
         });
     }
+    LB.currentGameIndex = currentGameIndex;
+}
+
+function explodeGameContainer(gameContainer) {
+    const numParticles = 12;
+    const container = document.body;
+    const rect = gameContainer.getBoundingClientRect();
+    const colors = ['#FF3B3B', '#FF8C00', '#FFD700', '#32CD32', '#1E90FF', '#8A2BE2'];
+
+    const fragment = document.createDocumentFragment();
+
+    for (let i = 0; i < numParticles; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'explosion-particle';
+
+        // Random size
+        const size = 15 + Math.random() * 25;
+        particle.style.width = size + 'px';
+        particle.style.height = size + 'px';
+        particle.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+
+        // Random starting offset
+        const offsetXStart = (Math.random() - 0.5) * 30; // spread at spawn
+        const offsetYStart = (Math.random() - 0.5) * 30;
+        particle.style.setProperty('--x-start', offsetXStart + 'px');
+        particle.style.setProperty('--y-start', offsetYStart + 'px');
+        particle.style.setProperty('--rotation', `${-360 + Math.random() * 720}deg`);
+
+        // Position relative to viewport
+        particle.style.left = (rect.left + rect.width / 2 - size / 2) + 'px';
+        particle.style.top = (rect.top + rect.height / 2 - size / 2) + 'px';
+
+        // Random direction/distance
+        const angle = Math.random() * 2 * Math.PI;
+        const distance = 120 + Math.random() * 80; // was 80 + Math.random() * 100
+
+        particle.style.setProperty('--x', Math.cos(angle) * distance + 'px');
+        particle.style.setProperty('--y', Math.sin(angle) * distance + 'px');
+
+        // Random scale
+        particle.style.setProperty('--scale', 1.5 + Math.random() * 1.5);
+
+        // Faster particles
+        particle.style.animationDuration = (0.8 + Math.random() * 0.4) + 's';
+
+        particle.addEventListener('animationend', () => particle.remove());
+
+        fragment.appendChild(particle);
+    }
+
+    container.appendChild(fragment);
 }
 
 function activateCurrentGame() {
@@ -348,7 +389,7 @@ function activateCurrentGame() {
     const selectedGame = gameContainers[currentGameIndex];
     if (selectedGame.classList.contains('empty-platform-game-container')) return;
 
-    if (document.getElementById('galleries').style.display !== 'none') {
+    if (document.getElementById('galleries').style.display === 'none') {
         console.error(`Nearly launched a game (${selectedGame}), investigate that`);
         return;
     }
@@ -360,7 +401,10 @@ function activateCurrentGame() {
     }
 }
 
-async function launchGame(gameContainer) {
+export async function launchGame(gameContainer) {
+
+    explodeGameContainer(gameContainer);
+
     const gameName = gameContainer.dataset.gameName;
     const gamePath = gameContainer.dataset.gamePath;
     const emulator = gameContainer.dataset.emulator;
@@ -528,7 +572,7 @@ async function populateGameMenu(gameMenuContainer, gameName, platformName) {
     }
 }
 
-async function openGameMenu(index) {
+export async function openGameMenu(index) {
     const container = gameContainers[index];
     const gameImage = container.querySelector('img');
     const gameName = container.dataset.gameName;
@@ -541,9 +585,6 @@ async function openGameMenu(index) {
     menu.style.display = 'flex';
     await populateGameMenu(gameMenu, gameName, platformName);
     window.currentPlatformName = platformName;
-    // document.querySelector('header .platform-name').textContent = cleanFileName(gameName);
-    // document.querySelector('header .item-type').textContent = '';
-    // document.querySelector('header .item-number').textContent = '';
     window.isGameMenuOpen = true;
     gameContainers = Array.from(document.querySelectorAll('.menu-game-container'));
     updateHeader();

@@ -169,21 +169,6 @@ async function fileExists(path, platform) {
         await Neutralino.filesystem.readFile(path);
         return true;
     } catch (error) {
-        if (platform == "sms") {
-            console.log("NF fsPath: ", path);
-        }
-
-        return false;
-    }
-}
-
-async function testMount(platform) {
-    try {
-        const response = await fetch(`/${platform}/`);
-        console.log(`✅ HTTP mount ${platform} status:`, response.status);
-        return response.ok;
-    } catch (err) {
-        console.log(`❌ HTTP mount ${platform} failed:`, err);
         return false;
     }
 }
@@ -192,7 +177,7 @@ export async function getGameImagePath(platform, gameName) {
     const extensions = ['png', 'jpg', 'jpeg', 'webp'];
 
     for (const ext of extensions) {
-        // Check with real filesystem path
+        // Check with real filesystem path (checking the mounted dir fails)
         const fsPath = `${LB.preferences[platform].gamesDir}/images/${gameName}.${ext}`;
         if (await fileExists(fsPath, platform)) {
             // Return HTTP path
@@ -202,14 +187,12 @@ export async function getGameImagePath(platform, gameName) {
     return null;
 }
 
-async function mountGamesDir(platform, gamesDirPath) {
-
+async function mountDir(platform, path) {
     try {
-        await Neutralino.server.mount(`/${platform}`, gamesDirPath);
+        await Neutralino.server.mount(`/${platform}`, path);
     } catch (err) {
         console.error('Failed to mount covers directory:', err);
     }
-
 }
 
 function getEnabledPlatforms() {
@@ -226,12 +209,8 @@ export async function mountAllGamesDir() {
     const enabledPlatforms = getEnabledPlatforms();
 
     for (const { platform, gamesDir } of enabledPlatforms) {
-        await mountGamesDir(platform, gamesDir);
+        await mountDir(platform, gamesDir);
         console.log(`Mounted ${platform}: ${gamesDir}`);
     }
 }
 
-// function getGameCoverPath(platformName, fileNameWithoutExt) {
-//     const encodedFileName = encodeURIComponent(fileNameWithoutExt) + '.jpg';
-//     return `/covers/${platformName}/${encodedFileName}`;
-// }
