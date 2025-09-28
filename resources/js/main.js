@@ -3,7 +3,7 @@ import { loadPreferences } from './preferences.js';
 import { buildGalleries } from './gallery-builder.js';
 import { initSlideShow } from './control.js';
 import { getPlatformInfo, PLATFORMS } from './platforms.js';
-import { setFooterSize, applyTheme } from './utils.js'; // Add these imports
+import { mountAllGamesDir, setFooterSize, applyTheme } from './utils.js';
 
 async function initApp() {
 
@@ -31,6 +31,10 @@ async function initApp() {
 
     // Load preferences and store in LB.preferences
     LB.preferences = await loadPreferences();
+
+    await mountAllGamesDir();
+
+    console.log("LB.preferences: ", LB.preferences);
 
     // Set basic preferences from LB.preferences
     LB.galleryNumOfCols = LB.preferences.settings.numberOfColumns;

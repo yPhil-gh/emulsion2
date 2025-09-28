@@ -137,19 +137,24 @@ function updateHeader() {
     header.querySelector('.item-number').textContent = count;
     header.querySelector('.item-type').textContent = (count <= 1) ? itemType : `${itemType}s`;
 
-    // Update platform image
-    const platformImageEl = header.querySelector('.platform-image');
-    if (platformImageEl) {
-        platformImageEl.style.backgroundImage = `url('images/platforms/${platformName}.png')`;
-    }
+    header.querySelector('.platform-image').style.backgroundImage = `url('images/platforms/${platformName}.png')`;
 }
 
 async function downloadImage(imgSrc, platform, gameName) {
     try {
         // Mounted covers path
-        const destPath = `${LB.userDataPath}/covers/${platform}/${gameName}.jpg`;
+        // const destPath = `${LB.userDataPath}/covers/${platform}/${gameName}.jpg`;
+        const extension = imgSrc.split('.').pop();
+
+        const destPath = `${LB.preferences[platform].gamesDir}/images/${gameName}.${extension}`;
 
         // NOTE: Don't call createDirectory inside mounted folder
+
+        // https://cdn2.steamgriddb.com/grid/1beb192fcbfba3b6afa17b00ae68605a.png
+
+
+        // console.log("dir: ", `${LB.preferences[platform].gamesDir}/images/${gameName}.${extension}`);
+        console.log("destPath: ", destPath);
 
         // Use curl to download the image (bypasses CORS)
         const command = `curl -L "${imgSrc}" -o "${destPath}"`;

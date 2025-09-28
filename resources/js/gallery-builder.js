@@ -1,7 +1,8 @@
 import { PLATFORMS } from './platforms.js';
 import { openPlatformMenu } from './menu-forms.js';
 import { LB } from './global.js';
-import { getPlatformInfo } from './platforms.js'; // Add this import
+import { getPlatformInfo } from './platforms.js';
+import { getGameImagePath } from './utils.js';
 
 // gallery-builder.js (fixed & portable)
 
@@ -127,11 +128,9 @@ async function buildSettingsPage(preferences, index) {
 }
 
 function incrementNbGames(platformName) {
-    console.log("platformName: ", platformName);
     const platform = PLATFORMS.find(p => p.name === platformName);
     if (platform) {
         platform.nbGames++;
-        console.log(`Incremented ${platformName} to ${platform.nbGames}`);
     } else {
         console.warn(`Platform not found: ${platformName}`);
     }
@@ -173,7 +172,7 @@ async function buildPlatformPage(platformName, platformPrefs = {}, index) {
         // Create entries for each game
         for (let i = 0; i < gameFiles.length; i++) {
             try {
-                const gameEntry = await createGameContainer(platformName, platformPrefs, gameFiles[i], i);
+                const gameEntry = await buildGameContainer(platformName, platformPrefs, gameFiles[i], i);
                 pageContent.appendChild(gameEntry);
                 incrementNbGames(platformName);
             } catch (err) {
@@ -234,7 +233,7 @@ async function buildRecentsPage(index) {
     return page;
 }
 
-async function createGameContainer(platformName, platformPrefs, gameFilePath, index) {
+async function buildGameContainer(platformName, platformPrefs, gameFilePath, index) {
     const gameContainer = document.createElement('div');
     gameContainer.className = 'game-container';
 
@@ -252,7 +251,7 @@ async function createGameContainer(platformName, platformPrefs, gameFilePath, in
     const gameImage = document.createElement('img');
     gameImage.className = 'game-image';
     // Use encoded file:// URL for images (so spaces/parentheses work)
-    gameImage.src = getGameCoverPath(platformName, gameInfo.fileNameWithoutExt);
+    gameImage.src = await getGameImagePath(platformName, gameInfo.fileNameWithoutExt);
     gameImage.onerror = () => {
         gameImage.src = 'images/missing.png';
     };
@@ -263,6 +262,11 @@ async function createGameContainer(platformName, platformPrefs, gameFilePath, in
 
     gameContainer.appendChild(gameImage);
     gameContainer.appendChild(gameLabel);
+
+    // gameContainer.addEventListener("contextmenu", (e) => {
+    //     e.preventDefault();
+    //     console.info("CONTEXTMENU!");
+    // });
 
     return gameContainer;
 }
@@ -308,10 +312,10 @@ async function getGameInfo(platformName, gameFilePath, prefs) {
     return { cleanName, fileNameWithoutExt, launchPath };
 }
 
-function getGameCoverPath(platformName, fileNameWithoutExt) {
-    const encodedFileName = encodeURIComponent(fileNameWithoutExt) + '.jpg';
-    return `/covers/${platformName}/${encodedFileName}`;
-}
+// function getGameCoverPath(platformName, fileNameWithoutExt) {
+//     const encodedFileName = encodeURIComponent(fileNameWithoutExt) + '.jpg';
+//     return `/covers/${platformName}/${encodedFileName}`;
+// }
 
 function createEmptyPlatformMessage(gamesDir) {
     const message = document.createElement('div');

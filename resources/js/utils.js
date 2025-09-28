@@ -1,3 +1,5 @@
+import { LB } from './global.js';
+
 export function setFooterSize(size) {
     console.log("size: ", size);
     const footer = document.getElementById('footer');
@@ -152,3 +154,84 @@ function _titleCase(s) {
         })
         .join(' ');
 }
+
+async function directoryExists(path) {
+    try {
+        await Neutralino.filesystem.readDirectory(path);
+        return true;
+    } catch (error) {
+        return false;
+    }
+}
+
+async function fileExists(path, platform) {
+    try {
+        await Neutralino.filesystem.readFile(path);
+        return true;
+    } catch (error) {
+        if (platform == "sms") {
+            console.log("NF fsPath: ", path);
+        }
+
+        return false;
+    }
+}
+
+async function testMount(platform) {
+    try {
+        const response = await fetch(`/${platform}/`);
+        console.log(`✅ HTTP mount ${platform} status:`, response.status);
+        return response.ok;
+    } catch (err) {
+        console.log(`❌ HTTP mount ${platform} failed:`, err);
+        return false;
+    }
+}
+
+export async function getGameImagePath(platform, gameName) {
+    const extensions = ['png', 'jpg', 'jpeg', 'webp'];
+
+    for (const ext of extensions) {
+        // Check with real filesystem path
+        const fsPath = `${LB.preferences[platform].gamesDir}/images/${gameName}.${ext}`;
+        if (await fileExists(fsPath, platform)) {
+            // Return HTTP path
+            return `/${platform}/images/${encodeURIComponent(gameName)}.${ext}`;
+        }
+    }
+    return null;
+}
+
+async function mountGamesDir(platform, gamesDirPath) {
+
+    try {
+        await Neutralino.server.mount(`/${platform}`, gamesDirPath);
+    } catch (err) {
+        console.error('Failed to mount covers directory:', err);
+    }
+
+}
+
+function getEnabledPlatforms() {
+    const enabled = [];
+    for (const [platform, config] of Object.entries(LB.preferences)) {
+        if (config.isEnabled && config.gamesDir) {
+            enabled.push({ platform, gamesDir: config.gamesDir });
+        }
+    }
+    return enabled;
+}
+
+export async function mountAllGamesDir() {
+    const enabledPlatforms = getEnabledPlatforms();
+
+    for (const { platform, gamesDir } of enabledPlatforms) {
+        await mountGamesDir(platform, gamesDir);
+        console.log(`Mounted ${platform}: ${gamesDir}`);
+    }
+}
+
+// function getGameCoverPath(platformName, fileNameWithoutExt) {
+//     const encodedFileName = encodeURIComponent(fileNameWithoutExt) + '.jpg';
+//     return `/covers/${platformName}/${encodedFileName}`;
+// }
