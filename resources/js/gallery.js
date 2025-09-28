@@ -44,7 +44,9 @@ function initGallery(galleryIndex, platformName = null) {
 function updateGallery() {
 
     document.getElementById('galleries').style.display = 'flex';
+    document.getElementById('menu').style.display = 'none';
 
+    console.log("updateGallery: ");
     // Hide all pages
     galleryPages.forEach(page => {
         page.style.display = 'none';
@@ -82,7 +84,7 @@ function updateFooterForGallery() {
     const controls = document.getElementById('controls');
     controls.innerHTML = `
         <div id="dpad" class="control-item">
-            <img id="dpad-icon" class="icon" src="images/controls/button-dpad-ew.png" alt="Dpad">
+            <img id="dpad-icon" class="icon" src="images/controls/button-dpad-nesw.png" alt="Dpad">
             <span>Browse</span>
         </div>
         <div id="shoulders" class="control-item">
