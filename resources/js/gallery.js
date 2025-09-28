@@ -47,27 +47,20 @@ function updateGallery() {
     document.getElementById('menu').style.display = 'none';
 
     console.log("updateGallery: ");
-    // Hide all pages
     galleryPages.forEach(page => {
         page.style.display = 'none';
     });
 
-    // Show current page
     const currentPage = galleryPages[currentGalleryPageIndex];
 
     if (currentPage) {
         window.currentPlatformName = currentPage.dataset.platform;
         currentPage.style.display = 'block';
 
-        // Get game containers for current page
         gameContainers = Array.from(currentPage.querySelectorAll('.game-container'));
 
-        // ...existing code...
-
-        // Update selection
         updateGameSelection();
 
-        // Scroll to selected game
         if (gameContainers[currentGameIndex]) {
             gameContainers[currentGameIndex].scrollIntoView({
                 behavior: 'smooth',
@@ -145,10 +138,13 @@ function updateHeader() {
 async function downloadImage(imgSrc, platform, gameName) {
     try {
         const extension = imgSrc.split('.').pop();
-        const destPath = `${LB.preferences[platform].gamesDir}/images/${gameName}.${extension}`;
+        const imagesDir = `${LB.preferences[platform].gamesDir}/images`;
+        const destPath = `${imagesDir}/${gameName}.${extension}`;
 
-        // NOTE: Don't call createDirectory inside mounted folder
-        // Use curl to bypass CORS (Use the real filesystem path for curl, not the mounted one)
+        // Create the images directory if it doesn't exist
+        await Neutralino.filesystem.createDirectory(imagesDir, { recursive: true });
+
+        // Use curl to download
         const command = `curl -L "${imgSrc}" -o "${destPath}"`;
         const result = await Neutralino.os.execCommand(command);
         if (result.exitCode !== 0) {
@@ -163,6 +159,7 @@ async function downloadImage(imgSrc, platform, gameName) {
         return null;
     }
 }
+
 
 async function selectMenuImage(selectedMenuContainer) {
     const img = selectedMenuContainer.querySelector('img.game-image');
