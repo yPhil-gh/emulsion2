@@ -137,6 +137,10 @@ function updateHeader() {
 
 async function downloadImage(imgSrc, platform, gameName) {
     try {
+
+        console.log("downloadImage platform:", platform);
+        console.log("LB.preferences:", LB.preferences);
+
         const extension = imgSrc.split('.').pop();
         const imagesDir = `${LB.preferences[platform].gamesDir}/images`;
         const destPath = `${imagesDir}/${gameName}.${extension}`;
@@ -160,13 +164,14 @@ async function downloadImage(imgSrc, platform, gameName) {
     }
 }
 
-
 async function selectMenuImage(selectedMenuContainer) {
     const img = selectedMenuContainer.querySelector('img.game-image');
     if (!img) return;
 
     const gameName = selectedMenuContainer.dataset.gameName;
     const platformName = selectedMenuContainer.dataset.platformName;
+
+    console.log("img.src, platformName, gameName: ", img.src, platformName, gameName);
 
     // Save the chosen image
     const savedPath = await downloadImage(img.src, platformName, gameName);
@@ -460,13 +465,13 @@ function createManualSelectButton(gameName, platformName, imgElem) {
 }
 
 function buildGameMenu(gameName, image, platformName) {
-    const gameMenuContainer = document.createElement('div');
-    gameMenuContainer.classList.add('page-content');
-    gameMenuContainer.style.gridTemplateColumns = `repeat(${LB.galleryNumOfCols}, 1fr)`;
+    const pageContent = document.createElement('div');
+    pageContent.classList.add('page-content');
+    pageContent.style.gridTemplateColumns = `repeat(${LB.galleryNumOfCols}, 1fr)`;
 
-    const currentImageContainer = document.createElement('div');
-    currentImageContainer.classList.add('menu-game-container');
-    currentImageContainer.style.height = 'calc(120vw / ' + LB.galleryNumOfCols + ')';
+    const menuGameContainer = document.createElement('div');
+    menuGameContainer.classList.add('menu-game-container');
+    menuGameContainer.style.height = 'calc(120vw / ' + LB.galleryNumOfCols + ')';
 
     const currentImage = document.createElement('img');
     currentImage.src = image.src;
@@ -481,19 +486,18 @@ function buildGameMenu(gameName, image, platformName) {
 
     gameLabel.appendChild(manualBtn);
 
-    currentImageContainer.appendChild(currentImage);
-    currentImageContainer.appendChild(gameLabel);
-
-    gameMenuContainer.appendChild(currentImageContainer);
+    menuGameContainer.appendChild(currentImage);
+    menuGameContainer.appendChild(gameLabel);
 
     const dummyGameContainer = document.createElement('div');
     dummyGameContainer.classList.add('menu-game-container', 'dummy-game-container');
     dummyGameContainer.style.height = 'calc(120vw / ' + LB.galleryNumOfCols + ')';
     dummyGameContainer.innerHTML = `Searching...`;
 
-    gameMenuContainer.appendChild(dummyGameContainer);
+    pageContent.appendChild(menuGameContainer);
+    pageContent.appendChild(dummyGameContainer);
 
-    return gameMenuContainer;
+    return pageContent;
 }
 
 async function populateGameMenu(gameMenuContainer, gameName, platformName) {
@@ -563,6 +567,11 @@ async function populateGameMenu(gameMenuContainer, gameName, platformName) {
             container.appendChild(icon);
 
             gameMenuContainer.appendChild(container);
+
+            gameMenuContainer.addEventListener("click", () => {
+                console.log("CLICK!");
+                selectMenuImage(container);
+            });
 
             img.onload = () => requestAnimationFrame(() => { img.style.opacity = '1'; });
             img.onerror = () => console.warn('Failed to load image:', url);
