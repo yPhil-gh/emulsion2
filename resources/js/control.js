@@ -115,6 +115,13 @@ function initSlideShow(platformToDisplay = 0) {
                 activateCurrentSlide();
             }
         });
+
+        slide.addEventListener("contextmenu", (event) => {
+            event.preventDefault();
+            console.log("event.currentTarget: ", event.currentTarget.dataset.platform);
+            openPlatformMenu(event.currentTarget.dataset.platform);
+        });
+
     });
 
     window.addEventListener('keydown', handleHomeKeyDown);

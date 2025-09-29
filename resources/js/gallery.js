@@ -37,7 +37,7 @@ function initGallery(galleryIndex, platformName = null) {
 
     // setupGalleryEvents();
 
-    window.addEventListener('keydown', handleGalleryKeyDown);
+    window.addEventListener('keydown', onGalleryKeyDown);
     galleries.addEventListener('wheel', onGalleryWheel);
 
     updateGallery();
@@ -229,7 +229,7 @@ export function simulateKeyDown(key) {
     document.dispatchEvent(keyboardEvent);
 }
 
-export function handleGalleryKeyDown(event) {
+export function onGalleryKeyDown(event) {
     event.stopPropagation();
 
     switch (event.key) {
@@ -249,7 +249,7 @@ export function handleGalleryKeyDown(event) {
     case 'PageDown': moveGameRow(10); break;
     case 'Home': selectGame(0); break;
     case 'End': selectGame(gameContainers.length - 1); break;
-    case 'a': console.log("handleGalleryKeyDown: "); break;
+    case 'a': console.log("onGalleryKeyDown: "); break;
 
     case 'Enter':
         const selected = gameContainers[currentGameIndex];
