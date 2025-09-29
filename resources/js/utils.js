@@ -1,7 +1,6 @@
 import { LB } from './global.js';
 
 export function setFooterSize(size) {
-    console.log("size: ", size);
     const footer = document.getElementById('footer');
     if (footer) {
         footer.className = `footer-${size}`;
@@ -9,7 +8,6 @@ export function setFooterSize(size) {
 }
 
 export function applyTheme(theme) {
-    console.log("APPLYTHEME!!! ");
     const body = document.querySelector('body');
     const menu = document.getElementById('menu');
 

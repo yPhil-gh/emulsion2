@@ -13,8 +13,6 @@ let galleryPages = [];
 
 function initGallery(galleryIndex, platformName = null) {
 
-    console.log("initGallery: ");
-
     const galleries = document.getElementById('galleries');
     galleryPages = Array.from(galleries.querySelectorAll('.page'));
 
@@ -48,7 +46,6 @@ function updateGallery() {
     document.getElementById('galleries').style.display = 'flex';
     document.getElementById('menu').style.display = 'none';
 
-    console.log("updateGallery: ");
     galleryPages.forEach(page => {
         page.style.display = 'none';
     });
@@ -140,9 +137,6 @@ function updateHeader() {
 async function downloadImage(imgSrc, platform, gameName) {
     try {
 
-        console.log("downloadImage platform:", platform);
-        console.log("LB.preferences:", LB.preferences);
-
         const extension = imgSrc.split('.').pop();
         const imagesDir = `${LB.preferences[platform].gamesDir}/images`;
         const destPath = `${imagesDir}/${gameName}.${extension}`;
@@ -178,8 +172,6 @@ async function selectMenuImage(selectedMenuContainer) {
 
     const savedPath = await downloadImage(img.src, platformName, gameName);
     if (!savedPath) return;
-
-    console.log("savedPath: ", savedPath);
 
     const extension = savedPath.split('.').pop();
 
@@ -249,7 +241,6 @@ export function onGalleryKeyDown(event) {
     case 'PageDown': moveGameRow(10); break;
     case 'Home': selectGame(0); break;
     case 'End': selectGame(gameContainers.length - 1); break;
-    case 'a': console.log("onGalleryKeyDown: "); break;
 
     case 'Enter':
         const selected = gameContainers[currentGameIndex];
@@ -296,7 +287,6 @@ function prevGame() {
 }
 
 function nextPage() {
-    console.log("nextPage: ");
     currentGalleryPageIndex = (currentGalleryPageIndex + 1) % galleryPages.length;
     currentGameIndex = 0;
     updateGallery();
@@ -587,9 +577,6 @@ async function populateGameMenu(gameMenuContainer, gameName, platformName) {
             // Add the image
             container.appendChild(img);
 
-            // Example usage:
-            console.log(`From ${sourcesMeta.steamgriddb.name}`); // "SteamGridDB"
-
             // steam-square, bomb wikipedia-w
             // steamgriddb, giantbomb, wikipedia
 
@@ -611,7 +598,6 @@ async function populateGameMenu(gameMenuContainer, gameName, platformName) {
             gameMenuContainer.appendChild(container);
 
             gameMenuContainer.addEventListener("click", () => {
-                console.log("CLICK!");
                 selectMenuImage(container);
             });
 

@@ -13,10 +13,7 @@ async function initApp() {
     const cliArgs = await handleCliArgs();
     await Neutralino.init();
 
-    console.log("cliArgs: ", cliArgs.autoSelect);
-
     if (PLATFORMS.some(p => p.name === cliArgs.autoSelect)) {
-        console.log("cliArgs.autoSelect is valid! ", cliArgs.autoSelect);
         LB.autoSelect = cliArgs.autoSelect;
     }
 
@@ -60,7 +57,7 @@ async function initApp() {
 
     initSlideShow(LB.autoSelect || 0);
 
-    showMainInterface();
+    emulsify();
 
     Neutralino.events.on('windowClose', () => {
         Neutralino.app.exit();
@@ -92,8 +89,6 @@ async function initApp() {
 async function handleCliArgs() {
     // Robustly split NL_ARGS on spaces and commas, trim each part
     const args = NL_ARGS || [];
-
-    console.log("args: ", args);
 
     // Load package info once
     let pkg;
@@ -140,7 +135,6 @@ ${PLATFORMS.map(p => p.name).join(' ')} settings recents
     };
     // --auto-select=[platform_name]
     const autoSelectArg = args.find(arg => arg.startsWith('--auto-select='));
-    console.log("autoSelectArg: ", autoSelectArg);
     if (autoSelectArg) {
         cliArgs.autoSelect = autoSelectArg.split('=')[1];
     }
@@ -206,8 +200,6 @@ function buildHomeSlide(platformName, preferences) {
     slide.setAttribute('data-name', platformName);
     slide.setAttribute('data-platform', platformName);
 
-    console.log("platformName: ", platformName);
-
     // --- Special cases first ---
     if (platformName === 'recents') {
         slide.setAttribute('data-is-enabled', true);
@@ -234,15 +226,10 @@ function buildHomeSlide(platformName, preferences) {
 }
 
 
-function showMainInterface() {
-
-    console.info("SHOWMAININTERFACE!");
+function emulsify() {
 
     const splash = document.getElementById('splash');
     if (splash) splash.style.display = 'none';
-
-    // const header = document.getElementById('header');
-    // if (header) header.style.display = 'flex';
 
     const footer = document.getElementById('footer');
     if (footer) footer.style.display = 'flex';
