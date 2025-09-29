@@ -1,10 +1,5 @@
+import { LB } from './global.js';
 import { PLATFORMS } from './platforms.js';
-let preferencesFilePath = '';
-
-async function getPreferencesPath() {
-    const configPath = await Neutralino.os.getPath('config');
-    preferencesFilePath = configPath + '/emulsion2/preferences.json'; // CHANGED to emulsion2
-}
 
 async function fileExists(path) {
     try {
@@ -25,13 +20,12 @@ async function directoryExists(path) {
 }
 
 async function loadPreferences() {
-    await getPreferencesPath();
 
     try {
-        const fileExistsResult = await fileExists(preferencesFilePath);
+        const fileExistsResult = await fileExists(LB.prefsFilePath);
 
         if (fileExistsResult) {
-            const preferencesFileContent = await Neutralino.filesystem.readFile(preferencesFilePath);
+            const preferencesFileContent = await Neutralino.filesystem.readFile(LB.prefsFilePath);
 
             try {
                 const preferences = JSON.parse(preferencesFileContent);
@@ -116,17 +110,15 @@ async function createDefaultPreferences() {
 
 async function savePreferences(preferences) {
     try {
-        const configPath = await Neutralino.os.getPath('config');
-        const emulsion2Dir = configPath + '/emulsion2'; // CHANGED to emulsion2
 
-        const dirExists = await directoryExists(emulsion2Dir);
+        const dirExists = await directoryExists(LB.userDataPath);
 
         if (!dirExists) {
-            await Neutralino.filesystem.createDirectory(emulsion2Dir);
+            await Neutralino.filesystem.createDirectory(LB.userDataPath);
         }
 
-        await Neutralino.filesystem.writeFile(preferencesFilePath, JSON.stringify(preferences, null, 2));
-        console.log('Preferences saved to:', preferencesFilePath);
+        await Neutralino.filesystem.writeFile(LB.prefsFilePath, JSON.stringify(preferences, null, 2));
+        console.log('Preferences saved to:', LB.prefsFilePath);
         return true;
     } catch (error) {
         console.error('Error saving preferences:', error);

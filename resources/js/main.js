@@ -20,7 +20,12 @@ async function initApp() {
     const configPath = await Neutralino.os.getPath('config');
     LB.userDataPath = configPath + '/emulsion2';
 
+    LB.prefsFilePath = LB.userDataPath + '/preferences.json';
+
+    LB.playHistoryFilePath = LB.userDataPath + '/play-history.json';
+
     const coversPath = `${LB.userDataPath}/covers`;
+
     try {
         await Neutralino.server.mount('/covers', coversPath);
     } catch (err) {

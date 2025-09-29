@@ -182,7 +182,7 @@ async function buildPlatformPage(platform, platformPrefs = {}, index) {
         }
     }
 
-    document.getElementById('loading-platform-name').textContent = getPlatformInfo(platform).name;
+    document.getElementById('splash-loading-platform-name').textContent = getPlatformInfo(platform).name;
 
     page.appendChild(pageContent);
     return page;

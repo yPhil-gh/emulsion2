@@ -404,24 +404,65 @@ function activateCurrentGame() {
 }
 
 export async function launchGame(gameContainer) {
-
     explodeGameContainer(gameContainer);
 
+    const fileName = gameContainer.dataset.fileName;
+    const filePath = gameContainer.dataset.gamePath;
     const gameName = gameContainer.dataset.gameName;
-    const gamePath = gameContainer.dataset.gamePath;
     const emulator = gameContainer.dataset.emulator;
     const emulatorArgs = gameContainer.dataset.emulatorArgs || '';
+    const platform = gameContainer.dataset.platform;
 
-    const command = `${emulator} ${emulatorArgs} "${gamePath}"`;
+    const entry = {
+        fileName,
+        filePath,
+        gameName,
+        emulator,
+        emulatorArgs,
+        platform,
+        date: new Date().toISOString()
+    };
+
+    const command = `${emulator} ${emulatorArgs} "${filePath}"`;
 
     try {
-        // execCommand is async; capture stdout/stderr in callback
-        await Neutralino.os.execCommand(command, (output) => {
-        });
+        // Launch game
+        await Neutralino.os.execCommand(command);
+
+        // Save play history
+        await savePlayHistory(entry);
     } catch (err) {
-        console.error('execCommand failed:', err);
+        console.error("execCommand failed:", err);
     }
 }
+
+async function savePlayHistory(entry) {
+    try {
+        // Read existing file
+        let history = [];
+        try {
+            const content = await Neutralino.filesystem.readFile(LB.playHistoryFilePath);
+            history = JSON.parse(content);
+        } catch (err) {
+            // File may not exist yet → ignore
+            history = [];
+        }
+
+        // Append new entry
+        history.push(entry);
+
+        // Write back
+        await Neutralino.filesystem.writeFile(
+            LB.playHistoryFilePath,
+            JSON.stringify(history, null, 2)
+        );
+
+        console.log(`📜 Saved play history: ${entry.gameName}`);
+    } catch (err) {
+        console.error("❌ Failed to save play history:", err);
+    }
+}
+
 
 function createManualSelectButton(gameName, platformName, imgElem) {
     const btn = document.createElement('button');
