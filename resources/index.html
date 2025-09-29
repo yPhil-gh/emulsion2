@@ -82,6 +82,24 @@
             </div>
         </div>
 
+        <!-- About Modal -->
+        <div id="aboutModal" class="modal">
+            <div class="modal-content">
+                <div class="about-header">
+                    <img src="images/icon.png" alt="App icon" style="width: 128px; margin: auto;">
+                    <h2>Emulsion <span id="aboutCurrentVersion">x.y.z</span></h2>
+                </div>
+                <h3 id="aboutUpToDate" style="display:none;">✨ Up to date!</h3>
+                <h3 id="aboutUpdateAvailable" style="display:none;">
+                    <button id="aboutUpgradeBtn" class="button">✨ <span id="aboutLatestVersion"></span> is available!</button>
+                </h3>
+                <div class="modal-buttons">
+                    <button class="button donate" id="aboutDonateBtn">Donate</button>
+                    <button class="button close" id="aboutCloseBtn">OK</button>
+                </div>
+            </div>
+        </div>
+
         <script src="js/neutralino.js"></script>
         <script type="module" src="js/main.js"></script>
 

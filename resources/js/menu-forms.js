@@ -3,14 +3,12 @@ import { setFooterSize, applyTheme } from './utils.js';
 import { getPlatformInfo } from './platforms.js';
 import { onGalleryKeyDown, updateHeader } from './gallery.js';
 import { LB } from './global.js';
-import { goToSlideshow, onHomeKeyDown } from './slideshow.js';
+import { initSlideShow, onHomeKeyDown } from './slideshow.js';
 
 window.isMenuOpen = false;
 window.currentPlatformName = null;
 
 function openPlatformMenu(platformName) {
-
-    console.log("openPlatformMenu, platformName: ", platformName);
 
     const menu = document.getElementById('menu');
     menu.innerHTML = '';
@@ -32,8 +30,6 @@ function openPlatformMenu(platformName) {
     window.removeEventListener('keydown', onGalleryKeyDown);
     window.addEventListener('keydown', onMenuKeyDown);
 
-    console.log("onMenuKeyDown: ");
-
     window.isMenuOpen = true;
     window.currentPlatformName = platformName;
     updateHeader();
@@ -48,7 +44,7 @@ function closePlatformMenu() {
     }
 
     // Restore slideshow state
-    goToSlideshow(window.currentPlatformName);
+    initSlideShow(window.currentPlatformName);
 
     // Restore gallery keyboard handling
     window.removeEventListener('keydown', onMenuKeyDown);
@@ -235,7 +231,9 @@ function buildPreferencesForm() {
 
     aboutButton.addEventListener('click', async () => {
         // Neutralino open URL to local or remote about page
-        await Neutralino.os.open(LB.baseDir + '/about.html');
+        console.log("/about.html: ");
+        showAbout();
+        // await Neutralino.os.open(LB.baseDir + '/about.html');
     });
 
     saveButton.addEventListener('click', async () => {
@@ -261,6 +259,70 @@ function buildPreferencesForm() {
 
     return formContainer;
 
+}
+
+async function showAbout() {
+  const currentVersion = NL_APPVERSION; // Neutralino gives you this from manifest.json
+
+  let latestVersion = 'Error fetching latest';
+  try {
+    const response = await fetch('https://api.github.com/repos/yPhil-gh/Emulsion/releases/latest');
+    const data = await response.json();
+    latestVersion = data.tag_name.replace(/^v/, ''); // strip "v"
+  } catch (err) {
+    console.error('Failed to fetch GitHub release:', err);
+  }
+
+  openAboutModal(currentVersion, latestVersion);
+}
+
+let isAboutOpen = false;
+
+function openAboutModal(currentVersion, latestVersion) {
+    const modal = document.getElementById('aboutModal');
+    const current = document.getElementById('aboutCurrentVersion');
+    const latest = document.getElementById('aboutLatestVersion');
+    const upToDate = document.getElementById('aboutUpToDate');
+    const updateAvailable = document.getElementById('aboutUpdateAvailable');
+
+    current.textContent = currentVersion;
+    latest.textContent = latestVersion;
+
+    if (latestVersion && latestVersion !== currentVersion && latestVersion !== 'Error fetching latest') {
+        upToDate.style.display = 'none';
+        updateAvailable.style.display = 'block';
+    } else {
+        upToDate.style.display = 'block';
+        updateAvailable.style.display = 'none';
+    }
+
+    modal.style.display = 'flex';
+    isAboutOpen = true;
+
+    // Wire buttons
+    document.getElementById('aboutDonateBtn').onclick = () => {
+        Neutralino.os.open('https://yphil.gitlab.io/ext/support.html');
+    };
+    document.getElementById('aboutUpgradeBtn').onclick = () => {
+        Neutralino.os.open('https://github.com/yPhil-gh/Emulsion/releases');
+    };
+    document.getElementById('aboutCloseBtn').onclick = closeAboutModal;
+
+    // Optional: trap Escape key
+    document.addEventListener('keydown', handleAboutKey, true);
+}
+
+function closeAboutModal() {
+    const modal = document.getElementById('aboutModal');
+    modal.style.display = 'none';
+    isAboutOpen = false;
+    document.removeEventListener('keydown', handleAboutKey, true);
+}
+
+function handleAboutKey(e) {
+    if(e.key === 'Escape') {
+        closeAboutModal();
+    }
 }
 
 

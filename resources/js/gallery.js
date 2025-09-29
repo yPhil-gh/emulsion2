@@ -3,7 +3,7 @@ import { getPlatformInfo, PLATFORMS } from './platforms.js';
 import { cleanFileName } from './utils.js';
 import { LB } from './global.js';
 import { getAllCoverImageUrls } from './backends.js';
-import { goToSlideshow } from './slideshow.js';
+import { initSlideShow } from './slideshow.js';
 
 // Global gallery state
 let currentGalleryPageIndex = 0;
@@ -11,7 +11,7 @@ let currentGameIndex = 0;
 let gameContainers = [];
 let galleryPages = [];
 
-function initGallery(galleryIndex, platformName = null) {
+export function initGallery(galleryIndex, platformName = null) {
 
     const galleries = document.getElementById('galleries');
     galleryPages = Array.from(galleries.querySelectorAll('.page'));
@@ -96,7 +96,7 @@ function updateFooterForGallery() {
             <span>Exit</span>
         </div>
     `;
-    controls.querySelector(".back").addEventListener("click", () => goToSlideshow(window.currentPlatformName));
+    controls.querySelector(".back").addEventListener("click", () => initSlideShow(window.currentPlatformName));
 
 }
 
@@ -111,7 +111,7 @@ function getNbGames(platformName) {
   return platform ? (platform.nbGames || 0) : 0;
 }
 
-function updateHeader() {
+export function updateHeader() {
 
     const platformName = window.currentPlatformName;
     const platformInfo = getPlatformInfo(platformName);
@@ -259,7 +259,7 @@ export function onGalleryKeyDown(event) {
             closeGameMenu();
             initGallery(null, window.currentPlatformName);
         } else {
-            goToSlideshow(window.currentPlatformName);
+            initSlideShow(window.currentPlatformName);
         }
         break;
 
@@ -631,8 +631,3 @@ async function closeGameMenu() {
     menu.style.display = 'none';
     menu.innerHTML = '';
 }
-
-export {
-    initGallery,
-    updateHeader
-};

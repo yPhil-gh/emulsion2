@@ -169,3 +169,7 @@ p.name {
   outline: 2px solid var(--color-button-on);
   outline-offset: 2px;
 }
+
+.about-header {
+  text-align: center;
+}
