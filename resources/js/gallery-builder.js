@@ -2,7 +2,6 @@ import { PLATFORMS } from './platforms.js';
 import { openPlatformMenu } from './menu-forms.js';
 import { LB } from './global.js';
 import { getPlatformInfo } from './platforms.js';
-import { getGameImagePath } from './utils.js';
 import { launchGame, openGameMenu } from './gallery.js';
 
 // gallery-builder.js (fixed & portable)
@@ -98,7 +97,6 @@ async function buildSettingsPage(preferences, index) {
     pageContent.className = 'page-content';
     pageContent.style.gridTemplateColumns = `repeat(${LB.galleryNumOfCols}, 1fr)`;
 
-    // 1️⃣ Prepend the special "settings" container
     const settingsContainer = buildSettingsPageContainer({
         platform: 'settings',
         vendor: 'Emulsion',
@@ -110,7 +108,6 @@ async function buildSettingsPage(preferences, index) {
     });
     pageContent.appendChild(settingsContainer);
 
-    // 2️⃣ Add normal platforms
     PLATFORMS.forEach((platform, i) => {
         const info = getPlatformInfo(platform.name);
         const platformContainer = buildSettingsPageContainer({
@@ -182,7 +179,11 @@ async function buildPlatformPage(platform, platformPrefs = {}, index) {
         }
     }
 
-    document.getElementById('loading-platform-name').textContent = platform;
+    const platformInfo = getPlatformInfo(platform);
+
+    console.log("Loading ", platformInfo.name);
+
+    document.getElementById('loading-platform-name').textContent = platformInfo.name;
 
     page.appendChild(pageContent);
     return page;
@@ -220,7 +221,7 @@ async function buildRecentsPage(index) {
 
         const gameImage = document.createElement('img');
         gameImage.className = 'game-image';
-        gameImage.src = getGameCoverPath(recent.platform, recent.fileName);
+        // gameImage.src = getGameCoverPath(recent.platform, recent.fileName);
         gameImage.onerror = () => { gameImage.src = 'images/missing.png'; };
 
         const gameLabel = document.createElement('div');
@@ -236,16 +237,16 @@ async function buildRecentsPage(index) {
     return page;
 }
 
-async function buildGameContainer(platformName, platformPrefs, gameFilePath, index) {
+async function buildGameContainer(platform, platformPrefs, gameFilePath, index) {
     const gameContainer = document.createElement('div');
     gameContainer.className = 'game-container';
 
     // Get game info
-    const gameInfo = await getGameInfo(platformName, gameFilePath, platformPrefs);
+    const gameInfo = getGameInfo(platform, gameFilePath, platformPrefs);
 
     gameContainer.title = `${gameInfo.cleanName}\n\nClick to launch with ${platformPrefs.emulator || 'unknown'}`;
     gameContainer.setAttribute('data-game-name', gameInfo.fileNameWithoutExt);
-    gameContainer.setAttribute('data-platform', platformName);
+    gameContainer.setAttribute('data-platform', platform);
     gameContainer.setAttribute('data-emulator', platformPrefs.emulator || '');
     gameContainer.setAttribute('data-emulator-args', platformPrefs.emulatorArgs || '');
     gameContainer.setAttribute('data-game-path', gameInfo.launchPath);
@@ -253,10 +254,18 @@ async function buildGameContainer(platformName, platformPrefs, gameFilePath, ind
 
     const gameImage = document.createElement('img');
     gameImage.className = 'game-image';
-    // Use encoded file:// URL for images (so spaces/parentheses work)
-    gameImage.src = await getGameImagePath(platformName, gameInfo.fileNameWithoutExt);
+
+    const basePath = `/${platform}/images/${encodeURIComponent(gameInfo.fileNameWithoutExt)}`;
+    gameImage.src = `${basePath}.jpg`;
+
     gameImage.onerror = () => {
-        gameImage.src = 'images/missing.png';
+        if (gameImage.src.endsWith('.jpg')) {
+            // Retry with PNG if JPG is missing
+            gameImage.src = `${basePath}.png`;
+        } else {
+            // Fallback to default "missing" image
+            gameImage.src = 'images/missing.png';
+        }
     };
 
     const gameLabel = document.createElement('div');
@@ -304,7 +313,7 @@ async function scanForGameFiles(gamesDir, extensions) {
     }
 }
 
-async function getGameInfo(platformName, gameFilePath, prefs) {
+function getGameInfo(platformName, gameFilePath, prefs) {
     let launchPath = gameFilePath;
     let fileName = (gameFilePath && gameFilePath.split('/').pop()) || '';
     let fileNameWithoutExt = fileName.replace(/\.[^/.]+$/, "");

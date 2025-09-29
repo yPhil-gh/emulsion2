@@ -2,7 +2,7 @@
 export const PLATFORMS = [
     { name: "atari", vendor: "Atari", displayName: "2600", extensions: [".zip"], nbGames: 0 },
     { name: "spectrum", vendor: "Sinclair", displayName: "ZX Spectrum", extensions: [".zip"], nbGames: 0 },
-    { name: "c64", vendor: "Commodore", displayName: "64", extensions: [".zip"], nbGames: 0 },
+    { name: "c64", vendor: "Commodore", displayName: "Commodore 64", extensions: [".zip"], nbGames: 0 },
     { name: "nes", vendor: "Nintendo", displayName: "NES", extensions: [".zip"], nbGames: 0 },
     { name: "sms", vendor: "Sega", displayName: "Master System", extensions: [".zip"], nbGames: 0 },
     { name: "pcengine", vendor: "NEC", displayName: "PC Engine", extensions: [".pce"], nbGames: 0 },
@@ -31,7 +31,9 @@ export function getPlatformInfo(platformName) {
     // Find platform info from PLATFORMS array
     const platform = PLATFORMS.find(p => p.name === platformName);
     if (platform) {
-        return { vendor: platform.vendor, name: platform.displayName };
+        return { vendor: platform.vendor,
+                 name: platform.displayName
+               };
     }
 
     // Fallback for settings and recents

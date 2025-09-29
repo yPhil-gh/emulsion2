@@ -155,38 +155,6 @@ function _titleCase(s) {
         .join(' ');
 }
 
-async function directoryExists(path) {
-    try {
-        await Neutralino.filesystem.readDirectory(path);
-        return true;
-    } catch (error) {
-        return false;
-    }
-}
-
-async function fileExists(path, platform) {
-    try {
-        await Neutralino.filesystem.readFile(path);
-        return true;
-    } catch (error) {
-        return false;
-    }
-}
-
-export async function getGameImagePath(platform, gameName) {
-    const extensions = ['png', 'jpg', 'jpeg', 'webp'];
-
-    for (const ext of extensions) {
-        // Check with real filesystem path (checking the mounted dir fails)
-        const fsPath = `${LB.preferences[platform].gamesDir}/images/${gameName}.${ext}`;
-        if (await fileExists(fsPath, platform)) {
-            // Return HTTP path
-            return `/${platform}/images/${encodeURIComponent(gameName)}.${ext}`;
-        }
-    }
-    return null;
-}
-
 async function mountDir(platform, path) {
     try {
         await Neutralino.server.mount(`/${platform}`, path);

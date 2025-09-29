@@ -14,6 +14,7 @@ async function initApp() {
 
     if (PLATFORMS.some(p => p.name === cliArgs.autoSelect)) {
         console.log("cliArgs.autoSelect is valid! ", cliArgs.autoSelect);
+        LB.autoSelect = cliArgs.autoSelect;
     }
 
     const configPath = await Neutralino.os.getPath('config');
@@ -56,7 +57,7 @@ async function initApp() {
     buildSlideshow(LB.preferences);
 
     // Initialize slideshow controls (no need to pass preferences parameter now)
-    initSlideShow(0);
+    initSlideShow(LB.autoSelect || 0);
 
     showMainInterface();
 
