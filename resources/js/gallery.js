@@ -115,6 +115,8 @@ export function updateHeader(platformName, gameName) {
 
     const header = document.getElementById('header');
 
+    header.style.display = 'flex';
+
     if (gameName) {
         header.querySelector('.platform-name').textContent = gameName;
         header.querySelector('.item-number').textContent = '0';
