@@ -65,6 +65,8 @@ function activateCurrentSlide() {
     }
 }
 
+let isModalOpen = false;
+
 function customConfirm(message, callback) {
     const modal = document.getElementById('customConfirmDialog');
     const okButton = document.getElementById('confirmOk');
@@ -73,20 +75,62 @@ function customConfirm(message, callback) {
 
     msgElem.innerText = message;
     modal.style.display = 'flex';
+    isModalOpen = true;
 
-    okButton.focus(); // Focus OK button
+    const buttons = [okButton, cancelButton];
+    let focusedIndex = 0;
+    buttons[focusedIndex].focus();
 
     const cleanup = () => {
         okButton.onclick = null;
         cancelButton.onclick = null;
         modal.style.display = 'none';
+        document.removeEventListener('keydown', handleKey, true);
+        isModalOpen = false;
     };
 
     okButton.onclick = () => { cleanup(); callback(true); };
     cancelButton.onclick = () => { cleanup(); callback(false); };
+
+    function handleKey(event) {
+        event.stopPropagation();
+        event.preventDefault();
+
+        switch (event.key) {
+            case 'Tab':
+                if (event.shiftKey) {
+                    // Shift+Tab: move focus backward
+                    focusedIndex = (focusedIndex + buttons.length - 1) % buttons.length;
+                } else {
+                    // Tab: move focus forward
+                    focusedIndex = (focusedIndex + 1) % buttons.length;
+                }
+                buttons[focusedIndex].focus();
+                break;
+
+            case 'ArrowLeft':
+            case 'ArrowRight':
+                // Swap focus
+                focusedIndex = 1 - focusedIndex;
+                buttons[focusedIndex].focus();
+                break;
+
+            case 'Enter':
+                buttons[focusedIndex].click();
+                break;
+
+            case 'Escape':
+                cleanup();
+                callback(false);
+                break;
+        }
+    }
+
+    document.addEventListener('keydown', handleKey, true);
 }
 
 export async function onHomeKeyDown(event) {
+    if (isModalOpen) return; // ignore global keys when modal is open
     event.stopPropagation();
     event.stopImmediatePropagation();
 
@@ -105,7 +149,7 @@ export async function onHomeKeyDown(event) {
                 if (result) {
                     Neutralino.app.exit();
                 } else {
-                    console.success("Thattaboy");
+                    console.info("Thattaboy");
                 }
             });
 
