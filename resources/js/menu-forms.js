@@ -3,7 +3,7 @@ import { setFooterSize, applyTheme } from './utils.js';
 import { getPlatformInfo } from './platforms.js';
 import { onGalleryKeyDown, updateHeader } from './gallery.js';
 import { LB } from './global.js';
-import { goToSlideshow, onHomeKeyDown } from './control.js';
+import { goToSlideshow, onHomeKeyDown } from './slideshow.js';
 
 window.isMenuOpen = false;
 window.currentPlatformName = null;

@@ -3,7 +3,7 @@ import { getPlatformInfo, PLATFORMS } from './platforms.js';
 import { cleanFileName } from './utils.js';
 import { LB } from './global.js';
 import { getAllCoverImageUrls } from './backends.js';
-import { goToSlideshow } from './control.js';
+import { goToSlideshow } from './slideshow.js';
 
 // Global gallery state
 let currentGalleryPageIndex = 0;

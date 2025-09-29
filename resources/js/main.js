@@ -1,7 +1,7 @@
 import { LB } from './global.js';
 import { loadPreferences } from './preferences.js';
 import { buildGalleries } from './gallery-builder.js';
-import { initSlideShow } from './control.js';
+import { initSlideShow } from './slideshow.js';
 import { getPlatformInfo, PLATFORMS } from './platforms.js';
 import { mountAllGamesDir, setFooterSize, applyTheme } from './utils.js';
 import { initGameController } from './gamecontroller.js';

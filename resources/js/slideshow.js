@@ -65,7 +65,24 @@ function activateCurrentSlide() {
     }
 }
 
-export function onHomeKeyDown(event) {
+function showCustomConfirm(message) {
+    return new Promise(resolve => {
+        const modal = document.getElementById('customConfirm');
+        modal.querySelector('p').textContent = message;
+        modal.style.display = 'flex';
+
+        modal.querySelector('#okBtn').onclick = () => {
+            modal.style.display = 'none';
+            resolve(true);
+        };
+        modal.querySelector('#cancelBtn').onclick = () => {
+            modal.style.display = 'none';
+            resolve(false);
+        };
+    });
+}
+
+export async function onHomeKeyDown(event) {
     event.stopPropagation();
     event.stopImmediatePropagation();
 
@@ -79,7 +96,18 @@ export function onHomeKeyDown(event) {
     case 'a': console.log("onHomeKeyDown: "); break;
     case 'Escape':
         if (document.getElementById('slideshow').style.display === 'flex') {
-            Neutralino.app.exit();
+
+            // const answer = await showCustomConfirm("Delete this game?");
+            // console.log(answer ? "Deleted" : "Canceled");
+
+            const result = confirm("Exit?");
+            if (result) {
+                Neutralino.app.exit();
+            } else {
+                console.log("User clicked Cancel");
+                return;
+            }
+
         }
         break;
     }
