@@ -1,4 +1,4 @@
-function initGamepad() {
+export function initGameController() {
     const gamepads = navigator.getGamepads();
     const connected = Array.from(gamepads).some(gamepad => gamepad !== null);
 
@@ -70,6 +70,7 @@ function initGamepad() {
                 const button = gamepad.buttons[buttonIndex];
                 const wasPressed = buttonStates[buttonIndex];
 
+
                 if (button.pressed && !wasPressed) {
                     buttonStates[buttonIndex] = true;
                 } else if (!button.pressed && wasPressed) {
@@ -80,6 +81,8 @@ function initGamepad() {
                         Neutralino.events.dispatch('restartApp', {});
                         return;
                     }
+
+                    console.log("buttonIndex: ", buttonIndex);
 
                     handleButtonPress(buttonIndex);
                 }
@@ -92,15 +95,15 @@ function initGamepad() {
     async function handleButtonPress(buttonIndex) {
         // Cross-platform keyboard simulation
         const keyMap = {
-            0: 'Return',      // Enter
+            0: 'Enter',      // Enter
             1: 'Escape',      // Escape
-            2: 'i',           // i key
-            4: 'Shift+Left',  // Shift+Left
-            5: 'Shift+Right', // Shift+Right
-            12: 'Up',         // Up arrow
-            13: 'Down',       // Down arrow
-            14: 'Left',       // Left arrow
-            15: 'Right'       // Right arrow
+            3: 'i',           // i key
+            4: 'Shift+ArrowLeft',  // Shift+Left
+            5: 'Shift+ArrowRight', // Shift+Right
+            12: 'ArrowUp',         // Up arrow
+            13: 'ArrowDown',       // Down arrow
+            14: 'ArrowLeft',       // Left arrow
+            15: 'ArrowRight'       // Right arrow
         };
 
         const key = keyMap[buttonIndex];
@@ -128,6 +131,26 @@ function initGamepad() {
         }
     }
 
+    // async function simulateKeyPress(key) {
+    //     let keyEventInit = {};
+
+    //     // Handle "Shift+Key" combos
+    //     if (key.includes('+')) {
+    //         const parts = key.split('+');
+    //         keyEventInit.key = parts[1];
+    //         keyEventInit.shiftKey = parts.includes('Shift');
+    //         keyEventInit.ctrlKey = parts.includes('Ctrl');
+    //         keyEventInit.altKey = parts.includes('Alt');
+    //     } else {
+    //         keyEventInit.key = key;
+    //     }
+
+    //     // Dispatch keydown and keyup
+    //     const target = document.activeElement || document.body;
+    //     target.dispatchEvent(new KeyboardEvent('keydown', keyEventInit));
+    //     target.dispatchEvent(new KeyboardEvent('keyup', keyEventInit));
+    // }
+
     // #FIX: More robust
     function simulateKeyEvent(key, modifiers = {}) {
         const event = new KeyboardEvent('keydown', {
@@ -150,7 +173,3 @@ function initGamepad() {
         startPolling();
     }
 }
-
-export {
-    initGamepad
-};

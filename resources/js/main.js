@@ -4,8 +4,11 @@ import { buildGalleries } from './gallery-builder.js';
 import { initSlideShow } from './control.js';
 import { getPlatformInfo, PLATFORMS } from './platforms.js';
 import { mountAllGamesDir, setFooterSize, applyTheme } from './utils.js';
+import { initGameController } from './gamecontroller.js';
 
 async function initApp() {
+
+    initGameController();
 
     const cliArgs = await handleCliArgs();
     await Neutralino.init();
