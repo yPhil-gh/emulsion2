@@ -1,11 +1,12 @@
 import { openPlatformMenu } from './menu-forms.js';
 import { LB } from './global.js';
-import { initGallery } from './gallery.js';
+import { initGallery, simulateKeyDown } from './gallery.js';
 
 let slideshow;
 let slides = [];
 let totalSlides = 0;
 let currentIndex = 0;
+let isInit = true;
 
 function updateSlideshow() {
     const angleIncrement = 360 / totalSlides;
@@ -20,6 +21,10 @@ function updateSlideshow() {
 
         if (i === currentIndex) {
             slide.classList.add('active');
+            if (LB.autoSelect && isInit) {
+                simulateKeyDown('Enter');
+                isInit = false;
+            }
         } else if (i === (currentIndex - 1 + totalSlides) % totalSlides) {
             slide.classList.add('prev-slide-flat');
         } else if (i === (currentIndex + 1) % totalSlides) {
@@ -80,8 +85,6 @@ function initSlideShow(platformToDisplay = 0) {
     slideshow = document.getElementById("slideshow");
     slides = Array.from(slideshow.querySelectorAll('.slide'));
     totalSlides = slides.length;
-
-    const preferences = LB.preferences;
 
     slideshow.style.display = 'flex';
     document.getElementById('galleries').style.display = 'none';

@@ -215,7 +215,7 @@ function onGalleryWheel(event) {
     }
 }
 
-function simulateKeyDown(key) {
+export function simulateKeyDown(key) {
     const keyCode = key === 'ArrowDown' ? 40 : 38;
     const keyboardEvent = new KeyboardEvent('keydown', {
         key,
@@ -296,6 +296,7 @@ function prevGame() {
 }
 
 function nextPage() {
+    console.log("nextPage: ");
     currentGalleryPageIndex = (currentGalleryPageIndex + 1) % galleryPages.length;
     currentGameIndex = 0;
     updateGallery();
