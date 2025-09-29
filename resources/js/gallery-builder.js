@@ -313,13 +313,16 @@ async function buildGameContainer(platform, platformPrefs, gameFilePath, index) 
     tooltip.className = 'tooltip';
     tooltip.innerHTML = `
   <h4>${gameInfo.cleanName}</h4>
-  Click to launch with <code>${platformPrefs.emulator || 'unknown'}</code>
+  Click to launch with <code>${platformPrefs.emulator}</code>
 `;
 
+
     // Append to your game container
-    gameContainer.appendChild(tooltip);
     gameContainer.appendChild(gameImage);
     gameContainer.appendChild(gameLabel);
+    gameContainer.appendChild(tooltip);
+
+    positionTooltip(gameContainer, tooltip);
 
     gameContainer.addEventListener("contextmenu", (e) => {
         e.preventDefault();
@@ -333,7 +336,35 @@ async function buildGameContainer(platform, platformPrefs, gameFilePath, index) 
     return gameContainer;
 }
 
-// Utility functions
+function positionTooltip(gameContainer, tooltip) {
+  const index = parseInt(gameContainer.dataset.index, 10);
+  const col = index % LB.galleryNumOfCols;
+  const offset = 8; // tweak pixels for “edge nudge”
+
+  tooltip.style.bottom = '25%';
+
+  if (col === 0) {
+    // first column → full left
+    tooltip.style.left = '0';
+    tooltip.style.transform = `translateX(0) translateY(-4px)`;
+  } else if (col === 1) {
+    // second column → small offset right
+    tooltip.style.left = '0';
+    tooltip.style.transform = `translateX(${offset}px) translateY(-4px)`;
+  } else if (col === LB.galleryNumOfCols - 2) {
+    // second-to-last → small offset left
+    tooltip.style.left = '100%';
+    tooltip.style.transform = `translateX(calc(-100% - ${offset}px)) translateY(-4px)`;
+  } else if (col === LB.galleryNumOfCols - 1) {
+    // last column → full right
+    tooltip.style.left = '100%';
+    tooltip.style.transform = `translateX(-100%) translateY(-4px)`;
+  } else {
+    // middle columns → centered
+    tooltip.style.left = '50%';
+    tooltip.style.transform = `translateX(-50%) translateY(-4px)`;
+  }
+}
 
 async function scanForGameFiles(gamesDir, extensions) {
     if (!gamesDir) return [];
