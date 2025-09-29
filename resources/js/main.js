@@ -175,6 +175,7 @@ function buildSlideshow(preferences) {
 
     // Finally recents if enabled
     if (LB.recentlyPlayedPolicy === 'show') {
+        // console.log("LB.recentlyPlayedPolicy: ", LB.recentlyPlayedPolicy);
         const recentsSlide = buildHomeSlide('recents', preferences);
         if (recentsSlide) {
             slideshow.appendChild(recentsSlide);
@@ -198,27 +199,37 @@ function buildHomeSlide(platformName, preferences) {
     const platformInfo = getPlatformInfo(platformName);
     slideContent.innerHTML = `<p class="vendor">${platformInfo.vendor}</p> <p class="name">${platformInfo.name}</p>`;
 
-    slide.setAttribute('data-platform', platformName);
-    slide.setAttribute('data-is-enabled', preferences[platformName].isEnabled);
-
     slide.appendChild(slideContent);
+    slide.setAttribute('data-name', platformName);
+    slide.setAttribute('data-platform', platformName);
 
+    console.log("platformName: ", platformName);
+
+    // --- Special cases first ---
     if (platformName === 'recents') {
+        slide.setAttribute('data-is-enabled', true);
         slide.setAttribute('data-index', LB.totalNumberOfPlatforms);
         return slide;
     }
 
-    // Apply the same filtering logic as your original
-    if (platformName !== 'settings' &&
-        ((LB.kioskMode || LB.disabledPlatformsPolicy === 'hide') && !preferences[platformName]?.isEnabled)) {
+    if (platformName === 'settings') {
+        slide.setAttribute('data-is-enabled', true);
+        slide.setAttribute('data-index', 0);
+        return slide;
+    }
+
+    // --- Normal platform filtering ---
+    const platformPrefs = preferences[platformName];
+    slide.setAttribute('data-is-enabled', platformPrefs?.isEnabled);
+
+    if ((LB.kioskMode || LB.disabledPlatformsPolicy === 'hide') && !platformPrefs?.isEnabled) {
         return null;
     }
 
-    slide.setAttribute('data-index', preferences[platformName].index);
-    slide.setAttribute('data-name', platformName);
-
+    slide.setAttribute('data-index', platformPrefs.index);
     return slide;
 }
+
 
 function showMainInterface() {
 

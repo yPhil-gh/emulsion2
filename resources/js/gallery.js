@@ -438,26 +438,28 @@ export async function launchGame(gameContainer) {
 
 async function savePlayHistory(entry) {
     try {
-        // Read existing file
         let history = [];
         try {
             const content = await Neutralino.filesystem.readFile(LB.playHistoryFilePath);
             history = JSON.parse(content);
-        } catch (err) {
-            // File may not exist yet → ignore
-            history = [];
+        } catch {
+            history = []; // file missing or empty
         }
 
-        // Append new entry
+        // Remove existing entry with same gameName + platform
+        history = history.filter(item =>
+            !(item.gameName === entry.gameName && item.platform === entry.platform)
+        );
+
+        // Add new entry
         history.push(entry);
 
-        // Write back
         await Neutralino.filesystem.writeFile(
             LB.playHistoryFilePath,
             JSON.stringify(history, null, 2)
         );
 
-        console.log(`📜 Saved play history: ${entry.gameName}`);
+        console.log(`📜 Play history updated: ${entry.gameName} [${entry.platform}]`);
     } catch (err) {
         console.error("❌ Failed to save play history:", err);
     }

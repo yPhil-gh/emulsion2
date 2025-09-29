@@ -188,6 +188,32 @@ async function buildPlatformPage(platform, platformPrefs = {}, index) {
     return page;
 }
 
+async function loadRecentGames() {
+    try {
+        const content = await Neutralino.filesystem.readFile(LB.playHistoryFilePath);
+        if (!content) return [];
+
+        const recents = JSON.parse(content);
+
+        // validate: must be array with required fields
+        if (!Array.isArray(recents)) return [];
+
+        return recents.map(r => ({
+            gameName: r.gameName || 'Unknown',
+            platform: r.platform || 'Unknown',
+            fileName: r.fileName || '',
+            filePath: r.filePath || '',
+            emulator: r.emulator || '',
+            emulatorArgs: r.emulatorArgs || '',
+            date: r.date || new Date().toISOString()
+        }));
+    } catch (err) {
+        // if file doesn’t exist or is malformed, return []
+        console.warn("⚠️ No recent games found:", err.message);
+        return [];
+    }
+}
+
 async function buildRecentsPage(index) {
     const recents = await loadRecentGames();
     if (!recents || recents.length === 0) return null;
@@ -202,31 +228,43 @@ async function buildRecentsPage(index) {
     pageContent.className = 'page-content';
     pageContent.style.gridTemplateColumns = `repeat(${LB.galleryNumOfCols}, 1fr)`;
 
+    // Sort recents by date descending
     const sortedRecents = [...recents].sort((a, b) => new Date(b.date) - new Date(a.date));
 
     sortedRecents.forEach((recent, i) => {
         const gameContainer = document.createElement('div');
-        gameContainer.className = 'game-container';
+        gameContainer.className = 'game-container selected';
 
-        const date = new Date(recent.date);
-        gameContainer.title = `${recent.gameName} (${recent.platform}) - Last played on ${date.toLocaleString()}`;
+        // Build detailed title
+        const titleParts = [
+            recent.gameName,
+            recent.platform,
+            recent.emulator,
+        ].filter(Boolean);
+        gameContainer.title = `${titleParts.join(' ')}\nClick to launch with ${recent.emulator}`;
 
-        gameContainer.setAttribute('data-game-name', recent.fileName);
+        // Set data attributes
+        gameContainer.setAttribute('data-game-name', recent.gameName);
         gameContainer.setAttribute('data-platform', recent.platform);
         gameContainer.setAttribute('data-emulator', recent.emulator || '');
         gameContainer.setAttribute('data-emulator-args', recent.emulatorArgs || '');
         gameContainer.setAttribute('data-game-path', recent.filePath);
         gameContainer.setAttribute('data-index', i);
 
+        // Image element
         const gameImage = document.createElement('img');
         gameImage.className = 'game-image';
-        // gameImage.src = getGameCoverPath(recent.platform, recent.fileName);
+        // Try all extensions (jpg, png, webp)
+        const encodedName = encodeURIComponent(recent.gameName);
+        gameImage.src = `/${recent.platform}/images/${encodedName}.jpg`; // fallback, can check png/webp if needed
         gameImage.onerror = () => { gameImage.src = 'images/missing.png'; };
 
+        // Game label
         const gameLabel = document.createElement('div');
         gameLabel.className = 'game-label';
         gameLabel.textContent = recent.gameName;
 
+        // Assemble container
         gameContainer.appendChild(gameImage);
         gameContainer.appendChild(gameLabel);
         pageContent.appendChild(gameContainer);

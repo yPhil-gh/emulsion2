@@ -155,6 +155,33 @@ async function updatePreference(platformName, key, value) {
     }
 }
 
+export async function savePlayHistory(entry) {
+    try {
+        // Read existing file
+        let history = [];
+        try {
+            const content = await Neutralino.filesystem.readFile(LB.playHistoryFilePath);
+            history = JSON.parse(content);
+        } catch (err) {
+            // File may not exist yet → ignore
+            history = [];
+        }
+
+        // Append new entry
+        history.push(entry);
+
+        // Write back
+        await Neutralino.filesystem.writeFile(
+            LB.playHistoryFilePath,
+            JSON.stringify(history, null, 2)
+        );
+
+        console.log(`📜 Saved play history: ${entry.gameName}`);
+    } catch (err) {
+        console.error("❌ Failed to save play history:", err);
+    }
+}
+
 export {
     loadPreferences,
     savePreferences,
