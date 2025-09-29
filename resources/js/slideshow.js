@@ -14,10 +14,17 @@ function updateSlideshow() {
 
     slides.forEach((slide, i) => {
         const angle = angleIncrement * (i - currentIndex);
+        const is3D = (LB.homeMenuTheme === '3D');
+
         slide.style.setProperty('--angle', angle);
         slide.style.setProperty('--radius', radius);
 
-        slide.classList.remove('active', 'prev-slide-flat', 'next-slide-flat', 'adjacent-flat');
+        slide.classList.remove(
+            'active',
+            'prev-slide-3d', 'prev-slide-flat',
+            'next-slide-3d', 'next-slide-flat',
+            'adjacent-3d', 'adjacent-flat'
+        );
 
         if (i === currentIndex) {
             slide.classList.add('active');
@@ -27,11 +34,11 @@ function updateSlideshow() {
                 isInit = false;
             }
         } else if (i === (currentIndex - 1 + totalSlides) % totalSlides) {
-            slide.classList.add('prev-slide-flat');
+            slide.classList.add(is3D ? 'prev-slide-3d' : 'prev-slide-flat');
         } else if (i === (currentIndex + 1) % totalSlides) {
-            slide.classList.add('next-slide-flat');
+            slide.classList.add(is3D ? 'next-slide-3d' : 'next-slide-flat');
         } else {
-            slide.classList.add('adjacent-flat');
+            slide.classList.add(is3D ? 'adjacent-3d' : 'adjacent-flat');
         }
     });
 }
