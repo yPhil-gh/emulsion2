@@ -176,6 +176,9 @@ export function initSlideShow(platformToDisplay = 0) {
     document.getElementById('galleries').style.display = 'none';
     document.getElementById('header').style.display = 'none';
 
+    document.getElementById('menu').style.display = 'none';
+    document.getElementById('menu').innerHTML = '';
+
     currentIndex = 0;
 
     if (typeof platformToDisplay === 'string') {

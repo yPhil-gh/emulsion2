@@ -68,7 +68,7 @@ function updateGallery() {
         }
     }
 
-    updateHeader();
+    updateHeader(currentPage.dataset.platform);
     updateFooterForGallery();
 }
 
@@ -111,25 +111,32 @@ function getNbGames(platformName) {
   return platform ? (platform.nbGames || 0) : 0;
 }
 
-export function updateHeader() {
+export function updateHeader(platformName, gameName) {
 
-    const platformName = window.currentPlatformName;
-    const platformInfo = getPlatformInfo(platformName);
     const header = document.getElementById('header');
 
-    header.querySelector(".next-link").addEventListener("click", nextPage);
-    header.querySelector(".prev-link").addEventListener("click", prevPage);
+    if (gameName) {
+        header.querySelector('.platform-name').textContent = gameName;
+        header.querySelector('.item-number').textContent = '0';
+        header.querySelector('.item-type').textContent = 'images';
+    } else {
 
-    header.querySelector('.platform-name').textContent = platformInfo.name;
+        const platformInfo = getPlatformInfo(platformName);
 
-    const platform = PLATFORMS.find(p => p.name === platformName);
-    const nbGames = platform ? platform.nbGames : 0;
+        const platform = PLATFORMS.find(p => p.name === platformName);
+        const nbGames = platform ? platform.nbGames : 0;
 
-    const count = platformName === 'settings' ? PLATFORMS.length : nbGames;
-    const itemType = platformName === 'settings' ? 'platform' : 'game';
+        const count = platformName === 'settings' ? PLATFORMS.length : nbGames;
+        const itemType = platformName === 'settings' ? 'platform' : 'game';
 
-    header.querySelector('.item-number').textContent = count;
-    header.querySelector('.item-type').textContent = (count <= 1) ? itemType : `${itemType}s`;
+        header.querySelector(".next-link").addEventListener("click", nextPage);
+        header.querySelector(".prev-link").addEventListener("click", prevPage);
+
+        header.querySelector('.platform-name').textContent = platformInfo.name;
+
+        header.querySelector('.item-number').textContent = count;
+        header.querySelector('.item-type').textContent = (count <= 1) ? itemType : `${itemType}s`;
+    }
 
     header.querySelector('.platform-image').style.backgroundImage = `url('images/platforms/${platformName}.png')`;
 }
@@ -535,6 +542,11 @@ function buildGameMenu(gameName, image, platformName) {
 async function populateGameMenu(gameMenuContainer, gameName, platformName) {
     const dummyContainer = gameMenuContainer.querySelector('.dummy-game-container');
 
+    const header = document.getElementById('header');
+
+    const itemNumberSpan = header.querySelector('.item-number'); // 🔑
+    let nbImgs = 0;
+
     const urls = await getAllCoverImageUrls(gameName, platformName, {
         steamGridAPIKey: LB.steamGridAPIKey,
         giantBombAPIKey: LB.giantBombAPIKey
@@ -549,6 +561,7 @@ async function populateGameMenu(gameMenuContainer, gameName, platformName) {
         dummyContainer.append(iconP, msgP);
         dummyContainer.style.gridColumn = `2 / calc(${LB.galleryNumOfCols} + 1)`;
         dummyContainer.style.animation = 'unset';
+        if(itemNumberSpan) itemNumberSpan.textContent = "0";
     } else {
         dummyContainer.remove();
 
@@ -570,17 +583,11 @@ async function populateGameMenu(gameMenuContainer, gameName, platformName) {
             container.classList.add('menu-game-container');
             container.setAttribute('data-platform-name', platformName);
             container.setAttribute('data-game-name', gameName);
-
-            container.style.position = 'relative'; // 🔑 so child can be absolute
+            container.style.position = 'relative';
             container.style.height = 'calc(120vw / ' + LB.galleryNumOfCols + ')';
 
             // Add the image
             container.appendChild(img);
-
-            // steam-square, bomb wikipedia-w
-            // steamgriddb, giantbomb, wikipedia
-
-            const sources = ['steamgriddb', 'giantbomb', 'wikipedia'];
 
             // Add FA icon overlay
             const icon = document.createElement('i');
@@ -589,24 +596,29 @@ async function populateGameMenu(gameMenuContainer, gameName, platformName) {
             icon.style.position = 'absolute';
             icon.style.bottom = '8px';
             icon.style.right = '8px';
-            icon.style.fontSize = '1.5rem'; // medium size
+            icon.style.fontSize = '1.5rem';
             icon.style.color = 'white';
-            icon.style.textShadow = '0 0 5px rgba(0,0,0,0.7)'; // readable on any bg
+            icon.style.textShadow = '0 0 5px rgba(0,0,0,0.7)';
 
             container.appendChild(icon);
 
             gameMenuContainer.appendChild(container);
 
-            gameMenuContainer.addEventListener("click", () => {
+            container.addEventListener("click", () => {
                 selectMenuImage(container);
             });
 
-            img.onload = () => requestAnimationFrame(() => { img.style.opacity = '1'; });
+            img.onload = () => {
+                requestAnimationFrame(() => { img.style.opacity = '1'; });
+                nbImgs++;
+                if (itemNumberSpan) itemNumberSpan.textContent = nbImgs;
+            };
+
             img.onerror = () => console.warn('Failed to load image:', url);
         });
-
     }
 }
+
 
 export async function openGameMenu(index) {
     const container = gameContainers[index];
@@ -619,11 +631,11 @@ export async function openGameMenu(index) {
     menu.appendChild(gameMenu);
     galleries.style.display = 'none';
     menu.style.display = 'flex';
+    updateHeader(platformName, gameName);
     await populateGameMenu(gameMenu, gameName, platformName);
     window.currentPlatformName = platformName;
     window.isGameMenuOpen = true;
     gameContainers = Array.from(document.querySelectorAll('.menu-game-container'));
-    updateHeader();
 }
 
 async function closeGameMenu() {

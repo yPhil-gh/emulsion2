@@ -32,7 +32,7 @@ function openPlatformMenu(platformName) {
 
     window.isMenuOpen = true;
     window.currentPlatformName = platformName;
-    updateHeader();
+    updateHeader(platformName);
 }
 
 function closePlatformMenu() {
@@ -223,39 +223,73 @@ function buildPreferencesForm() {
     formContainerVSpacerDiv.classList.add('spacer-div');
     formContainer.appendChild(formContainerVSpacerDiv);
 
-    // Event listeners
     cancelButton.addEventListener('click', () => {
-        // simulate escape key behavior
-        document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', code: 'Escape', keyCode: 27, which: 27, bubbles: true }));
+        initSlideShow(window.currentPlatformName);
     });
 
     aboutButton.addEventListener('click', async () => {
-        // Neutralino open URL to local or remote about page
-        console.log("/about.html: ");
         showAbout();
-        // await Neutralino.os.open(LB.baseDir + '/about.html');
     });
 
     saveButton.addEventListener('click', async () => {
         try {
+            // --- Collect new values ---
             let numberOfColumns = parseInt(formItems[0].input.value, 10);
             if (numberOfColumns < 2) numberOfColumns = 2;
             else if (numberOfColumns > 12) numberOfColumns = 12;
 
-            await updatePreference('settings', 'numberOfColumns', numberOfColumns);
-            await updatePreference('settings', 'footerSize', formItems[1].radios.find(r => r.checked)?.value);
-            await updatePreference('settings', 'homeMenuTheme', formItems[2].radios.find(r => r.checked)?.value);
-            await updatePreference('settings', 'theme', formItems[3].radios.find(r => r.checked)?.value);
-            await updatePreference('settings', 'disabledPlatformsPolicy', formItems[4].radios.find(r => r.checked)?.value);
-            await updatePreference('settings', 'recentlyPlayedPolicy', formItems[5].radios.find(r => r.checked)?.value);
-            await updatePreference('settings', 'steamGridAPIKey', formItems[6].input.value);
-            await updatePreference('settings', 'giantBombAPIKey', formItems[7].input.value);
+            const newPrefs = {
+                numberOfColumns,
+                footerSize: formItems[1].radios.find(r => r.checked)?.value,
+                homeMenuTheme: formItems[2].radios.find(r => r.checked)?.value,
+                theme: formItems[3].radios.find(r => r.checked)?.value,
+                disabledPlatformsPolicy: formItems[4].radios.find(r => r.checked)?.value,
+                recentlyPlayedPolicy: formItems[5].radios.find(r => r.checked)?.value,
+                steamGridAPIKey: formItems[6].input.value,
+                giantBombAPIKey: formItems[7].input.value
+            };
 
-            // Neutralino.app.reloadWindow();
+            // --- Save preferences ---
+            await updatePreference('settings', 'numberOfColumns', newPrefs.numberOfColumns);
+            await updatePreference('settings', 'footerSize', newPrefs.footerSize);
+            await updatePreference('settings', 'homeMenuTheme', newPrefs.homeMenuTheme);
+            await updatePreference('settings', 'theme', newPrefs.theme);
+            await updatePreference('settings', 'disabledPlatformsPolicy', newPrefs.disabledPlatformsPolicy);
+            await updatePreference('settings', 'recentlyPlayedPolicy', newPrefs.recentlyPlayedPolicy);
+            await updatePreference('settings', 'steamGridAPIKey', newPrefs.steamGridAPIKey);
+            await updatePreference('settings', 'giantBombAPIKey', newPrefs.giantBombAPIKey);
+
+            // --- Detect changes except homeMenuTheme and theme ---
+            const somethingImportantChanged =
+                  newPrefs.numberOfColumns !== LB.galleryNumOfCols ||
+                  newPrefs.disabledPlatformsPolicy !== LB.disabledPlatformsPolicy ||
+                  newPrefs.recentlyPlayedPolicy !== LB.recentlyPlayedPolicy ||
+                  newPrefs.steamGridAPIKey !== (LB.steamGridAPIKey || '') ||
+                  newPrefs.giantBombAPIKey !== (LB.giantBombAPIKey || '');
+
+            // --- Update LB to reflect changes ---
+            Object.assign(LB, {
+                galleryNumOfCols: newPrefs.numberOfColumns,
+                footerSize: newPrefs.footerSize,
+                homeMenuTheme: newPrefs.homeMenuTheme,
+                theme: newPrefs.theme,
+                disabledPlatformsPolicy: newPrefs.disabledPlatformsPolicy,
+                recentlyPlayedPolicy: newPrefs.recentlyPlayedPolicy,
+                steamGridAPIKey: newPrefs.steamGridAPIKey,
+                giantBombAPIKey: newPrefs.giantBombAPIKey
+            });
+
+            if (somethingImportantChanged) {
+                window.location.reload();
+            } else {
+                initSlideShow(window.currentPlatformName);
+            }
+
         } catch (error) {
             console.error('Failed to save preferences:', error);
         }
     });
+
 
     return formContainer;
 
