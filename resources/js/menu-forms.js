@@ -7,7 +7,7 @@ import { initSlideShow, onHomeKeyDown } from './slideshow.js';
 import { getAllCoverImageUrls } from './backends.js';
 
 window.isMenuOpen = false;
-window.currentPlatformName = null;
+LB.currentPlatformName = null;
 
 export function openPlatformMenu(platformName) {
 
@@ -34,7 +34,7 @@ export function openPlatformMenu(platformName) {
     window.addEventListener('keydown', onMenuKeyDown);
 
     window.isMenuOpen = true;
-    window.currentPlatformName = platformName;
+    LB.currentPlatformName = platformName;
     updateHeader(platformName);
 }
 
@@ -47,7 +47,7 @@ function closePlatformMenu() {
     }
 
     // Restore slideshow state
-    initSlideShow(window.currentPlatformName);
+    initSlideShow(LB.currentPlatformName);
 
     // Restore gallery keyboard handling
     window.removeEventListener('keydown', onMenuKeyDown);
@@ -56,7 +56,7 @@ function closePlatformMenu() {
     }
 
     window.isMenuOpen = false;
-    window.currentPlatformName = null;
+    LB.currentPlatformName = null;
 }
 
 function onMenuKeyDown(event) {
@@ -227,7 +227,7 @@ function buildPreferencesForm() {
     formContainer.appendChild(formContainerVSpacerDiv);
 
     cancelButton.addEventListener('click', () => {
-        initSlideShow(window.currentPlatformName);
+        initSlideShow(LB.currentPlatformName);
     });
 
     aboutButton.addEventListener('click', async () => {
@@ -285,7 +285,7 @@ function buildPreferencesForm() {
             if (somethingImportantChanged) {
                 window.location.reload();
             } else {
-                initSlideShow(window.currentPlatformName);
+                initSlideShow(LB.currentPlatformName);
             }
 
         } catch (error) {
@@ -728,19 +728,23 @@ function buildPlatformForm(platformName) {
     async function _batchButtonClick(event) {
         console.log("Batch download started");
 
-        let batchSubLabel = document.getElementById("batch-sub-label");
+        const platformName = LB.currentPlatformName;
+        console.log("platformName: ", platformName);
 
-        const platformName = "nes"; // or dynamically
+        const platformPrefs = LB.preferences[platformName];
+        if (!platformPrefs || !platformPrefs.gamesDir) {
+            gamesDirSubLabel.textContent = 'This field cannot be empty';
+            return;
+        }
+
         const page = document.querySelector(`#galleries .page[data-platform="${platformName}"]`);
         if (!page) return console.error("Platform page not found");
 
         const games = page.querySelectorAll(".game-container");
         if (!games.length) return console.warn("No games in this page");
 
-        const platformPrefs = LB.preferences[platformName];
-        if (!platformPrefs || !platformPrefs.gamesDir) {
-            console.error(`No gamesDir set for platform ${platformName}, aborting batch.`);
-            return;
+        if (!platformPrefs.isEnabled) {
+            alert(platformPrefs.isEnabled);
         }
 
         for (let i = 0; i < games.length; i++) {
@@ -769,7 +773,7 @@ function buildPlatformForm(platformName) {
                     const path = `/${platformName}/images/${encodeURIComponent(gameName)}.${extension}?t=${Date.now()}`;
                     const imgEl = gameContainer.querySelector("img");
                     if (imgEl) imgEl.src = path;
-                    batchSubLabel.textContent = `Found ${gameName}`;
+                    document.getElementById("batch-sub-label").textContent = `Found ${gameName}`;
                 }
 
             } catch (err) {

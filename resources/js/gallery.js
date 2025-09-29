@@ -53,7 +53,7 @@ function updateGallery() {
     const currentPage = galleryPages[currentGalleryPageIndex];
 
     if (currentPage) {
-        window.currentPlatformName = currentPage.dataset.platform;
+        LB.currentPlatformName = currentPage.dataset.platform;
         currentPage.style.display = 'block';
 
         gameContainers = Array.from(currentPage.querySelectorAll('.game-container'));
@@ -96,7 +96,7 @@ function updateFooterForGallery() {
             <span>Exit</span>
         </div>
     `;
-    controls.querySelector(".back").addEventListener("click", () => initSlideShow(window.currentPlatformName));
+    controls.querySelector(".back").addEventListener("click", () => initSlideShow(LB.currentPlatformName));
 
 }
 
@@ -274,9 +274,9 @@ export function onGalleryKeyDown(event) {
     case 'Escape':
         if (window.isGameMenuOpen) {
             closeGameMenu();
-            initGallery(null, window.currentPlatformName);
+            initGallery(null, LB.currentPlatformName);
         } else {
-            initSlideShow(window.currentPlatformName);
+            initSlideShow(LB.currentPlatformName);
         }
         break;
 
@@ -643,7 +643,7 @@ export async function openGameMenu(index) {
     menu.style.display = 'flex';
     updateHeader(platformName, gameName);
     await populateGameMenu(gameMenu, gameName, platformName);
-    window.currentPlatformName = platformName;
+    LB.currentPlatformName = platformName;
     window.isGameMenuOpen = true;
     gameContainers = Array.from(document.querySelectorAll('.menu-game-container'));
 }
