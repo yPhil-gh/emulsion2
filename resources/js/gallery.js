@@ -13,6 +13,8 @@ let galleryPages = [];
 
 function initGallery(galleryIndex, platformName = null) {
 
+    console.log("initGallery: ");
+
     const galleries = document.getElementById('galleries');
     galleryPages = Array.from(galleries.querySelectorAll('.page'));
 
@@ -33,12 +35,12 @@ function initGallery(galleryIndex, platformName = null) {
     currentGalleryPageIndex = Math.max(0, targetPageIndex);
     currentGameIndex = 0;
 
-    updateGallery();
     // setupGalleryEvents();
 
     window.addEventListener('keydown', handleGalleryKeyDown);
     galleries.addEventListener('wheel', onGalleryWheel);
 
+    updateGallery();
 }
 
 function updateGallery() {
@@ -230,53 +232,51 @@ export function simulateKeyDown(key) {
 export function handleGalleryKeyDown(event) {
     event.stopPropagation();
 
-    // Safety check first
-    if (gameContainers.length === 0) return;
-
     switch (event.key) {
-        case 'ArrowRight':
-            if (event.shiftKey) nextPage();
-            else nextGame();
-            break;
+    case 'ArrowRight':
+        if (event.shiftKey) nextPage();
+        else nextGame();
+        break;
 
-        case 'ArrowLeft':
-            if (event.shiftKey) prevPage();
-            else prevGame();
-            break;
+    case 'ArrowLeft':
+        if (event.shiftKey) prevPage();
+        else prevGame();
+        break;
 
-        case 'ArrowUp': moveGameRow(-1); break;
-        case 'ArrowDown': moveGameRow(1); break;
-        case 'PageUp': moveGameRow(-10); break;
-        case 'PageDown': moveGameRow(10); break;
-        case 'Home': selectGame(0); break;
-        case 'End': selectGame(gameContainers.length - 1); break;
+    case 'ArrowUp': moveGameRow(-1); break;
+    case 'ArrowDown': moveGameRow(1); break;
+    case 'PageUp': moveGameRow(-10); break;
+    case 'PageDown': moveGameRow(10); break;
+    case 'Home': selectGame(0); break;
+    case 'End': selectGame(gameContainers.length - 1); break;
+    case 'a': console.log("handleGalleryKeyDown: "); break;
 
-        case 'Enter':
-            const selected = gameContainers[currentGameIndex];
-            // Add safety checks
-            if (selected && selected.classList) {
-                if (selected.classList.contains('menu-game-container')) {
-                    selectMenuImage(selected);
-                } else {
-                    activateCurrentGame();
-                }
-            }
-            break;
-
-        case 'Escape':
-            if (window.isGameMenuOpen) {
-                closeGameMenu();
-                initGallery(null, window.currentPlatformName);
+    case 'Enter':
+        const selected = gameContainers[currentGameIndex];
+        // Add safety checks
+        if (selected && selected.classList) {
+            if (selected.classList.contains('menu-game-container')) {
+                selectMenuImage(selected);
             } else {
-                goToSlideshow(window.currentPlatformName);
+                activateCurrentGame();
             }
-            break;
+        }
+        break;
 
-        case 'i':
-            if (!LB.kioskMode && gameContainers[currentGameIndex]) {
-                openGameMenu(currentGameIndex);
-            }
-            break;
+    case 'Escape':
+        if (window.isGameMenuOpen) {
+            closeGameMenu();
+            initGallery(null, window.currentPlatformName);
+        } else {
+            goToSlideshow(window.currentPlatformName);
+        }
+        break;
+
+    case 'i':
+        if (!LB.kioskMode && gameContainers[currentGameIndex]) {
+            openGameMenu(currentGameIndex);
+        }
+        break;
     }
 
     updateGameSelection();

@@ -71,17 +71,18 @@ function handleMenuKeyDown(event) {
     event.stopPropagation();
 
     switch (event.key) {
-        case 'Escape':
-            closePlatformMenu();
-            break;
-        case 'Enter':
-            // Handle form submission if needed
-            break;
-        case 's':
-            if (event.ctrlKey) {
-                event.preventDefault();
-            }
-            break;
+    case 'Escape':
+        closePlatformMenu();
+        break;
+    case 'Enter':
+        // Handle form submission if needed
+        break;
+    case 'a': console.log("handleMenuKeyDown: "); break;
+    case 's':
+        if (event.ctrlKey) {
+            event.preventDefault();
+        }
+        break;
     }
 }
 
