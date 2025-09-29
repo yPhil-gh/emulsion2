@@ -52,9 +52,6 @@ async function buildGalleries(preferences) {
         }
     }
 
-    // Compute total number of platforms/pages excluding settings page if present
-    LB.totalNumberOfPlatforms = Math.max(0, trueIndex - (settingsIncluded ? 1 : 0));
-
 }
 
 function buildSettingsPageContainer({ platform, index, vendor = '', displayName = '', imgSrc, onClick, isSpecial = false }) {
@@ -269,6 +266,8 @@ async function buildRecentsPage(index) {
         gameContainer.appendChild(gameLabel);
         pageContent.appendChild(gameContainer);
     });
+
+    LB.nbOfRecents = sortedRecents.length;
 
     page.appendChild(pageContent);
     return page;

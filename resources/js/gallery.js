@@ -126,7 +126,16 @@ export function updateHeader(platformName, gameName) {
         const platform = PLATFORMS.find(p => p.name === platformName);
         const nbGames = platform ? platform.nbGames : 0;
 
-        const count = platformName === 'settings' ? PLATFORMS.length : nbGames;
+        let count;
+
+        if (platformName === 'settings') {
+            count = PLATFORMS.length;
+        } else if (platformName === 'recents') {
+            count = LB.nbOfRecents;
+        } else {
+            count = nbGames;
+        }
+
         const itemType = platformName === 'settings' ? 'platform' : 'game';
 
         header.querySelector(".next-link").addEventListener("click", nextPage);

@@ -6,7 +6,7 @@ import { getPlatformInfo, PLATFORMS } from './platforms.js';
 import { mountAllGamesDir, setFooterSize, applyTheme } from './utils.js';
 import { initGameController } from './gamecontroller.js';
 
-async function initApp() {
+async function emulsify() {
 
     initGameController();
 
@@ -57,7 +57,7 @@ async function initApp() {
 
     initSlideShow(LB.autoSelect || 0);
 
-    emulsify();
+    showUI();
 
     Neutralino.events.on('windowClose', () => {
         Neutralino.app.exit();
@@ -151,9 +151,6 @@ function buildSlideshow(preferences) {
 
     slideshow.innerHTML = '';
 
-    // Count total platforms for recents index
-    LB.totalNumberOfPlatforms = Object.keys(preferences).length - 1; // exclude settings
-
     // Build slides in the correct order - settings first
     const settingsSlide = buildHomeSlide('settings', preferences);
     if (settingsSlide) {
@@ -203,7 +200,7 @@ function buildHomeSlide(platformName, preferences) {
     // --- Special cases first ---
     if (platformName === 'recents') {
         slide.setAttribute('data-is-enabled', true);
-        slide.setAttribute('data-index', LB.totalNumberOfPlatforms);
+        slide.setAttribute('data-index', PLATFORMS.length);
         return slide;
     }
 
@@ -226,7 +223,7 @@ function buildHomeSlide(platformName, preferences) {
 }
 
 
-function emulsify() {
+function showUI() {
 
     const splash = document.getElementById('splash');
     if (splash) splash.style.display = 'none';
@@ -235,5 +232,4 @@ function emulsify() {
     if (footer) footer.style.display = 'flex';
 }
 
-// Start the app
-initApp();
+emulsify(); // !!

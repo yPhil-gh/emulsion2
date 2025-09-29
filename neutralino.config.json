@@ -82,7 +82,7 @@
             "minimumOS": "10.13.0",
             "appName": "Emulsion2",
             "appBundleName": "Emulsion2",
-            "appIdentifier": "com.marketmix.ext.bun.demo",
+            "appIdentifier": "com.yphil.emulsion2",
             "appIcon":  "icon.icns"
         },
         "win": {
