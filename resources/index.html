@@ -72,14 +72,15 @@
             </div>
         </footer>
 
-        <div id="customConfirm" class="modal">
-            <div class="modal-content">
-                <p>Are you sure you want to continue?</p>
-                <button id="okBtn">OK</button>
-                <button id="cancelBtn">Cancel</button>
+        <div id="customConfirmDialog" class="custom-confirm">
+            <div class="custom-confirm-content">
+                <p id="confirmMessage">Message goes here</p>
+                <div class="custom-confirm-buttons">
+                    <button id="confirmOk">OK</button>
+                    <button id="confirmCancel">Cancel</button>
+                </div>
             </div>
         </div>
-
 
         <script src="js/neutralino.js"></script>
         <script type="module" src="js/main.js"></script>

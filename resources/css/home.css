@@ -139,58 +139,63 @@ p.name {
 }
 
 /* customConfirm dialog */
-/* Fullscreen semi-transparent overlay */
-.modal {
-  display: none; /* Hidden by default */
-  position: fixed;
-  z-index: 1000;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0,0,0,0.5);
-  justify-content: center;
-  align-items: center;
+.custom-confirm {
+    display: none; /* hidden by default */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5); /* overlay */
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
 }
 
-/* The modal box */
-.modal p {
-  margin-bottom: 20px;
-  font-size: 16px;
-  color: #333;
+.custom-confirm-content {
+    background: #fff;
+    padding: 20px 30px;
+    border-radius: 8px;
+    min-width: 320px;
+    max-width: 90%;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
 }
 
-/* Inner box styling */
-.modal .modal-content {
-  background-color: #fff;
-  padding: 20px 30px;
-  border-radius: 8px;
-  text-align: center;
-  min-width: 300px;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+.custom-confirm-content p {
+    margin-bottom: 20px;
+    font-size: 16px;
+    color: #222;
 }
 
-/* Buttons */
-.modal button {
-  margin: 0 10px;
-  padding: 8px 16px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
+.custom-confirm-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
 }
 
-.modal button#okBtn {
-  background-color: #4CAF50;
-  color: white;
+.custom-confirm-buttons button {
+    padding: 8px 18px;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.2s;
 }
 
-.modal button#cancelBtn {
-  background-color: #f44336;
-  color: white;
+.custom-confirm-buttons button#confirmOk {
+    background: #007bff;
+    color: white;
 }
 
-/* Optional hover effect */
-.modal button:hover {
-  opacity: 0.9;
+.custom-confirm-buttons button#confirmOk:hover {
+    background: #0056b3;
+}
+
+.custom-confirm-buttons button#confirmCancel {
+    background: #ccc;
+}
+
+.custom-confirm-buttons button#confirmCancel:hover {
+    background: #999;
 }

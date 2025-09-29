@@ -65,21 +65,25 @@ function activateCurrentSlide() {
     }
 }
 
-function showCustomConfirm(message) {
-    return new Promise(resolve => {
-        const modal = document.getElementById('customConfirm');
-        modal.querySelector('p').textContent = message;
-        modal.style.display = 'flex';
+function customConfirm(message, callback) {
+    const modal = document.getElementById('customConfirmDialog');
+    const okButton = document.getElementById('confirmOk');
+    const cancelButton = document.getElementById('confirmCancel');
+    const msgElem = document.getElementById('confirmMessage');
 
-        modal.querySelector('#okBtn').onclick = () => {
-            modal.style.display = 'none';
-            resolve(true);
-        };
-        modal.querySelector('#cancelBtn').onclick = () => {
-            modal.style.display = 'none';
-            resolve(false);
-        };
-    });
+    msgElem.innerText = message;
+    modal.style.display = 'flex';
+
+    okButton.focus(); // Focus OK button
+
+    const cleanup = () => {
+        okButton.onclick = null;
+        cancelButton.onclick = null;
+        modal.style.display = 'none';
+    };
+
+    okButton.onclick = () => { cleanup(); callback(true); };
+    cancelButton.onclick = () => { cleanup(); callback(false); };
 }
 
 export async function onHomeKeyDown(event) {
@@ -97,16 +101,13 @@ export async function onHomeKeyDown(event) {
     case 'Escape':
         if (document.getElementById('slideshow').style.display === 'flex') {
 
-            // const answer = await showCustomConfirm("Delete this game?");
-            // console.log(answer ? "Deleted" : "Canceled");
-
-            const result = confirm("Exit?");
-            if (result) {
-                Neutralino.app.exit();
-            } else {
-                console.log("User clicked Cancel");
-                return;
-            }
+            customConfirm("Really, quit?", (result) => {
+                if (result) {
+                    Neutralino.app.exit();
+                } else {
+                    console.success("Thattaboy");
+                }
+            });
 
         }
         break;
