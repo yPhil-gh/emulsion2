@@ -174,27 +174,22 @@ async function selectMenuImage(selectedMenuContainer) {
     const gameName = selectedMenuContainer.dataset.gameName;
     const platformName = selectedMenuContainer.dataset.platformName;
 
-    console.log("img.src, platformName, gameName: ", img.src, platformName, gameName);
-
-    // Save the chosen image
     const savedPath = await downloadImage(img.src, platformName, gameName);
     if (!savedPath) return;
 
-    // Use mounted path directly
-    const mountedUrl = `/covers/${platformName}/${gameName}.jpg?t=${Date.now()}`;
+    console.log("savedPath: ", savedPath);
 
-    // Update gallery image immediately
-    const galleryContainer = document.querySelector(
-        `.game-container[data-platform="${platformName}"][data-game-name="${gameName}"]`
-    );
+    const extension = savedPath.split('.').pop();
+
+    const path = `/${platformName}/images/${encodeURIComponent(gameName)}.${extension}?t=${Date.now()}`;
+
+    const galleryContainer = document.querySelector(`.game-container[data-platform="${platformName}"][data-game-name="${gameName}"]`);
+
     if (galleryContainer) {
-        const galleryImg = galleryContainer.querySelector('img');
-        if (galleryImg) {
-            galleryImg.src = mountedUrl;
-        }
+        galleryContainer.querySelector('img').src = path;
+        galleryContainer.classList.add('selected');
     }
 
-    // Close menu and refresh gallery
     document.getElementById('menu').innerHTML = '';
     const currentPage = galleryPages[currentGalleryPageIndex];
     if (currentPage) {

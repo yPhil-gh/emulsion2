@@ -20,7 +20,6 @@ async function initApp() {
     const configPath = await Neutralino.os.getPath('config');
     LB.userDataPath = configPath + '/emulsion2';
 
-    // Mount the covers directory
     const coversPath = `${LB.userDataPath}/covers`;
     try {
         await Neutralino.server.mount('/covers', coversPath);
@@ -28,16 +27,12 @@ async function initApp() {
         console.error('Failed to mount covers directory:', err);
     }
 
-    // Set paths
-
-    // Load preferences and store in LB.preferences
     LB.preferences = await loadPreferences();
 
     await mountAllGamesDir();
 
     console.log("LB.preferences: ", LB.preferences);
 
-    // Set basic preferences from LB.preferences
     LB.galleryNumOfCols = LB.preferences.settings.numberOfColumns;
     LB.recentlyPlayedPolicy = LB.preferences.settings.recentlyPlayedPolicy;
     LB.disabledPlatformsPolicy = LB.preferences.settings.disabledPlatformsPolicy;
@@ -53,10 +48,8 @@ async function initApp() {
 
     await buildGalleries(LB.preferences);
 
-    // Build the carousel slides using the EXACT same logic as your original
     buildSlideshow(LB.preferences);
 
-    // Initialize slideshow controls (no need to pass preferences parameter now)
     initSlideShow(LB.autoSelect || 0);
 
     showMainInterface();

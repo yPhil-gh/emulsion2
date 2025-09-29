@@ -159,15 +159,18 @@ async function buildPlatformPage(platform, platformPrefs = {}, index) {
         return page;
     }
 
-    // Scan for game files in that directory
-    const gameFiles = await scanForGameFiles(platformPrefs.gamesDir, extensions);
+    let gameFiles = await scanForGameFiles(platformPrefs.gamesDir, extensions);
 
     if (!gameFiles || gameFiles.length === 0) {
         // No games found: display friendly message
         const emptyMessage = createEmptyPlatformMessage(platformPrefs.gamesDir);
         pageContent.appendChild(emptyMessage);
     } else {
-        // Create entries for each game
+        // Sort alphabetically, case-insensitive
+        gameFiles.sort((a, b) =>
+            a.localeCompare(b, undefined, { sensitivity: 'base' })
+        );
+
         for (let i = 0; i < gameFiles.length; i++) {
             try {
                 const gameEntry = await buildGameContainer(platform, platformPrefs, gameFiles[i], i);
@@ -179,11 +182,7 @@ async function buildPlatformPage(platform, platformPrefs = {}, index) {
         }
     }
 
-    const platformInfo = getPlatformInfo(platform);
-
-    console.log("Loading ", platformInfo.name);
-
-    document.getElementById('loading-platform-name').textContent = platformInfo.name;
+    document.getElementById('loading-platform-name').textContent = getPlatformInfo(platform).name;
 
     page.appendChild(pageContent);
     return page;
