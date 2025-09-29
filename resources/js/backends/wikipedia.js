@@ -1,7 +1,6 @@
 import { cleanFileName } from '../utils.js';
 
 export const fetchImages = async (gameName) => {
-
     try {
         const sanitizedName = cleanFileName(gameName);
 
@@ -18,14 +17,11 @@ export const fetchImages = async (gameName) => {
         if (!searchResp.ok) return [];
         const searchData = await searchResp.json();
 
-        const pageTitles = (searchData.query?.search || [])
-            .map(p => p.title);
-
+        const pageTitles = (searchData.query?.search || []).map(p => p.title);
         if (!pageTitles.length) return [];
 
         const fileTitles = [];
 
-        // For each page, get its images
         for (const title of pageTitles) {
             const imagesUrl = new URL('https://en.wikipedia.org/w/api.php');
             imagesUrl.searchParams.set('action', 'query');
@@ -53,7 +49,6 @@ export const fetchImages = async (gameName) => {
 
         if (!fileTitles.length) return [];
 
-        // 3️⃣ Fetch the actual image URLs
         const images = [];
         for (const fileTitle of fileTitles) {
             const infoUrl = new URL('https://en.wikipedia.org/w/api.php');
@@ -67,9 +62,14 @@ export const fetchImages = async (gameName) => {
             const infoResp = await fetch(infoUrl.toString());
             if (!infoResp.ok) continue;
             const infoData = await infoResp.json();
+
             const page = Object.values(infoData.query.pages)[0];
             const url = page?.imageinfo?.[0]?.url;
-            if (url) images.push({ url, source: 'wikipedia' });
+
+            if (url) {
+                // In NORMAL mode we keep source for consistency
+                images.push({ url, source: 'wikipedia' });
+            }
         }
 
         return images;

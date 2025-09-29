@@ -6,7 +6,7 @@ import { launchGame, openGameMenu } from './gallery.js';
 
 // gallery-builder.js (fixed & portable)
 
-async function buildGalleries(preferences) {
+export async function buildGalleries(preferences) {
 
     const galleriesContainer = document.getElementById('galleries');
     if (!galleriesContainer) {
@@ -448,4 +448,3 @@ function escapeHtml(str) {
         .replace(/'/g, '&#39;');
 }
 
-export { buildGalleries };

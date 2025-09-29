@@ -1,14 +1,15 @@
 import { updatePreference } from './preferences.js';
 import { setFooterSize, applyTheme } from './utils.js';
 import { getPlatformInfo } from './platforms.js';
-import { onGalleryKeyDown, updateHeader } from './gallery.js';
+import { onGalleryKeyDown, updateHeader, downloadImage } from './gallery.js';
 import { LB } from './global.js';
 import { initSlideShow, onHomeKeyDown } from './slideshow.js';
+import { getAllCoverImageUrls } from './backends.js';
 
 window.isMenuOpen = false;
 window.currentPlatformName = null;
 
-function openPlatformMenu(platformName) {
+export function openPlatformMenu(platformName) {
 
     const menu = document.getElementById('menu');
     menu.innerHTML = '';
@@ -565,6 +566,11 @@ function buildPlatformForm(platformName) {
     cancelButton.classList.add('button');
     cancelButton.textContent = 'Cancel';
 
+    const testButton = document.createElement('button');
+    testButton.type = 'button';
+    testButton.classList.add('button');
+    testButton.textContent = 'Batch';
+
     try {
         gamesDirInput.value = LB.preferences[platformName]?.gamesDir ?? '';
     } catch (err) {
@@ -622,6 +628,7 @@ function buildPlatformForm(platformName) {
 
     const formContainerButtons = document.createElement('div');
     formContainerButtons.classList.add('cancel-save-buttons');
+    formContainerButtons.appendChild(testButton);
     formContainerButtons.appendChild(cancelButton);
     formContainerButtons.appendChild(helpButton);
     formContainerButtons.appendChild(saveButton);
@@ -665,6 +672,7 @@ function buildPlatformForm(platformName) {
     });
 
     cancelButton.addEventListener('click', _cancelButtonClick);
+    testButton.addEventListener('click', _testButtonClick);
 
     helpButton.addEventListener('click', () => {
         Neutralino.os.open('https://gitlab.com/yphil/emulsion/-/blob/master/README.md#usage');
@@ -684,6 +692,69 @@ function buildPlatformForm(platformName) {
 
         document.dispatchEvent(escapeKeyEvent);
     }
+
+async function _testButtonClick(event) {
+    console.log("Batch download started");
+
+    const games = document.querySelectorAll(".game-container");
+    if (!games.length) return;
+
+    const platformName = "nes";
+    const platformPrefs = LB.preferences[platformName];
+    if (!platformPrefs || !platformPrefs.gamesDir) {
+        console.error(`No gamesDir set for platform ${platformName}, aborting batch.`);
+        return;
+    }
+
+    // Create progress bar
+    let progress = document.getElementById("batch-progress");
+    if (!progress) {
+        progress = document.createElement("progress");
+        progress.id = "batch-progress";
+        progress.max = games.length;
+        progress.value = 0;
+        progress.style.width = "100%";
+        document.body.appendChild(progress);
+    }
+
+    for (let i = 0; i < games.length; i++) {
+        const gameContainer = games[i];
+        const gameName = gameContainer.dataset.gameName;
+
+        try {
+            const urls = await getAllCoverImageUrls(gameName, platformName, {
+                steamGridAPIKey: LB.preferences.steamGridAPIKey,
+                giantBombAPIKey: LB.preferences.giantBombAPIKey
+            });
+
+            if (!urls.length) {
+                console.warn(`No image found for ${gameName}`);
+                continue; // skip if nothing found
+            }
+
+            // Step 3: get the actual URL string
+            const url = typeof urls[0] === 'string' ? urls[0] : urls[0]?.url;
+            if (!url) continue; // skip if undefined
+
+            const savedPath = await downloadImage(url, platformName, gameName, platformPrefs.gamesDir);
+            if (savedPath) {
+                const extension = savedPath.split('.').pop();
+                const path = `/${platformName}/images/${encodeURIComponent(gameName)}.${extension}?t=${Date.now()}`;
+                gameContainer.querySelector("img").src = path;
+            }
+
+        } catch (err) {
+            console.error(`❌ Failed batch for ${gameName}:`, err);
+        }
+
+        progress.value = i + 1;
+    }
+
+    console.log("✅ Batch download finished");
+}
+
+
+
 
     async function _saveButtonClick(event) {
 
@@ -722,6 +793,25 @@ function buildPlatformForm(platformName) {
         }
     }
 
+    function createProgressBar() {
+        let progressBar = document.getElementById("progress-bar");
+
+        if (!progressBar) {
+            progressBar = document.createElement("progress");
+            progressBar.id = "progress-bar";
+            progressBar.value = 0;
+            progressBar.max = 100; // will be updated later
+            progressBar.style.width = "100%";
+            progressBar.style.display = "block";
+            progressBar.style.margin = "10px 0";
+
+            // append it somewhere sensible (top of body here)
+            document.body.prepend(progressBar);
+        }
+
+        return progressBar;
+    }
+
         // EXTENSION INPUT ROW CREATOR
     function _createExtensionInputRow(value, isFirst) {
         const row = document.createElement('div');
@@ -756,6 +846,10 @@ function buildPlatformForm(platformName) {
     dummyHeightDiv.className = 'dummyHeightDiv';
 
     formContainer.appendChild(formContainerButtons);
+
+    const progressBar = createProgressBar();
+
+    formContainer.appendChild(progressBar);
     formContainer.appendChild(dummyHeightDiv);
 
     return formContainer;
@@ -808,6 +902,40 @@ function updateFooterForMenu() {
 
 }
 
-export {
-    openPlatformMenu
-};
+export async function unattendedDownload(games, platform, options = {}) {
+    const progressBar = document.getElementById("progress-bar");
+    progressBar.value = 0;
+    progressBar.max = games.length;
+
+    for (let i = 0; i < games.length; i++) {
+        const gameName = games[i];
+
+        try {
+            // 1. Fetch images
+            const images = await getAllCoverImageUrls(gameName, platform, options);
+
+            if (images.length > 0) {
+                // 2. First image only
+                const firstImg = images[0];
+
+                // 3. Save locally
+                const savedPath = await downloadImage(firstImg, platform, gameName);
+
+                if (savedPath) {
+                    console.log(`✅ ${gameName} → ${savedPath}`);
+                } else {
+                    console.warn(`⚠️ ${gameName}: download failed`);
+                }
+            } else {
+                console.warn(`⚠️ No images found for ${gameName}`);
+            }
+        } catch (err) {
+            console.error(`❌ Error with ${gameName}:`, err);
+        }
+
+        // 4. Update progress
+        progressBar.value = i + 1;
+    }
+
+    console.log("🎉 All games processed!");
+}

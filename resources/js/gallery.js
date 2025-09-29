@@ -150,34 +150,33 @@ export function updateHeader(platformName, gameName) {
     header.querySelector('.platform-image').style.backgroundImage = `url('images/platforms/${platformName}.png')`;
 }
 
-async function downloadImage(imgSrc, platform, gameName) {
-    try {
-
-        const extension = imgSrc.split('.').pop();
-        const imagesDir = `${LB.preferences[platform].gamesDir}/images`;
-        const destPath = `${imagesDir}/${gameName}.${extension}`;
-
-        try {
-            await Neutralino.filesystem.createDirectory(imagesDir, { recursive: true });
-        } catch (err) {
-            console.log("createDirectory: ", err);
-        }
-
-        // Use curl to download
-        const command = `curl -L "${imgSrc}" -o "${destPath}"`;
-        const result = await Neutralino.os.execCommand(command);
-        if (result.exitCode !== 0) {
-            console.error("curl failed:", result.stdErr);
-            return null;
-        }
-
-        console.log(`✅ Saved cover: ${destPath}`);
-        return destPath;
-    } catch (err) {
-        console.error("❌ downloadImage failed:", err);
+export async function downloadImage(imgSrc, platform, gameName) {
+    if (!imgSrc) {
+        console.warn(`No image source for ${gameName} on ${platform}`);
         return null;
     }
+
+    const extension = imgSrc.split('.').pop();
+    const imagesDir = `${LB.preferences[platform].gamesDir}/images`;
+    const destPath = `${imagesDir}/${gameName}.${extension}`;
+
+    try {
+        await Neutralino.filesystem.createDirectory(imagesDir, { recursive: true });
+    } catch (err) {
+        console.log("createDirectory: ", err);
+    }
+
+    const command = `curl -L "${imgSrc}" -o "${destPath}"`;
+    const result = await Neutralino.os.execCommand(command);
+    if (result.exitCode !== 0) {
+        console.error("curl failed:", result.stdErr);
+        return null;
+    }
+
+    console.log(`✅ Saved cover: ${destPath}`);
+    return destPath;
 }
+
 
 async function selectMenuImage(selectedMenuContainer) {
     const img = selectedMenuContainer.querySelector('img.game-image');
