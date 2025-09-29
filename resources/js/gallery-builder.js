@@ -137,12 +137,12 @@ function incrementNbGames(platformName) {
     }
 }
 
-async function buildPlatformPage(platformName, platformPrefs = {}, index) {
+async function buildPlatformPage(platform, platformPrefs = {}, index) {
     const page = document.createElement('div');
     page.className = 'page';
     page.id = `page${index}`;
     page.setAttribute('data-index', index);
-    page.setAttribute('data-platform', platformName);
+    page.setAttribute('data-platform', platform);
     page.style.display = 'flex';
 
     const pageContent = document.createElement('div');
@@ -173,14 +173,16 @@ async function buildPlatformPage(platformName, platformPrefs = {}, index) {
         // Create entries for each game
         for (let i = 0; i < gameFiles.length; i++) {
             try {
-                const gameEntry = await buildGameContainer(platformName, platformPrefs, gameFiles[i], i);
+                const gameEntry = await buildGameContainer(platform, platformPrefs, gameFiles[i], i);
                 pageContent.appendChild(gameEntry);
-                incrementNbGames(platformName);
+                incrementNbGames(platform);
             } catch (err) {
                 console.error('Error creating game entry for', gameFiles[i], err);
             }
         }
     }
+
+    document.getElementById('loading-platform-name').textContent = platform;
 
     page.appendChild(pageContent);
     return page;

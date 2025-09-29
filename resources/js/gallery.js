@@ -145,8 +145,11 @@ async function downloadImage(imgSrc, platform, gameName) {
         const imagesDir = `${LB.preferences[platform].gamesDir}/images`;
         const destPath = `${imagesDir}/${gameName}.${extension}`;
 
-        // Create the images directory if it doesn't exist
-        await Neutralino.filesystem.createDirectory(imagesDir, { recursive: true });
+        try {
+            await Neutralino.filesystem.createDirectory(imagesDir, { recursive: true });
+        } catch (err) {
+            console.log("createDirectory: ", err);
+        }
 
         // Use curl to download
         const command = `curl -L "${imgSrc}" -o "${destPath}"`;

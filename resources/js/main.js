@@ -225,7 +225,6 @@ function showMainInterface() {
 
     console.info("SHOWMAININTERFACE!");
 
-    // Hide the splash screen
     const splash = document.getElementById('splash');
     if (splash) splash.style.display = 'none';
 
