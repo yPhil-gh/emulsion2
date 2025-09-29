@@ -280,7 +280,8 @@ async function buildGameContainer(platform, platformPrefs, gameFilePath, index) 
     // Get game info
     const gameInfo = getGameInfo(platform, gameFilePath, platformPrefs);
 
-    gameContainer.title = `${gameInfo.cleanName}\n\nClick to launch with ${platformPrefs.emulator || 'unknown'}`;
+    // gameContainer.setAttribute('data-tooltip', `${gameInfo.cleanName}\n\nClick to launch with ${platformPrefs.emulator}`);
+
     gameContainer.setAttribute('data-game-name', gameInfo.fileNameWithoutExt);
     gameContainer.setAttribute('data-platform', platform);
     gameContainer.setAttribute('data-emulator', platformPrefs.emulator || '');
@@ -307,7 +308,16 @@ async function buildGameContainer(platform, platformPrefs, gameFilePath, index) 
     const gameLabel = document.createElement('div');
     gameLabel.className = 'game-label';
     gameLabel.textContent = gameInfo.cleanName;
+    // Create the tooltip element
+    const tooltip = document.createElement('div');
+    tooltip.className = 'tooltip';
+    tooltip.innerHTML = `
+  <h4>${gameInfo.cleanName}</h4>
+  Click to launch with <code>${platformPrefs.emulator || 'unknown'}</code>
+`;
 
+    // Append to your game container
+    gameContainer.appendChild(tooltip);
     gameContainer.appendChild(gameImage);
     gameContainer.appendChild(gameLabel);
 

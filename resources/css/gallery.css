@@ -103,7 +103,7 @@ div.menu-game-container {
 
   font-size: 20px;
   font-weight: bold;
-  overflow: hidden;
+  /* overflow: hidden; */
   /* white-space: nowrap; */
   position: relative; /* Needed for absolute positioning of the label */
 }
@@ -267,4 +267,30 @@ div.platform-container {
 
 .empty-platform-message {
   text-align: center;
+}
+
+/* Tooltip element */
+.game-container .tooltip {
+  position: absolute;
+  bottom: 25%;
+  left: 50%;
+  text-align: left;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,0.88);
+  color: #fff;
+  width: 250px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 13px;
+  white-space: normal; /* allow HTML wrapping */
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.12s ease, transform 0.12s ease;
+  z-index: 9999;
+}
+
+.game-container:hover .tooltip,
+.game-container:focus .tooltip {
+  opacity: 1;
+  transform: translateX(-50%) translateY(-4px);
 }
