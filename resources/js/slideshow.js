@@ -206,6 +206,7 @@ export function initSlideShow(platformToDisplay = 0) {
     window.addEventListener('keydown', onHomeKeyDown);
 
     updateSlideshow();
+    updateFooterForSlideshow();
 }
 
 
