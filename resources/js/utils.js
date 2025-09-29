@@ -180,3 +180,15 @@ export async function mountAllGamesDir() {
     }
 }
 
+export function selectGalleryPageByPlatform(platformName) {
+    const pages = document.querySelectorAll('#galleries .page');
+
+    for (const page of pages) {
+        if (page.querySelector(`.game-container[data-platform="${platformName}"]`)) {
+            return page;
+        }
+    }
+
+    return null; // not found
+}
+

@@ -1,5 +1,5 @@
 import { updatePreference } from './preferences.js';
-import { setFooterSize, applyTheme } from './utils.js';
+import { setFooterSize, applyTheme, selectGalleryPageByPlatform } from './utils.js';
 import { getPlatformInfo } from './platforms.js';
 import { onGalleryKeyDown, updateHeader, downloadImage } from './gallery.js';
 import { LB } from './global.js';
@@ -10,6 +10,8 @@ window.isMenuOpen = false;
 window.currentPlatformName = null;
 
 export function openPlatformMenu(platformName) {
+
+    console.log("openPlatformMenu: ");
 
     const menu = document.getElementById('menu');
     menu.innerHTML = '';
@@ -467,6 +469,42 @@ function buildPlatformForm(platformName) {
     emulatorGroup.appendChild(emulatorInputLabel);
     emulatorGroup.appendChild(emulatorCtn);
 
+
+    const batchGroup = document.createElement('div');
+
+    const batchIcon = document.createElement('div');
+    batchIcon.classList.add('form-icon');
+    batchIcon.innerHTML = '<i class="form-icon fa fa-2x fa-file-image-o" aria-hidden="true"></i>';
+
+    const batchInputLabel = document.createElement('label');
+    batchInputLabel.textContent = "Get all cover images";
+
+    const batchSubLabel = document.createElement('span');
+    batchSubLabel.id = 'batch-sub-label';
+    batchSubLabel.classList.add('sub-label');
+
+    const batchInput = createProgressBar();
+    // batchInput.type = 'text';
+    batchInput.classList.add('input');
+    // batchInput.placeholder = `Your ${platformInfo.name} batch`;
+
+    const batchCtn = document.createElement('div');
+    batchCtn.classList.add('dual-ctn');
+
+    const batchButton = document.createElement('button');
+    batchButton.classList.add('button', 'button-browse');
+    batchButton.textContent = 'Go';
+
+    batchButton.addEventListener('click', _batchButtonClick);
+
+    batchCtn.appendChild(batchIcon);
+    batchCtn.appendChild(batchInput);
+    batchCtn.appendChild(batchButton);
+
+    batchInputLabel.appendChild(batchSubLabel);
+    batchGroup.appendChild(batchInputLabel);
+    batchGroup.appendChild(batchCtn);
+
     // ======== NEW EXTENSIONS SECTION ========
     const extensionsGroup = document.createElement('div');
 
@@ -566,11 +604,6 @@ function buildPlatformForm(platformName) {
     cancelButton.classList.add('button');
     cancelButton.textContent = 'Cancel';
 
-    const testButton = document.createElement('button');
-    testButton.type = 'button';
-    testButton.classList.add('button');
-    testButton.textContent = 'Batch';
-
     try {
         gamesDirInput.value = LB.preferences[platformName]?.gamesDir ?? '';
     } catch (err) {
@@ -623,12 +656,12 @@ function buildPlatformForm(platformName) {
     formContainer.appendChild(statusLabel);
     formContainer.appendChild(gamesDirGroup);
     formContainer.appendChild(emulatorGroup);
-    formContainer.appendChild(extensionsGroup);  // <-- New addition
+    formContainer.appendChild(batchGroup);
+    formContainer.appendChild(extensionsGroup);
     formContainer.appendChild(emulatorArgsGroup);
 
     const formContainerButtons = document.createElement('div');
     formContainerButtons.classList.add('cancel-save-buttons');
-    formContainerButtons.appendChild(testButton);
     formContainerButtons.appendChild(cancelButton);
     formContainerButtons.appendChild(helpButton);
     formContainerButtons.appendChild(saveButton);
@@ -672,7 +705,6 @@ function buildPlatformForm(platformName) {
     });
 
     cancelButton.addEventListener('click', _cancelButtonClick);
-    testButton.addEventListener('click', _testButtonClick);
 
     helpButton.addEventListener('click', () => {
         Neutralino.os.open('https://gitlab.com/yphil/emulsion/-/blob/master/README.md#usage');
@@ -693,67 +725,60 @@ function buildPlatformForm(platformName) {
         document.dispatchEvent(escapeKeyEvent);
     }
 
-async function _testButtonClick(event) {
-    console.log("Batch download started");
+    async function _batchButtonClick(event) {
+        console.log("Batch download started");
 
-    const games = document.querySelectorAll(".game-container");
-    if (!games.length) return;
+        let batchSubLabel = document.getElementById("batch-sub-label");
 
-    const platformName = "nes";
-    const platformPrefs = LB.preferences[platformName];
-    if (!platformPrefs || !platformPrefs.gamesDir) {
-        console.error(`No gamesDir set for platform ${platformName}, aborting batch.`);
-        return;
-    }
+        const platformName = "nes"; // or dynamically
+        const page = document.querySelector(`#galleries .page[data-platform="${platformName}"]`);
+        if (!page) return console.error("Platform page not found");
 
-    // Create progress bar
-    let progress = document.getElementById("batch-progress");
-    if (!progress) {
-        progress = document.createElement("progress");
-        progress.id = "batch-progress";
-        progress.max = games.length;
-        progress.value = 0;
-        progress.style.width = "100%";
-        document.body.appendChild(progress);
-    }
+        const games = page.querySelectorAll(".game-container");
+        if (!games.length) return console.warn("No games in this page");
 
-    for (let i = 0; i < games.length; i++) {
-        const gameContainer = games[i];
-        const gameName = gameContainer.dataset.gameName;
-
-        try {
-            const urls = await getAllCoverImageUrls(gameName, platformName, {
-                steamGridAPIKey: LB.preferences.steamGridAPIKey,
-                giantBombAPIKey: LB.preferences.giantBombAPIKey
-            });
-
-            if (!urls.length) {
-                console.warn(`No image found for ${gameName}`);
-                continue; // skip if nothing found
-            }
-
-            // Step 3: get the actual URL string
-            const url = typeof urls[0] === 'string' ? urls[0] : urls[0]?.url;
-            if (!url) continue; // skip if undefined
-
-            const savedPath = await downloadImage(url, platformName, gameName, platformPrefs.gamesDir);
-            if (savedPath) {
-                const extension = savedPath.split('.').pop();
-                const path = `/${platformName}/images/${encodeURIComponent(gameName)}.${extension}?t=${Date.now()}`;
-                gameContainer.querySelector("img").src = path;
-            }
-
-        } catch (err) {
-            console.error(`❌ Failed batch for ${gameName}:`, err);
+        const platformPrefs = LB.preferences[platformName];
+        if (!platformPrefs || !platformPrefs.gamesDir) {
+            console.error(`No gamesDir set for platform ${platformName}, aborting batch.`);
+            return;
         }
 
-        progress.value = i + 1;
+        for (let i = 0; i < games.length; i++) {
+            setProgress(i + 1, games.length);
+
+            const gameContainer = games[i];
+            const gameName = gameContainer.dataset.gameName;
+
+            try {
+                const urls = await getAllCoverImageUrls(gameName, platformName, {
+                    steamGridAPIKey: LB.preferences.steamGridAPIKey,
+                    giantBombAPIKey: LB.preferences.giantBombAPIKey
+                });
+
+                if (!urls.length) {
+                    console.warn(`No image found for ${gameName}`);
+                    continue;
+                }
+
+                const url = typeof urls[0] === 'string' ? urls[0] : urls[0]?.url;
+                if (!url) continue;
+
+                const savedPath = await downloadImage(url, platformName, gameName, platformPrefs.gamesDir);
+                if (savedPath) {
+                    const extension = savedPath.split('.').pop();
+                    const path = `/${platformName}/images/${encodeURIComponent(gameName)}.${extension}?t=${Date.now()}`;
+                    const imgEl = gameContainer.querySelector("img");
+                    if (imgEl) imgEl.src = path;
+                    batchSubLabel.textContent = `Found ${gameName}`;
+                }
+
+            } catch (err) {
+                console.error(`❌ Failed batch for ${gameName}:`, err);
+            }
+        }
+
+        console.log("✅ Batch download finished");
     }
-
-    console.log("✅ Batch download finished");
-}
-
-
 
 
     async function _saveButtonClick(event) {
@@ -794,23 +819,39 @@ async function _testButtonClick(event) {
     }
 
     function createProgressBar() {
-        let progressBar = document.getElementById("progress-bar");
+        let container = document.getElementById("progress-container");
+        if (!container) {
+            // Outer container
+            container = document.createElement("div");
+            container.id = "progress-container";
+            container.style.width = "100%";
+            container.style.height = "20px";
+            container.style.margin = "10px 0";
 
-        if (!progressBar) {
-            progressBar = document.createElement("progress");
-            progressBar.id = "progress-bar";
-            progressBar.value = 0;
-            progressBar.max = 100; // will be updated later
-            progressBar.style.width = "100%";
-            progressBar.style.display = "block";
-            progressBar.style.margin = "10px 0";
+            // Inner fill
+            const fill = document.createElement("div");
+            fill.id = "progress-fill";
+            fill.style.width = "0%";
+            fill.style.height = "100%";
+            // fill.style.background = "#0a0";
 
-            // append it somewhere sensible (top of body here)
-            document.body.prepend(progressBar);
+            container.appendChild(fill);
+
+            // Prepend it somewhere sensible
+            document.body.prepend(container);
         }
 
-        return progressBar;
+        return container;
     }
+
+    // Helper to update progress
+    function setProgress(current, total) {
+        const fill = document.getElementById("progress-fill");
+        if (fill && total > 0) {
+            fill.style.width = `${(current / total) * 100}%`;
+        }
+    }
+
 
         // EXTENSION INPUT ROW CREATOR
     function _createExtensionInputRow(value, isFirst) {
@@ -847,9 +888,6 @@ async function _testButtonClick(event) {
 
     formContainer.appendChild(formContainerButtons);
 
-    const progressBar = createProgressBar();
-
-    formContainer.appendChild(progressBar);
     formContainer.appendChild(dummyHeightDiv);
 
     return formContainer;
