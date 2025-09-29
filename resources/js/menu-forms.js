@@ -376,7 +376,7 @@ function buildPlatformForm(platformName) {
     const gamesDirLabel = document.createElement('label');
     gamesDirLabel.textContent = 'Games directory';
 
-    const gamesDirSubLabel = document.createElement('label');
+    const gamesDirSubLabel = document.createElement('span');
     gamesDirSubLabel.id = 'games-dir-sub-label';
     gamesDirSubLabel.classList.add('sub-label');
 
@@ -395,9 +395,9 @@ function buildPlatformForm(platformName) {
     gamesDirCtn.appendChild(gamesDirInput);
     gamesDirCtn.appendChild(gamesDirButton);
 
+    gamesDirLabel.appendChild(gamesDirSubLabel);
     gamesDirGroup.appendChild(gamesDirLabel);
     gamesDirGroup.appendChild(gamesDirCtn);
-    gamesDirGroup.appendChild(gamesDirSubLabel);
 
     const emulatorGroup = document.createElement('div');
 
@@ -408,7 +408,7 @@ function buildPlatformForm(platformName) {
     const emulatorInputLabel = document.createElement('label');
     emulatorInputLabel.textContent = "Emulator";
 
-    const emulatorSubLabel = document.createElement('label');
+    const emulatorSubLabel = document.createElement('span');
     emulatorSubLabel.id = 'emulator-sub-label';
     emulatorSubLabel.classList.add('sub-label');
 
@@ -428,9 +428,9 @@ function buildPlatformForm(platformName) {
     emulatorCtn.appendChild(emulatorInput);
     emulatorCtn.appendChild(emulatorButton);
 
+    emulatorInputLabel.appendChild(emulatorSubLabel);
     emulatorGroup.appendChild(emulatorInputLabel);
     emulatorGroup.appendChild(emulatorCtn);
-    emulatorGroup.appendChild(emulatorSubLabel);
 
     // ======== NEW EXTENSIONS SECTION ========
     const extensionsGroup = document.createElement('div');

@@ -97,7 +97,7 @@ button {
 label {
   display: flex !important;
   flex-direction: row;
-  align-items: center;
+  align-items: baseline;
 
   font-family: var(--font-second);
   font-weight: normal;
@@ -118,6 +118,7 @@ label.checkbox {
 }
 
 .sub-label {
+  margin-left: 5px;
   color: red;
   font-size: 0.6em
 }
@@ -219,7 +220,7 @@ label.checkbox {
 }
 
 .spacer-div {
-  min-height: 40px;;
+  min-height: 100px;;
 }
 
 .cancel-save-buttons .button {
