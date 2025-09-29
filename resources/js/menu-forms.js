@@ -3,27 +3,17 @@ import { setFooterSize, applyTheme } from './utils.js';
 import { getPlatformInfo } from './platforms.js';
 import { onGalleryKeyDown, updateHeader } from './gallery.js';
 import { LB } from './global.js';
-import { goToSlideshow } from './control.js';
+import { goToSlideshow, onHomeKeyDown } from './control.js';
 
 window.isMenuOpen = false;
 window.currentPlatformName = null;
 
 function openPlatformMenu(platformName) {
 
+    console.log("openPlatformMenu, platformName: ", platformName);
+
     const menu = document.getElementById('menu');
-    if (!menu) {
-        console.error('Menu DOM element missing.');
-        return;
-    }
-
-    // Clear previous menu
     menu.innerHTML = '';
-
-    // Ensure preferences are loaded
-    if (!LB.preferences) {
-        console.error('Preferences not loaded.');
-        return;
-    }
 
     // Build the appropriate menu
     if (platformName === 'settings') {
@@ -38,8 +28,11 @@ function openPlatformMenu(platformName) {
     updateFooterForMenu();
 
     // Keyboard handling
+    window.removeEventListener('keydown', onHomeKeyDown);
     window.removeEventListener('keydown', onGalleryKeyDown);
-    window.addEventListener('keydown', handleMenuKeyDown);
+    window.addEventListener('keydown', onMenuKeyDown);
+
+    console.log("onMenuKeyDown: ");
 
     window.isMenuOpen = true;
     window.currentPlatformName = platformName;
@@ -58,7 +51,7 @@ function closePlatformMenu() {
     goToSlideshow(window.currentPlatformName);
 
     // Restore gallery keyboard handling
-    window.removeEventListener('keydown', handleMenuKeyDown);
+    window.removeEventListener('keydown', onMenuKeyDown);
     if (typeof onGalleryKeyDown === 'function') {
         window.addEventListener('keydown', onGalleryKeyDown);
     }
@@ -67,17 +60,18 @@ function closePlatformMenu() {
     window.currentPlatformName = null;
 }
 
-function handleMenuKeyDown(event) {
+function onMenuKeyDown(event) {
     event.stopPropagation();
 
     switch (event.key) {
     case 'Escape':
+        console.log("Escape!: ");
         closePlatformMenu();
         break;
     case 'Enter':
         // Handle form submission if needed
         break;
-    case 'a': console.log("handleMenuKeyDown: "); break;
+    case 'a': console.log("onMenuKeyDown: "); break;
     case 's':
         if (event.ctrlKey) {
             event.preventDefault();

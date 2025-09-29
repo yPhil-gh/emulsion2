@@ -21,6 +21,7 @@ function updateSlideshow() {
 
         if (i === currentIndex) {
             slide.classList.add('active');
+            LB.currentHomePlatform = slide.dataset.platform;
             if (LB.autoSelect && isInit) {
                 simulateKeyDown('Enter');
                 isInit = false;
@@ -53,7 +54,7 @@ function activateCurrentSlide() {
 
     document.getElementById('slideshow').style.display = 'none';
     document.getElementById('header').style.display = 'flex';
-    window.removeEventListener('keydown', handleHomeKeyDown);
+    window.removeEventListener('keydown', onHomeKeyDown);
 
     if (isPlatformEnabled) {
         galleries.style.display = 'flex';
@@ -64,20 +65,23 @@ function activateCurrentSlide() {
     }
 }
 
-function handleHomeKeyDown(event) {
+export function onHomeKeyDown(event) {
     event.stopPropagation();
     event.stopImmediatePropagation();
 
     switch (event.key) {
-        case 'ArrowRight': nextSlide(); break;
-        case 'ArrowLeft': prevSlide(); break;
-        case 'Enter': activateCurrentSlide(); break;
-    case 'a': console.log("handleHomeKeyDown: "); break;
-        case 'Escape':
-            if (document.getElementById('slideshow').style.display === 'flex') {
-                Neutralino.app.exit();
-            }
-            break;
+    case 'ArrowRight': nextSlide(); break;
+    case 'ArrowLeft': prevSlide(); break;
+    case 'Enter': activateCurrentSlide(); break;
+    case 'i':
+        openPlatformMenu(LB.currentHomePlatform);
+        break;
+    case 'a': console.log("onHomeKeyDown: "); break;
+    case 'Escape':
+        if (document.getElementById('slideshow').style.display === 'flex') {
+            Neutralino.app.exit();
+        }
+        break;
     }
 }
 
@@ -124,7 +128,7 @@ function initSlideShow(platformToDisplay = 0) {
 
     });
 
-    window.addEventListener('keydown', handleHomeKeyDown);
+    window.addEventListener('keydown', onHomeKeyDown);
 
     updateSlideshow();
 }
@@ -136,7 +140,7 @@ function goToSlideshow(platformName) {
     document.getElementById('galleries').style.display = 'none';
     document.getElementById('header').style.display = 'none';
 
-    window.addEventListener('keydown', handleHomeKeyDown);
+    window.addEventListener('keydown', onHomeKeyDown);
 
     const foundIndex = slides.findIndex(s =>
         s.dataset.platform === platformName ||
