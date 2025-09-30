@@ -394,7 +394,7 @@ function buildPlatformForm(platformName) {
 
     const platformInfo = getPlatformInfo(platformName);
 
-    statusLabelPlatormName.innerHTML = `${platformInfo.name} is&nbsp;`;
+    statusLabelPlatormName.innerHTML = `${platformInfo.vendor} ${platformInfo.name} is&nbsp;`;
 
     const statusLabelPlatormStatus = document.createElement('span');
     statusLabelPlatormStatus.id = 'form-status-label-platform-status';
