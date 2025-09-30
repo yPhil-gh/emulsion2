@@ -1,4 +1,47 @@
-export function initGameController() {
+let sdlProc;
+
+export async function initSDL() {
+    try {
+        const binPath = `${NL_CWD}/extensions/sdl2/build/sdl2_ext`;
+
+        sdlProc = await Neutralino.os.spawnProcess(binPath, []);
+        console.log("SDL spawned:", sdlProc);
+
+        Neutralino.events.on("processOutput", (evt) => {
+            if(evt.detail.id === sdlProc.id) {
+                const line = evt.detail.data.trim();
+
+                // Always log stdout for debug
+                console.log("[SDL2 stdout]", line);
+
+                // Only act on kill combo
+                if(line === "KILL_EMULATOR") {
+                    console.log("🚨 Kill emulator combo detected!");
+                    Neutralino.events.dispatch("killEmulator", {});
+                }
+            }
+        });
+
+        Neutralino.events.on("processError", (evt) => {
+            if(evt.detail.id === sdlProc.id) {
+                console.error("[SDL2 stderr]", evt.detail.data);
+            }
+        });
+
+        Neutralino.events.on("windowClose", async () => {
+            if(sdlProc) {
+                await Neutralino.os.updateSpawnedProcess(sdlProc.id, "exit");
+            }
+            await Neutralino.app.exit();
+        });
+
+    } catch(err) {
+        console.error("SDL2 spawn failed:", err);
+    }
+}
+
+
+export function initGameControllerChromiumAPI() {
     const gamepads = navigator.getGamepads();
     const connected = Array.from(gamepads).some(gamepad => gamepad !== null);
 
@@ -171,63 +214,5 @@ export function initGameController() {
     // Initialize if gamepad is already connected at startup
     if (connected) {
         startPolling();
-    }
-}
-
-let ws;
-export const buttonStates = {};
-
-export function initSDL() {
-    ws = new WebSocket("ws://localhost:9002");
-
-    ws.onopen = () => {
-        console.log("SDL WebSocket connected");
-    };
-
-    ws.onmessage = (msg) => {
-        try {
-            const event = JSON.parse(msg.data);
-            handleSDLEvent(event);
-        } catch (err) {
-            console.warn("Invalid SDL message:", msg.data);
-        }
-    };
-
-    ws.onclose = () => console.log("SDL WebSocket closed");
-    ws.onerror = (err) => console.error("SDL WebSocket error:", err);
-}
-
-function handleSDLEvent(event) {
-    switch (event.eventType) {
-        case "sdl-init":
-            console.log("SDL ready");
-            break;
-
-        case "controller-added":
-            console.log("Controller connected:", event.data.index);
-            break;
-
-        case "controller-removed":
-            console.log("Controller removed:", event.data.index);
-            break;
-
-        case "button-down":
-            buttonStates[event.data.button] = true;
-            console.log("Button down:", event.data.button);
-            checkCombos();
-            break;
-
-        case "button-up":
-            buttonStates[event.data.button] = false;
-            console.log("Button up:", event.data.button);
-            break;
-    }
-}
-
-function checkCombos() {
-    // Example: exit emulator combo (Back + DpadDown, adapt to your button IDs)
-    if (buttonStates[6] && buttonStates[14]) {
-        console.log("Exit combo triggered!");
-        // call your existing exitEmulator() here
     }
 }
