@@ -740,7 +740,7 @@ function buildPlatformForm(platformName) {
         const page = document.querySelector(`#galleries .page[data-platform="${platformName}"]`);
         if (!page) return console.error("Platform page not found");
 
-        const games = page.querySelectorAll(".game-container");
+        const games = page.querySelectorAll(".game-container[data-image-missing]");
         if (!games.length) return console.warn("No games in this page");
 
         if (!platformPrefs.isEnabled) {
@@ -755,11 +755,12 @@ function buildPlatformForm(platformName) {
 
             try {
                 const urls = await getAllCoverImageUrls(gameName, platformName, {
-                    steamGridAPIKey: LB.preferences.steamGridAPIKey,
-                    giantBombAPIKey: LB.preferences.giantBombAPIKey
+                    steamGridAPIKey: LB.steamGridAPIKey,
+                    giantBombAPIKey: LB.giantBombAPIKey
                 });
 
                 if (!urls.length) {
+                    progressText.textContent = `Not Found ${gameName}`;
                     console.warn(`No image found for ${gameName}`);
                     continue;
                 }
@@ -768,12 +769,15 @@ function buildPlatformForm(platformName) {
                 if (!url) continue;
 
                 const savedPath = await downloadImage(url, platformName, gameName, platformPrefs.gamesDir);
+                const progressText = document.getElementById("progress-text");
                 if (savedPath) {
                     const extension = savedPath.split('.').pop();
                     const path = `/${platformName}/images/${encodeURIComponent(gameName)}.${extension}?t=${Date.now()}`;
                     const imgEl = gameContainer.querySelector("img");
                     if (imgEl) imgEl.src = path;
-                    document.getElementById("batch-sub-label").textContent = `Found ${gameName}`;
+                    progressText.textContent = `Found ${gameName}`;
+                } else {
+                    progressText.textContent = `Not Found ${gameName}`;
                 }
 
             } catch (err) {
@@ -828,18 +832,18 @@ function buildPlatformForm(platformName) {
             // Outer container
             container = document.createElement("div");
             container.id = "progress-container";
-            container.style.width = "100%";
-            container.style.height = "20px";
-            container.style.margin = "10px 0";
 
             // Inner fill
             const fill = document.createElement("div");
             fill.id = "progress-fill";
-            fill.style.width = "0%";
-            fill.style.height = "100%";
-            // fill.style.background = "#0a0";
+            fill.class = "progress-fill";
+
+            // Inner text
+            const text = document.createElement("div");
+            text.id = "progress-text";
 
             container.appendChild(fill);
+            container.appendChild(text);
 
             // Prepend it somewhere sensible
             document.body.prepend(container);

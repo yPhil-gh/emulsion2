@@ -302,6 +302,7 @@ async function buildGameContainer(platform, platformPrefs, gameFilePath, index) 
         } else {
             // Fallback to default "missing" image
             gameImage.src = 'images/missing.png';
+            gameContainer.setAttribute('data-image-missing', true);
         }
     };
 
