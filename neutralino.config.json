@@ -75,6 +75,12 @@
         "binaryVersion": "6.3.0",
         "clientVersion": "6.3.0"
     },
+    "extensions": [
+        {
+            "id": "gameControllerExt",
+            "command": "node ${NL_PATH}/extensions/gamecontroller/index.js"
+        }
+    ],
     "appIconPath": "/resources/images/icon.png",
     "buildScript": {
         "mac": {

@@ -8,8 +8,6 @@ import { initSDL, initGameControllerChromiumAPI } from './gamecontroller.js';
 
 async function emulsify() {
 
-    initSDL();
-
     const cliArgs = await handleCliArgs();
     await Neutralino.init();
 
