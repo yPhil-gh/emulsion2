@@ -64,13 +64,11 @@ function onMenuKeyDown(event) {
 
     switch (event.key) {
     case 'Escape':
-        console.log("Escape!: ");
         closePlatformMenu();
         break;
     case 'Enter':
         // Handle form submission if needed
         break;
-    case 'a': console.log("onMenuKeyDown: "); break;
     case 's':
         if (event.ctrlKey) {
             event.preventDefault();
@@ -299,13 +297,13 @@ function buildPreferencesForm() {
 }
 
 async function showAbout() {
-  const currentVersion = NL_APPVERSION; // Neutralino gives you this from manifest.json
+    const currentVersion = NL_APP_VERSION;
 
   let latestVersion = 'Error fetching latest';
   try {
     const response = await fetch('https://api.github.com/repos/yPhil-gh/Emulsion/releases/latest');
     const data = await response.json();
-    latestVersion = data.tag_name.replace(/^v/, ''); // strip "v"
+      latestVersion = data.tag_name.replace(/^v/, ''); // strip "v"
   } catch (err) {
     console.error('Failed to fetch GitHub release:', err);
   }
@@ -313,28 +311,38 @@ async function showAbout() {
   openAboutModal(currentVersion, latestVersion);
 }
 
-let isAboutOpen = false;
+function compareVersions(a, b) {
+    const pa = a.split('.').map(Number);
+    const pb = b.split('.').map(Number);
+    for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
+        const na = pa[i] || 0;
+        const nb = pb[i] || 0;
+        if (na > nb) return 1;
+        if (na < nb) return -1;
+    }
+    return 0;
+}
 
 function openAboutModal(currentVersion, latestVersion) {
-    const modal = document.getElementById('aboutModal');
-    const current = document.getElementById('aboutCurrentVersion');
-    const latest = document.getElementById('aboutLatestVersion');
+
     const upToDate = document.getElementById('aboutUpToDate');
     const updateAvailable = document.getElementById('aboutUpdateAvailable');
 
-    current.textContent = currentVersion;
-    latest.textContent = latestVersion;
+    document.getElementById('aboutCurrentVersion').textContent = currentVersion;
+    document.getElementById('aboutLatestVersion').textContent = latestVersion;
 
-    if (latestVersion && latestVersion !== currentVersion && latestVersion !== 'Error fetching latest') {
-        upToDate.style.display = 'none';
-        updateAvailable.style.display = 'block';
-    } else {
-        upToDate.style.display = 'block';
-        updateAvailable.style.display = 'none';
+    if (latestVersion) {
+        const cmp = compareVersions(currentVersion, latestVersion);
+        if (cmp < 0){
+            upToDate.style.display = 'none';
+            updateAvailable.style.display = 'block';
+        } else {
+            upToDate.style.display = 'block';
+            updateAvailable.style.display = 'none';
+        }
     }
 
-    modal.style.display = 'flex';
-    isAboutOpen = true;
+    document.getElementById('aboutModal').style.display = 'flex';
 
     // Wire buttons
     document.getElementById('aboutDonateBtn').onclick = () => {
@@ -346,28 +354,23 @@ function openAboutModal(currentVersion, latestVersion) {
     document.getElementById('aboutCloseBtn').onclick = closeAboutModal;
 
     // Optional: trap Escape key
-    document.addEventListener('keydown', handleAboutKey, true);
+    document.addEventListener('keydown', aboutKeyDown, true);
 }
 
 function closeAboutModal() {
     const modal = document.getElementById('aboutModal');
     modal.style.display = 'none';
-    isAboutOpen = false;
-    document.removeEventListener('keydown', handleAboutKey, true);
+    document.removeEventListener('keydown', aboutKeyDown, true);
 }
 
-function handleAboutKey(e) {
-    if(e.key === 'Escape') {
+function aboutKeyDown(event) {
+    event.stopPropagation();
+    if(event.key === 'Escape') {
         closeAboutModal();
     }
 }
 
-
 function buildPlatformForm(platformName) {
-
-    // if (platformName === 'settings') {
-    //     return _buildPrefsForm();
-    // }
 
     const formContainer = document.createElement('div');
     formContainer.classList.add('platform-menu-container');
@@ -394,7 +397,7 @@ function buildPlatformForm(platformName) {
 
     const platformInfo = getPlatformInfo(platformName);
 
-    statusLabelPlatormName.innerHTML = `${platformInfo.vendor} ${platformInfo.name} is&nbsp;`;
+    statusLabelPlatormName.innerHTML = `${platformInfo.name} is&nbsp;`;
 
     const statusLabelPlatormStatus = document.createElement('span');
     statusLabelPlatormStatus.id = 'form-status-label-platform-status';
@@ -468,7 +471,6 @@ function buildPlatformForm(platformName) {
     emulatorInputLabel.appendChild(emulatorSubLabel);
     emulatorGroup.appendChild(emulatorInputLabel);
     emulatorGroup.appendChild(emulatorCtn);
-
 
     const batchGroup = document.createElement('div');
 
@@ -901,33 +903,6 @@ function buildPlatformForm(platformName) {
     return formContainer;
 }
 
-
-function createFormGroup(id, labelText) {
-    const group = document.createElement('div');
-    group.className = 'form-group';
-
-    const label = document.createElement('label');
-    label.htmlFor = id;
-    label.textContent = labelText;
-
-    group.appendChild(label);
-    return group;
-}
-
-function createButton(text, clickHandler) {
-    const button = document.createElement('button');
-    button.type = 'button';
-    button.textContent = text;
-    button.addEventListener('click', clickHandler);
-    return button;
-}
-
-function createButtonsContainer() {
-    const container = document.createElement('div');
-    container.className = 'form-buttons';
-    return container;
-}
-
 function updateFooterForMenu() {
     const controls = document.getElementById('controls');
     controls.innerHTML = `
@@ -946,42 +921,4 @@ function updateFooterForMenu() {
     `;
     controls.querySelector(".back").addEventListener("click", closePlatformMenu);
 
-}
-
-export async function unattendedDownload(games, platform, options = {}) {
-    const progressBar = document.getElementById("progress-bar");
-    progressBar.value = 0;
-    progressBar.max = games.length;
-
-    for (let i = 0; i < games.length; i++) {
-        const gameName = games[i];
-
-        try {
-            // 1. Fetch images
-            const images = await getAllCoverImageUrls(gameName, platform, options);
-
-            if (images.length > 0) {
-                // 2. First image only
-                const firstImg = images[0];
-
-                // 3. Save locally
-                const savedPath = await downloadImage(firstImg, platform, gameName);
-
-                if (savedPath) {
-                    console.log(`✅ ${gameName} → ${savedPath}`);
-                } else {
-                    console.warn(`⚠️ ${gameName}: download failed`);
-                }
-            } else {
-                console.warn(`⚠️ No images found for ${gameName}`);
-            }
-        } catch (err) {
-            console.error(`❌ Error with ${gameName}:`, err);
-        }
-
-        // 4. Update progress
-        progressBar.value = i + 1;
-    }
-
-    console.log("🎉 All games processed!");
 }

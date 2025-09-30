@@ -87,7 +87,7 @@ function updateFooterForGallery() {
             <img id="south-icon" class="icon" src="images/controls/button-south.png" alt="Button - South">
             <span>Select</span>
         </div>
-        <div id="west" class="control-item config hover" title="Config">
+        <div id="west" class="control-item">
             <img id="west-icon" class="icon" src="images/controls/button-west.png" alt="Button - West">
             <span>Config</span>
         </div>
@@ -96,19 +96,8 @@ function updateFooterForGallery() {
             <span>Exit</span>
         </div>
     `;
-    // controls.querySelector(".back").addEventListener("click", () => initSlideShow(LB.currentPlatformName));
+    controls.querySelector(".back").addEventListener("click", () => initSlideShow(LB.currentPlatformName));
 
-    controls.querySelector(".config").addEventListener("click", () => {
-        openPlatformMenu(LB.currentPlatformName);
-    });
-
-    controls.querySelector(".back").addEventListener("click", () => {
-        if (document.getElementById('menu').style.display !== 'none') {
-            initGallery(null, LB.currentPlatformName);
-        } else {
-            initSlideShow(LB.currentPlatformName);
-        }
-    });
 }
 
 function updateGameSelection() {

@@ -4,8 +4,6 @@ import { fetchImages as giantbombFetch } from './backends/giantbomb.js';
 
 export const getAllCoverImageUrls = async (gameName, platform, options = {}) => {
 
-    console.log("gameName, platform, options: ", gameName, platform, options);
-
     const { steamGridAPIKey, giantBombAPIKey } = options;
 
     const backends = [];

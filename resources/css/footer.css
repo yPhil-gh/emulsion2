@@ -109,6 +109,6 @@ footer {
   transition: all 0.3s ease;
 }
 
-footer .hover:hover {
+footer .back:hover {
   color: var(--color-outline-selected);
 }

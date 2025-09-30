@@ -1,7 +1,6 @@
 import { openPlatformMenu } from './menu-forms.js';
 import { LB } from './global.js';
 import { initGallery, simulateKeyDown } from './gallery.js';
-import { getPlatformInfo } from './platforms.js';
 
 let slideshow;
 let slides = [];
@@ -30,7 +29,6 @@ function updateSlideshow() {
         if (i === currentIndex) {
             slide.classList.add('active');
             LB.currentHomePlatform = slide.dataset.platform;
-            document.querySelector('#controls .config').title = `Configure ${getPlatformInfo(slide.dataset.platform).vendor} ${getPlatformInfo(slide.dataset.platform).name}`;
             if (LB.autoSelect && isInit) {
                 simulateKeyDown('Enter');
                 isInit = false;
@@ -160,7 +158,6 @@ export async function onHomeKeyDown(event) {
     case 'i':
         openPlatformMenu(LB.currentHomePlatform);
         break;
-    case 'a': console.log("onHomeKeyDown: "); break;
     case 'Escape':
         if (document.getElementById('slideshow').style.display === 'flex') {
             quit();
@@ -209,8 +206,6 @@ export function initSlideShow(platformToDisplay = 0) {
 
         slide.addEventListener("contextmenu", (event) => {
             event.preventDefault();
-            console.log("event.currentTarget: ", event.currentTarget.dataset.platform);
-            openPlatformMenu(event.currentTarget.dataset.platform);
         });
 
     });
@@ -233,23 +228,14 @@ function updateFooterForSlideshow() {
           <img id="south-icon" class="icon" src="images/controls/button-south.png" alt="Button - South">
           <span>Select</span>
       </div>
-      <div id="west" class="control-item config hover" title="Configure Emulsion">
+      <div id="west" class="control-item">
           <img id="west-icon" class="icon" src="images/controls/button-west.png" alt="Button - West">
           <span id="west-span">Config</span>
       </div>
-        <div class="control-item back hover" title="Back">
+      <div id="east" class="control-item back" title="Back">
           <img id="east-icon" class="icon" src="images/controls/button-east.png" alt="Button - East">
           <span id="east-span">Exit</span>
       </div>
     `;
     controls.querySelector(".back").addEventListener("click", () => quit());
-
-    controls.querySelector(".config").addEventListener("click", () => {
-
-        const platformName = document.querySelector('#slideshow .slide.active').dataset.platform;
-
-        console.log("platformName: ", platformName);
-        openPlatformMenu(platformName);
-    });
-
 }
