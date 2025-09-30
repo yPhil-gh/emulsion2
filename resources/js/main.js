@@ -4,11 +4,11 @@ import { buildGalleries } from './gallery-builder.js';
 import { initSlideShow } from './slideshow.js';
 import { getPlatformInfo, PLATFORMS } from './platforms.js';
 import { mountAllGamesDir, setFooterSize, applyTheme } from './utils.js';
-import { initGameController } from './gamecontroller.js';
+import { initGameController, initSDL } from './gamecontroller.js';
 
 async function emulsify() {
 
-    initGameController();
+    initSDL();
 
     const cliArgs = await handleCliArgs();
     await Neutralino.init();

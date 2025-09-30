@@ -173,3 +173,61 @@ export function initGameController() {
         startPolling();
     }
 }
+
+let ws;
+export const buttonStates = {};
+
+export function initSDL() {
+    ws = new WebSocket("ws://localhost:9002");
+
+    ws.onopen = () => {
+        console.log("SDL WebSocket connected");
+    };
+
+    ws.onmessage = (msg) => {
+        try {
+            const event = JSON.parse(msg.data);
+            handleSDLEvent(event);
+        } catch (err) {
+            console.warn("Invalid SDL message:", msg.data);
+        }
+    };
+
+    ws.onclose = () => console.log("SDL WebSocket closed");
+    ws.onerror = (err) => console.error("SDL WebSocket error:", err);
+}
+
+function handleSDLEvent(event) {
+    switch (event.eventType) {
+        case "sdl-init":
+            console.log("SDL ready");
+            break;
+
+        case "controller-added":
+            console.log("Controller connected:", event.data.index);
+            break;
+
+        case "controller-removed":
+            console.log("Controller removed:", event.data.index);
+            break;
+
+        case "button-down":
+            buttonStates[event.data.button] = true;
+            console.log("Button down:", event.data.button);
+            checkCombos();
+            break;
+
+        case "button-up":
+            buttonStates[event.data.button] = false;
+            console.log("Button up:", event.data.button);
+            break;
+    }
+}
+
+function checkCombos() {
+    // Example: exit emulator combo (Back + DpadDown, adapt to your button IDs)
+    if (buttonStates[6] && buttonStates[14]) {
+        console.log("Exit combo triggered!");
+        // call your existing exitEmulator() here
+    }
+}
