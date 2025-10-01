@@ -4,12 +4,95 @@ import { buildGalleries } from './gallery-builder.js';
 import { initSlideShow } from './slideshow.js';
 import { getPlatformInfo, PLATFORMS } from './platforms.js';
 import { mountAllGamesDir, setFooterSize, applyTheme } from './utils.js';
-import { initSDL, initGameControllerChromiumAPI } from './gamecontroller.js';
 
 async function emulsify() {
 
+
     const cliArgs = await handleCliArgs();
     await Neutralino.init();
+
+
+    console.log('🔧 Setting up game controller extension...');
+
+    // Listen for extension ready event
+    Neutralino.events.on('extensionReady', (evt) => {
+        console.log('🚀 Extension ready:', evt.detail);
+        if (evt.detail.id === 'gameControllerExt') {
+            console.log('✅ GAME CONTROLLER EXTENSION IS READY!');
+        }
+    });
+
+    // Listen for game controller events
+    Neutralino.events.on('gameControllerEvent', (evt) => {
+        console.log('🎮 Controller event received:', evt.detail);
+        handleControllerEvent(evt.detail.event, evt.detail.data);
+    });
+
+    // Check extension stats
+    try {
+        const stats = await Neutralino.extensions.getStats();
+        console.log('📊 Extension stats:', stats);
+
+        // If our extension isn't loaded, try to start it
+        if (!stats.loaded.includes('gameControllerExt')) {
+            console.log('🔄 GameController extension not loaded, starting it...');
+            // The extension should auto-start via config, but we can check
+        }
+    } catch (err) {
+        console.log('Extension stats error:', err);
+    }
+
+
+    // // Listen for extension events
+    // Neutralino.events.on('extensionReady', (evt) => {
+    //     console.log('🚀 Extension ready event:', evt.detail);
+    //     if (evt.detail.id === 'gameControllerExt') {
+    //         console.log('✅ GameController extension is ready!');
+    //     }
+    // });
+
+    // Neutralino.events.on('extensionDispatch', (evt) => {
+    //     console.log('📨 Extension dispatch:', evt.detail);
+    //     const { id, data } = evt.detail;
+
+    //     if (id === 'gameControllerExt' && data.type === 'gamecontroller') {
+    //         handleControllerEvent(data.data.event, data.data.data);
+    //     }
+    // });
+
+    // // Test if extension is loaded
+    // setTimeout(() => {
+    //     Neutralino.extensions.getStats().then(stats => {
+    //         console.log('📊 Extension stats:', stats);
+    //     }).catch(err => {
+    //         console.log('❌ Still cannot get stats:', err);
+    //     });
+    // }, 2000);
+
+
+    // // Simple game controller listener
+    // Neutralino.events.on("extensionDispatch", (event) => {
+    //     console.log('🔧 Extension event received:', event.detail);
+
+    //     const { event: eventName, data } = event.detail;
+
+    //     if (eventName.startsWith('gamecontroller:')) {
+    //         const controllerEvent = eventName.replace('gamecontroller:', '');
+    //         console.log(`🎮 Game Controller: ${controllerEvent}`, data);
+
+    //         if (controllerEvent === 'ready') {
+    //             console.log('🎮✅ Game controller extension is ready!');
+    //         }
+
+    //         if (controllerEvent === 'button-down') {
+    //             handleControllerInput(data.button, true);
+    //         }
+
+    //         if (controllerEvent === 'button-up') {
+    //             handleControllerInput(data.button, false);
+    //         }
+    //     }
+    // });
 
     if (PLATFORMS.some(p => p.name === cliArgs.autoSelect)) {
         LB.autoSelect = cliArgs.autoSelect;
@@ -62,27 +145,68 @@ async function emulsify() {
     });
 }
 
-// function getArgValue(args, flag) {
-//     // Finds --flag or --flag=value, returns value or true/false
-//     const found = args.find(arg => arg === flag || arg.startsWith(flag + '='));
-//     if (!found) return false;
-//     if (found === flag) return true;
-//     return found.split('=')[1];
-// }
 
-// async function handleCliArgs() {
-//     const args = NL_ARGS || [];
+function setupGameControllerListener() {
+    // Listen for ALL extension events
+    Neutralino.events.on("extensionDispatch", (event) => {
+        const { id, data } = event.detail;
 
-//     return {
-//         open: getArgValue(args, '--open'),
-//         kiosk: args.includes('--kiosk'),
-//         fullScreen: args.includes('--full-screen'),
-//         autoSelect: getArgValue(args, '--auto-select'),
-//         help: args.includes('--help') || args.includes('-h'),
-//         version: args.includes('--version') || args.includes('-v'),
-//         // add more flags as needed
-//     };
-// }
+        if (id === 'gameControllerExt') {
+            console.log('🎮 Game controller event:', data.event, data.data);
+
+            switch(data.event) {
+            case 'ready':
+                console.log('🎮 Game controller extension ready!');
+                break;
+
+            case 'controller-connected':
+                console.log('🕹️ Controller connected:', data.data.name);
+                // Update your UI
+                break;
+
+            case 'controller-disconnected':
+                console.log('🕹️ Controller disconnected');
+                // Update your UI
+                break;
+
+            case 'button-down':
+                console.log('🎯 Button pressed:', data.data.button);
+                handleControllerInput(data.data.button, true);
+                break;
+
+            case 'button-up':
+                console.log('🎯 Button released:', data.data.button);
+                handleControllerInput(data.data.button, false);
+                break;
+
+            case 'kill-combo-triggered':
+                console.log('⚠️ Kill combo triggered!');
+                break;
+            }
+        }
+    });
+}
+
+function handleControllerInput(button, pressed) {
+    console.log(`Button ${button} ${pressed ? 'pressed' : 'released'}`);
+
+    // Map to your app actions
+    const buttonMap = {
+        'a': 'confirm',
+        'b': 'back',
+        'x': 'option1',
+        'y': 'option2',
+        'dpup': 'navigateUp',
+        'dpdown': 'navigateDown',
+        'dpleft': 'navigateLeft',
+        'dpright': 'navigateRight'
+    };
+
+    if (buttonMap[button]) {
+        console.log(`Action: ${buttonMap[button]} ${pressed ? 'start' : 'end'}`);
+        // Add your actual navigation logic here
+    }
+}
 
 async function handleCliArgs() {
     // Robustly split NL_ARGS on spaces and commas, trim each part

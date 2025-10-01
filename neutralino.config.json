@@ -19,7 +19,10 @@
         "filesystem.*",
         "debug.log",
         "server.*",
-        "os.execCommand"
+        "os.execCommand",
+        "window.*",
+        "events.*",
+        "extensions.*"
     ],
     "globalVariables": {
         "APP_NAME": "Emulsion2",
@@ -78,7 +81,7 @@
     "extensions": [
         {
             "id": "gameControllerExt",
-            "command": "node ${NL_PATH}/extensions/gamecontroller/index.js"
+            "command": "sh -c 'echo \"EXTENSION STARTING\" && node extensions/gamecontroller/index.js'"
         }
     ],
     "appIconPath": "/resources/images/icon.png",
